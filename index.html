@@ -1270,8 +1270,16 @@
     <div class="login-card">
       <div class="login-logo">Bestpeers Learning Dashboard</div>
       <div class="login-sub">Analytics Transition Platform</div>
+      
+      <div id="signup-fields" style="display:none; margin-bottom: 16px;">
+        <div class="login-form">
+          <input type="text" id="auth-fname" class="login-input" placeholder="First Name">
+          <input type="text" id="auth-lname" class="login-input" placeholder="Last Name">
+        </div>
+      </div>
+
       <div class="login-form" id="auth-form">
-        <input type="email" id="auth-email" class="login-input" placeholder="Email address" required>
+        <input type="email" id="auth-email" class="login-input" placeholder="Work Email (@bestpeers.com)" required>
         <input type="password" id="auth-password" class="login-input" placeholder="Password" required>
         <button class="login-btn" id="auth-submit" onclick="handleAuth()">Sign In</button>
       </div>
@@ -1658,20 +1666,34 @@
     function toggleAuthMode() {
       isSignUp = !isSignUp;
       document.getElementById('auth-submit').textContent = isSignUp ? 'Sign Up' : 'Sign In';
+      const signupFields = document.getElementById('signup-fields');
+      if (signupFields) signupFields.style.display = isSignUp ? 'block' : 'none';
       document.getElementById('auth-toggle').innerHTML = isSignUp ?
-        'Already have an account? <span onclick="toggleAuthMode()">Sign In</span>' :
-        'Don\'t have an account? <span onclick="toggleAuthMode()">Sign Up</span>';
+        'Already have an account? <span onclick="toggleAuthMode()" style="color:var(--blue2);cursor:pointer;">Sign In</span>' :
+        'Don\'t have an account? <span onclick="toggleAuthMode()" style="color:var(--blue2);cursor:pointer;">Sign Up</span>';
     }
 
     async function handleAuth() {
       const email = document.getElementById('auth-email').value;
       const password = document.getElementById('auth-password').value;
+      const fname = document.getElementById('auth-fname') ? document.getElementById('auth-fname').value : '';
+      const lname = document.getElementById('auth-lname') ? document.getElementById('auth-lname').value : '';
 
       if (!email || !password) return alert('Fill all fields');
 
+      if (isSignUp) {
+        if (!email.toLowerCase().endsWith('@bestpeers.com')) {
+          return alert('Only @bestpeers.com emails are allowed to sign up.');
+        }
+        if (!fname || !lname) return alert('Please enter your First and Last name.');
+      }
+
       try {
         if (isSignUp) {
-          await auth.createUserWithEmailAndPassword(email, password);
+          const res = await auth.createUserWithEmailAndPassword(email, password);
+          // Set initial profile for new user
+          const newState = { ...defaultState, firstName: fname, lastName: lname, role: 'user' };
+          await db.collection('users').doc(res.user.uid).set(newState);
         } else {
           await auth.signInWithEmailAndPassword(email, password);
         }
@@ -1687,17 +1709,33 @@
     auth.onAuthStateChanged(user => {
       if (user) {
         document.body.classList.add('auth');
-        document.querySelector('.user-name').textContent = user.email.split('@')[0];
         loadFromFirestore(user.uid);
       } else {
         document.body.classList.remove('auth');
         state = { ...defaultState };
+        updateUserUI();
         renderDashboard();
       }
     });
 
+    function updateUserUI() {
+      const welcomeTitle = document.querySelector('.welcome-title');
+      const sidebarName = document.querySelector('.user-name');
+      const avatar = document.querySelector('.avatar');
+      
+      const fName = state.firstName || 'User';
+      const lName = state.lastName || '';
+      
+      if (welcomeTitle) welcomeTitle.textContent = `Welcome back, ${fName} 👋`;
+      if (sidebarName) sidebarName.textContent = `${fName} ${lName}`;
+      if (avatar) avatar.textContent = (fName[0] || '') + (lName[0] || '');
+    }
+
     // ── DATA ─────────────────────────────────────────────────────────────────────
     const defaultState = {
+      firstName: '',
+      lastName: '',
+      role: 'user',
       weekStatus: {},
       skillNow: {},
       projectStatus: {},
@@ -1808,14 +1846,18 @@
         const doc = await db.collection('users').doc(uid).get();
         if (doc.exists) {
           state = { ...defaultState, ...doc.data() };
-          renderDashboard();
+          updateUserUI();
+          initApp();
+        } else {
+          // New user, doc might not exist yet if they skipped signup logic
+          initApp();
         }
       } catch (e) {
         console.error("Error loading state:", e);
       }
     }
 
-    async function saveToFirestore() {
+    async function saveState() {
       const user = auth.currentUser;
       if (!user) return;
       try {
@@ -1844,7 +1886,7 @@
       renderDashboard();
     }
 
-    initApp();
+
 
     // ── NAVIGATION ───────────────────────────────────────────────────────────────
     function showPage(id, btn) {
@@ -1930,13 +1972,17 @@
       <div style="text-align:right;">
         <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--blue2);">${e.hours.toFixed(1)}</div>
         <div style="font-size:10px;color:var(--text3);">hrs</div>
-        <button onclick="deleteEntry(${e.id})" style="margin-top:6px;font-size:10px;color:var(--text3);background:none;border:none;cursor:pointer;padding:2px 6px;border-radius:4px;border:1px solid var(--border);">✕</button>
+        ${state.role === 'host' ? `<button onclick="deleteEntry(${e.id})" style="margin-top:6px;font-size:10px;color:var(--text3);background:none;border:none;cursor:pointer;padding:2px 6px;border-radius:4px;border:1px solid var(--border);">✕</button>` : ''}
       </div>
     </div>
   `).join('');
     }
 
     function deleteEntry(id) {
+      if (state.role !== 'host') {
+        alert("Only the Host can delete entries.");
+        return;
+      }
       state.logEntries = state.logEntries.filter(e => e.id !== id);
       saveState(); renderLogEntries(); updateKPIs();
     }
@@ -2266,7 +2312,7 @@
     function setResourceFilter(d) { state.activeResourceFilter = d; renderResources(); }
 
     // ── SAVE ALL ──────────────────────────────────────────────────────────────────
-    function saveAll() { saveToFirestore(); }
+    function saveAll() { saveState(); }
 
     function showToast() {
       const t = document.getElementById('save-toast');
