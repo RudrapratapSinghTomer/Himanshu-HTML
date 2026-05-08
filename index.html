@@ -2434,9 +2434,10 @@
         grid.innerHTML = Array.from({ length: 20 }, (_, i) => i + 1).map(w => {
           const r = state.weekReviews[w];
           const isActive = w === state.selectedReviewWeek;
+          const isDone = r && (r.saved || r.topics);
           return `<div class="review-week-btn ${isActive ? 'active' : ''}" onclick="selectReviewWeek(${w})">
             <div class="wnum">WK ${String(w).padStart(2, '0')}</div>
-            <div class="wstatus" style="color:${r ? 'var(--green)' : 'var(--text3)'};">${r ? '✓ Done' : '–'}</div>
+            <div class="wstatus" style="color:${isDone ? 'var(--green)' : 'var(--text3)'};">${isDone ? '✓ Done' : '–'}</div>
           </div>`;
         }).join('');
       }
@@ -2537,14 +2538,11 @@
     }
 
     function autoPopulateWeekly(wNum) {
-      if (!state.weekReviews[wNum]) state.weekReviews[wNum] = {};
-      const r = state.weekReviews[wNum];
-      
-      // If the Host has manually saved/locked this, don't overwrite it
-      if (r.locked) return;
-
       const logs = state.logEntries.filter(e => parseInt(e.week) === wNum);
       if (logs.length === 0) return;
+
+      if (!state.weekReviews[wNum]) state.weekReviews[wNum] = {};
+      const r = state.weekReviews[wNum];
 
       const weekDef = WEEKS.find(wk => wk.w === wNum);
       
