@@ -1785,7 +1785,10 @@
       ]
     };
 
-    const PHASES = ROADMAPS['Data Analytics'];
+    function getActivePhases() {
+      const activeRoadmap = state.assignedRoadmap || 'Data Analytics';
+      return ROADMAPS[activeRoadmap] || ROADMAPS['Data Analytics'];
+    }
 
     const WEEKS = [
       { w: 1, phase: 'p1', title: 'What is Data Analytics?', tools: ['Notes', 'YouTube'], goals: 'Analyst vs Engineer vs Scientist roles; Analytics lifecycle; Tool landscape', handson: 'Write 1-page role comparison; Map 5 JDs to skills' },
@@ -1920,6 +1923,7 @@
         for (let i = 1; i <= 20; i++) { const o = document.createElement('option'); o.value = i; o.textContent = `Week ${i}`; logWeekSel.appendChild(o); }
       }
       renderDashboard();
+      fixLinks();
     }
 
 
@@ -1939,6 +1943,7 @@
       if (id === 'weekly') renderWeekly();
       if (id === 'resources') renderResources();
       if (id === 'daily') renderLogEntries();
+      fixLinks();
     }
 
     function showTab(page, tab, btn) {
@@ -2038,10 +2043,13 @@
     }
 
     function updateKPIs() {
+      const activePhases = getActivePhases();
+      const totalWeeks = [].concat(...activePhases.map(p => p.weeks)).length;
+      const associatedProjIds = PROJECTS.filter(p => activePhases.some(ph => ph.id === p.phase)).map(p => p.id);
+      
       const totalHours = state.logEntries.reduce((s, e) => s + (e.hours || 0), 0);
       document.getElementById('kpi-hours').textContent = totalHours.toFixed(1);
 
-      // streak
       const dates = [...new Set(state.logEntries.map(e => e.date))].sort();
       let streak = 0;
       if (dates.length) {
@@ -2056,23 +2064,28 @@
       document.getElementById('kpi-streak').textContent = streak;
       document.getElementById('streak-count').textContent = streak;
 
-      const doneProjs = Object.values(state.projectStatus).filter(s => s === 'Completed').length;
+      const doneProjs = associatedProjIds.filter(id => state.projectStatus[id] === 'Completed').length;
       document.getElementById('kpi-projects').textContent = doneProjs;
 
       const skillsAt3 = SKILLS.filter(s => (state.skillNow[s.key] || 0) >= 3).length;
       document.getElementById('kpi-skills').textContent = skillsAt3;
 
-      const doneWeeks = Object.values(state.weekStatus).filter(s => s === 'done').length;
-      const pct = Math.round((doneWeeks / 20) * 100);
+      const doneWeeks = Object.values(state.weekStatus).filter((s, idx) => {
+        const wNum = parseInt(Object.keys(state.weekStatus)[idx]);
+        return s === 'done' && [].concat(...activePhases.map(p => p.weeks)).includes(wNum);
+      }).length;
+      
+      const pct = totalWeeks > 0 ? Math.round((doneWeeks / totalWeeks) * 100) : 0;
       document.getElementById('overall-pct').textContent = pct + '%';
 
       const projLabel = document.getElementById('proj-count-label');
-      if (projLabel) projLabel.textContent = `${doneProjs} / 8 complete`;
+      if (projLabel) projLabel.textContent = `${doneProjs} / ${associatedProjIds.length} complete`;
     }
 
     function renderPhaseProgressBars() {
       const el = document.getElementById('phase-progress-bars');
-      el.innerHTML = PHASES.map(p => {
+      const phases = getActivePhases();
+      el.innerHTML = phases.map(p => {
         const done = p.weeks.filter(w => state.weekStatus[w] === 'done').length;
         const pct = Math.round((done / p.weeks.length) * 100);
         return `
@@ -2203,12 +2216,13 @@
         const pct = Math.round((done / 20) * 100);
         const statusColor = pct > 70 ? 'var(--green)' : pct > 30 ? 'var(--gold)' : 'var(--red)';
         const isActive = (viewingUserId === u.id) || (viewingUserId === null && u.id === auth.currentUser.uid);
+        const hasRequest = Object.values(u.weekReviews || {}).some(r => r.editRequested);
         
         return `
           <div onclick="switchViewUser('${u.id}')" style="padding:10px; border-radius:8px; background:${isActive ? 'var(--navy3)' : 'var(--card2)'}; border:1px solid ${isActive ? 'var(--blue)' : 'var(--border)'}; cursor:pointer; display:flex; align-items:center; gap:10px;">
             <div style="width:8px; height:8px; border-radius:50%; background:${statusColor}; box-shadow: 0 0 5px ${statusColor};"></div>
             <div style="flex:1;">
-              <div style="font-size:12px; font-weight:600;">${u.firstName} ${u.lastName}</div>
+              <div style="font-size:12px; font-weight:600;">${u.firstName} ${u.lastName} ${hasRequest ? ' ⚠️' : ''}</div>
               <div style="font-size:10px; color:var(--text3);">${u.assignedRoadmap || 'No Roadmap'} · ${pct}%</div>
             </div>
           </div>
@@ -2224,10 +2238,26 @@
         viewingUserId = uid;
         const u = allUsers.find(user => user.id === uid);
         state = { ...defaultState, ...u };
+        
+        // If Host views a user with edit request, clear the request so they can edit
+        Object.keys(state.weekReviews).forEach(w => {
+          if (state.weekReviews[w].editRequested) {
+            state.weekReviews[w].editRequested = false;
+            state.weekReviews[w].saved = false; // Allow editing again
+          }
+        });
+
         document.getElementById('assign-roadmap-select').value = state.assignedRoadmap || '';
         renderRoadmap();
-        updateUserUI(); // Temporarily show employee name in UI
+        updateUserUI(); 
       }
+    }
+
+    function fixLinks() {
+      document.querySelectorAll('a').forEach(a => {
+        a.target = "_blank";
+        a.rel = "noopener noreferrer";
+      });
     }
 
     async function assignRoadmapToUser(roadmapName) {
@@ -2382,7 +2412,7 @@
       const w = state.selectedReviewWeek;
       document.getElementById('review-week-label').textContent = w;
       const r = state.weekReviews[w] || {};
-      const isLocked = r.saved && state.role !== 'host';
+      const isLocked = r.saved && state.role !== 'host' && !r.editRequested;
 
       ['topics', 'handson', 'win', 'blocker', 'focus'].forEach(f => {
         const el = document.getElementById('review-' + f);
@@ -2399,17 +2429,61 @@
 
       const saveBtn = document.getElementById('review-save-btn');
       if (isLocked) {
-        saveBtn.innerHTML = 'Locked (Contact Host to Edit)';
-        saveBtn.disabled = true;
-        saveBtn.style.opacity = 0.5;
-      } else {
-        saveBtn.innerHTML = 'Save Weekly Review →';
+        saveBtn.innerHTML = 'Review Locked · Request Edit →';
+        saveBtn.onclick = requestReviewEdit;
         saveBtn.disabled = false;
         saveBtn.style.opacity = 1;
+        saveBtn.classList.remove('btn-primary');
+        saveBtn.classList.add('btn-secondary');
+      } else {
+        saveBtn.innerHTML = 'Save Weekly Review →';
+        saveBtn.onclick = saveWeekReview;
+        saveBtn.disabled = false;
+        saveBtn.style.opacity = 1;
+        saveBtn.classList.add('btn-primary');
+        saveBtn.classList.remove('btn-secondary');
+      }
+
+      if (r.editRequested && state.role !== 'host') {
+        saveBtn.innerHTML = 'Edit Request Pending...';
+        saveBtn.disabled = true;
       }
     }
 
-    function selectReviewWeek(w) { state.selectedReviewWeek = w; renderWeekly(); }
+    function requestReviewEdit() {
+      const w = state.selectedReviewWeek;
+      if (!state.weekReviews[w]) return;
+      state.weekReviews[w].editRequested = true;
+      saveState(); renderWeekly();
+      alert("Edit request sent to Host.");
+    }
+
+    function selectReviewWeek(w) { 
+      state.selectedReviewWeek = w; 
+      autoPopulateWeekly(w);
+      renderWeekly(); 
+    }
+
+    function autoPopulateWeekly(wNum) {
+      if (!state.weekReviews[wNum]) state.weekReviews[wNum] = {};
+      const r = state.weekReviews[wNum];
+      if (r.saved) return; // Don't overwrite saved reviews
+
+      const weekDef = WEEKS.find(wk => wk.w === wNum);
+      const logTopics = state.logEntries
+        .filter(e => parseInt(e.week) === wNum)
+        .map(e => e.topic)
+        .join(', ');
+      
+      const logHandsOn = state.logEntries
+        .filter(e => parseInt(e.week) === wNum)
+        .map(e => e.handson)
+        .filter(h => h)
+        .join('; ');
+
+      if (!r.topics && weekDef) r.topics = `Planned: ${weekDef.goals}. Logged: ${logTopics}`;
+      if (!r.handson && weekDef) r.handson = `Planned: ${weekDef.handson}. Logged: ${logHandsOn}`;
+    }
 
     function saveWeekReview() {
       const w = state.selectedReviewWeek;
