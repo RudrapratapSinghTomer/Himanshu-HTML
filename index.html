@@ -1645,7 +1645,7 @@
       <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
       </svg>
-      Progress saved!
+      <span id="save-toast-text">Progress saved!</span>
     </div>
 
   </div> <!-- end main-content -->
@@ -1674,6 +1674,7 @@
 
     // ── AUTH LOGIC ───────────────────────────────────────────────────────────────
     let isSignUp = false;
+    let myRole = 'user'; // Track real logged-in role
 
     function toggleAuthMode() {
       isSignUp = !isSignUp;
@@ -1718,15 +1719,19 @@
       auth.signOut();
     }
 
-    auth.onAuthStateChanged(user => {
+    auth.onAuthStateChanged(async (user) => {
       if (user) {
         document.body.classList.add('auth');
+        // Initial load to get myRole
+        const doc = await db.collection('users').doc(user.uid).get();
+        if (doc.exists) myRole = doc.data().role || 'user';
         loadFromFirestore(user.uid);
       } else {
         document.body.classList.remove('auth');
+        myRole = 'user';
         state = { ...defaultState };
         updateUserUI();
-        renderDashboard();
+        initApp();
       }
     });
 
@@ -1872,20 +1877,20 @@
         if (doc.exists) {
           state = { ...defaultState, ...doc.data() };
           updateUserUI();
-          initApp();
-        } else {
-          // New user, doc might not exist yet if they skipped signup logic
-          initApp();
         }
+        // Always run initApp to populate dynamic fields
+        initApp();
       } catch (e) {
         console.error("Error loading state:", e);
+        initApp();
       }
     }
 
     async function saveState() {
       const user = auth.currentUser;
       if (!user) return;
-      const targetUid = (state.role === 'host' && viewingUserId) ? viewingUserId : user.uid;
+      // If host is viewing someone else, save to THEIR doc. Otherwise save to MINE.
+      const targetUid = (myRole === 'host' && viewingUserId) ? viewingUserId : user.uid;
       try {
         await db.collection('users').doc(targetUid).set(state);
         showToast();
@@ -1944,11 +1949,11 @@
     }
 
     // ── MOOD ─────────────────────────────────────────────────────────────────────
-    function selectMood(m) {
+    function setMood(m, btn) {
       state.selectedMood = m;
-      document.querySelectorAll('.mood-btn').forEach(b => { b.classList.toggle('selected', parseInt(b.dataset.mood) === m); });
+      document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
+      if (btn) btn.classList.add('selected');
     }
-    selectMood(3);
 
     // ── LOG ENTRY ────────────────────────────────────────────────────────────────
     function addLogEntry() {
@@ -2004,7 +2009,7 @@
 
       const moodEmoji = ['', '😴', '😐', '🙂', '😄', '🔥'];
       container.innerHTML = filtered.map(e => `
-        <div class="card log-item" style="padding:20px; margin-bottom:16px; border-left:4px solid ${state.role === 'host' ? 'var(--blue)' : 'var(--teal)'}; transition: transform 0.2s;">
+        <div class="card log-item" style="padding:20px; margin-bottom:16px; border-left:4px solid ${myRole === 'host' ? 'var(--blue)' : 'var(--teal)'}; transition: transform 0.2s;">
           <div style="display:grid; grid-template-columns: 1fr auto; gap:16px;">
             <div>
               <div style="display:flex; gap:8px; align-items:center; margin-bottom:8px;">
@@ -2025,7 +2030,7 @@
                 <div style="font-family:'Syne',sans-serif; font-size:24px; font-weight:800; color:var(--blue2);">${e.hours.toFixed(1)}<span style="font-size:12px; font-weight:400; color:var(--text3); margin-left:4px;">hrs</span></div>
                 <div style="font-size:16px; margin-top:4px;">${moodEmoji[e.mood || 3]}</div>
               </div>
-              ${state.role === 'host' ? `<button onclick="deleteEntry(${e.id})" style="background:var(--red)11; color:var(--red); border:1px solid var(--red)33; padding:4px 8px; border-radius:6px; font-size:11px; cursor:pointer; margin-top:10px;">Delete Entry</button>` : ''}
+              ${myRole === 'host' ? `<button onclick="deleteEntry(${e.id})" style="background:var(--red)11; color:var(--red); border:1px solid var(--red)33; padding:4px 8px; border-radius:6px; font-size:11px; cursor:pointer; margin-top:10px;">Delete Entry</button>` : ''}
             </div>
           </div>
         </div>
@@ -2033,7 +2038,7 @@
     }
 
     function deleteEntry(id) {
-      if (state.role !== 'host') {
+      if (myRole !== 'host') {
         alert("Only the Host can delete entries.");
         return;
       }
@@ -2083,12 +2088,10 @@
       const skillsAt3 = SKILLS.filter(s => (state.skillNow[s.key] || 0) >= 3).length;
       document.getElementById('kpi-skills').textContent = skillsAt3;
 
-      const doneWeeks = Object.values(state.weekStatus).filter((s, idx) => {
-        const wNum = parseInt(Object.keys(state.weekStatus)[idx]);
-        return s === 'done' && [].concat(...activePhases.map(p => p.weeks)).includes(wNum);
-      }).length;
+      const allRoadmapWeeks = [].concat(...activePhases.map(p => p.weeks));
+      const doneWeeks = allRoadmapWeeks.filter(w => state.weekStatus[w] === 'done').length;
       
-      const pct = totalWeeks > 0 ? Math.round((doneWeeks / totalWeeks) * 100) : 0;
+      const pct = allRoadmapWeeks.length > 0 ? Math.round((doneWeeks / allRoadmapWeeks.length) * 100) : 0;
       document.getElementById('overall-pct').textContent = pct + '%';
 
       const projLabel = document.getElementById('proj-count-label');
@@ -2167,7 +2170,7 @@
     let allUsers = [];
 
     async function renderRoadmap() {
-      const isHost = state.role === 'host';
+      const isHost = myRole === 'host';
       const sidebar = document.getElementById('host-employee-list');
       const assignWrap = document.getElementById('host-assign-wrap');
       
@@ -2279,7 +2282,7 @@
     }
 
     async function assignRoadmapToUser(roadmapName) {
-      if (!viewingUserId && state.role !== 'host') return;
+      if (!viewingUserId && myRole !== 'host') return;
       state.assignedRoadmap = roadmapName;
       await saveState();
       renderRoadmap();
@@ -2416,31 +2419,30 @@
     }
 
     // ── WEEKLY REVIEW ─────────────────────────────────────────────────────────────
-    function renderWeekly() {
-      const grid = document.getElementById('review-week-grid');
-      grid.innerHTML = Array.from({ length: 20 }, (_, i) => i + 1).map(w => {
-        const r = state.weekReviews[w];
-        const isActive = w === state.selectedReviewWeek;
-        return `<div class="review-week-btn ${isActive ? 'active' : ''}" onclick="selectReviewWeek(${w})">
-      <div class="wnum">WK ${String(w).padStart(2, '0')}</div>
-      <div class="wstatus" style="color:${r ? 'var(--green)' : 'var(--text3)'};">${r ? '✓ Done' : '–'}</div>
-    </div>`;
-      }).join('');
-
     let hostEditMode = false;
-    function toggleHostEditMode() {
-      hostEditMode = !hostEditMode;
-      document.getElementById('host-edit-mode-btn').textContent = `Edit Mode: ${hostEditMode ? 'ON' : 'OFF'}`;
-      renderWeekly();
-    }
-
     function renderWeekly() {
+      // 1. Render Week Grid
+      const grid = document.getElementById('review-week-grid');
+      if (grid) {
+        grid.innerHTML = Array.from({ length: 20 }, (_, i) => i + 1).map(w => {
+          const r = state.weekReviews[w];
+          const isActive = w === state.selectedReviewWeek;
+          return `<div class="review-week-btn ${isActive ? 'active' : ''}" onclick="selectReviewWeek(${w})">
+            <div class="wnum">WK ${String(w).padStart(2, '0')}</div>
+            <div class="wstatus" style="color:${r ? 'var(--green)' : 'var(--text3)'};">${r ? '✓ Done' : '–'}</div>
+          </div>`;
+        }).join('');
+      }
+
+      // 2. Render Review Details
       const w = state.selectedReviewWeek;
-      document.getElementById('review-week-label').textContent = w;
-      const r = state.weekReviews[w] || {};
+      const label = document.getElementById('review-week-label');
+      if (label) label.textContent = w;
       
-      const isHost = state.role === 'host';
-      document.getElementById('host-edit-toggle-wrap').style.display = isHost ? 'block' : 'none';
+      const r = state.weekReviews[w] || {};
+      const isHost = myRole === 'host';
+      const toggleWrap = document.getElementById('host-edit-toggle-wrap');
+      if (toggleWrap) toggleWrap.style.display = isHost ? 'block' : 'none';
       
       const editMode = hostEditMode && isHost;
       const fields = ['topics', 'handson', 'win', 'blocker', 'focus'];
@@ -2450,40 +2452,58 @@
         const editEl = document.getElementById('edit-' + f);
         const val = r[f] || 'No data recorded yet.';
         
-        displayEl.textContent = val;
-        if (editEl) editEl.value = val;
-        
-        displayEl.style.display = editMode ? 'none' : 'block';
-        if (editEl) editEl.style.display = editMode ? 'block' : 'none';
+        if (displayEl) {
+          displayEl.textContent = val;
+          displayEl.style.display = editMode ? 'none' : 'block';
+        }
+        if (editEl) {
+          editEl.value = val;
+          editEl.style.display = editMode ? 'block' : 'none';
+        }
       });
 
       const hoursDisplay = document.getElementById('review-hours-display');
       const hoursEdit = document.getElementById('edit-hours');
       const totalHours = state.logEntries.filter(e => parseInt(e.week) === w).reduce((s, e) => s + (e.hours || 0), 0);
-      hoursDisplay.textContent = r.hours || totalHours.toFixed(1);
+      
+      if (hoursDisplay) {
+        hoursDisplay.textContent = r.hours || totalHours.toFixed(1);
+        hoursDisplay.style.display = editMode ? 'none' : 'block';
+      }
       if (hoursEdit) {
         hoursEdit.value = r.hours || totalHours.toFixed(1);
-        hoursDisplay.style.display = editMode ? 'none' : 'block';
         hoursEdit.style.display = editMode ? 'block' : 'none';
       }
 
       const ratingDisplay = document.getElementById('review-rating-display');
-      const stars = '⭐'.repeat(r.rating || 5);
-      ratingDisplay.textContent = stars;
+      if (ratingDisplay) {
+        const stars = '⭐'.repeat(r.rating || 5);
+        ratingDisplay.textContent = stars;
+      }
 
       const statusBadge = document.getElementById('review-status-badge');
-      statusBadge.textContent = r.saved ? 'Locked' : 'Draft';
-      statusBadge.className = 'badge ' + (r.saved ? 'badge-blue' : '');
+      if (statusBadge) {
+        statusBadge.textContent = r.saved ? 'Locked' : 'Draft';
+        statusBadge.className = 'badge ' + (r.saved ? 'badge-blue' : '');
+      }
 
       const actionBtn = document.getElementById('review-action-btn');
       const saveBtn = document.getElementById('review-save-btn');
       
       if (editMode) {
-        actionBtn.style.display = 'none';
-        saveBtn.style.display = 'block';
+        if (actionBtn) actionBtn.style.display = 'none';
+        if (saveBtn) saveBtn.style.display = 'block';
       } else {
-        saveBtn.style.display = 'none';
-        actionBtn.style.display = (r.saved || state.role === 'host') ? 'none' : 'block';
+        if (saveBtn) saveBtn.style.display = 'none';
+        if (actionBtn) actionBtn.style.display = (r.saved || state.role === 'host') ? 'none' : 'block';
+      }
+    }
+
+    function toggleHostEditMode() {
+      hostEditMode = !hostEditMode;
+      const btn = document.getElementById('host-edit-mode-btn');
+      if (btn) btn.textContent = `Edit Mode: ${hostEditMode ? 'ON' : 'OFF'}`;
+      renderWeekly();
     }
 
     function submitWeeklyReview() {
@@ -2579,10 +2599,14 @@
     // ── SAVE ALL ──────────────────────────────────────────────────────────────────
     function saveAll() { saveState(); }
 
-    function showToast() {
+    function showToast(msg = "Progress saved successfully!") {
       const t = document.getElementById('save-toast');
-      t.classList.add('show');
-      setTimeout(() => t.classList.remove('show'), 2500);
+      const text = document.getElementById('save-toast-text');
+      if (t && text) {
+        text.textContent = msg;
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 2500);
+      }
     }
 
     // ── INITIAL RENDER ────────────────────────────────────────────────────────────
