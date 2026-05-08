@@ -1460,8 +1460,31 @@
 
       <!-- ROADMAP PAGE -->
       <div class="page" id="page-roadmap">
-        <div class="phase-bar" id="phase-filter-bar"></div>
-        <div class="week-grid" id="week-grid"></div>
+        <div style="display:flex; gap:24px; align-items:start;">
+          <!-- HOST SIDEBAR -->
+          <div id="host-employee-list" style="width:280px; display:none; flex-shrink:0;">
+            <div class="card" style="padding:16px;">
+              <div class="card-title" style="font-size:12px; margin-bottom:12px;">Employee Progress</div>
+              <div id="employee-list-content" style="display:flex; flex-direction:column; gap:8px;">
+                <!-- Employees injected here -->
+              </div>
+            </div>
+          </div>
+
+          <div style="flex:1; min-width:0;">
+            <div id="roadmap-controls" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+              <div class="phase-bar" id="phase-filter-bar" style="margin-bottom:0; flex:1;"></div>
+              <div id="host-assign-wrap" style="display:none; margin-left:16px;">
+                <select class="form-select" id="assign-roadmap-select" onchange="assignRoadmapToUser(this.value)" style="font-size:12px; padding:8px 12px; height:auto;">
+                  <option value="">Assign Roadmap...</option>
+                  <option value="Data Analytics">Data Analytics</option>
+                  <option value="Data Engineering">Data Engineering</option>
+                </select>
+              </div>
+            </div>
+            <div class="week-grid" id="week-grid"></div>
+          </div>
+        </div>
       </div>
 
       <!-- DAILY LOG PAGE -->
@@ -1615,8 +1638,7 @@
               <input type="number" class="form-input" id="review-rating" min="1" max="10" placeholder="7">
             </div>
             <div class="review-full">
-              <button class="btn btn-primary" style="width:100%;padding:12px;" onclick="saveWeekReview()">Save Review
-                →</button>
+              <button class="btn btn-primary" id="review-save-btn" style="width:100%;padding:12px;" onclick="saveWeekReview()">Save Weekly Review →</button>
             </div>
           </div>
         </div>
@@ -1736,9 +1758,11 @@
       firstName: '',
       lastName: '',
       role: 'user',
+      assignedRoadmap: 'Data Analytics',
       weekStatus: {},
       skillNow: {},
       projectStatus: {},
+      projectTasks: {}, // {projId: [0, 1, 0]}
       logEntries: [],
       weekReviews: {},
       selectedMood: 3,
@@ -1746,14 +1770,22 @@
       activeSkillTab: 'all',
       activeResourceFilter: 'All',
     };
-    const PHASES = [
-      { id: 'p1', name: 'Analytics Mindset', color: '#14B8A6', weeks: [1, 2] },
-      { id: 'p2', name: 'SQL Deep Dive', color: '#3B82F6', weeks: [3, 4, 5, 6] },
-      { id: 'p3', name: 'Python Analytics', color: '#8B5CF6', weeks: [7, 8, 9, 10] },
-      { id: 'p4', name: 'Power BI', color: '#F97316', weeks: [11, 12, 13, 14] },
-      { id: 'p5', name: 'Advanced Excel', color: '#F59E0B', weeks: [15, 16] },
-      { id: 'p6', name: 'Portfolio & Career', color: '#10B981', weeks: [17, 18, 19, 20] },
-    ];
+    const ROADMAPS = {
+      'Data Analytics': [
+        { id: 'p1', name: 'Analytics Mindset', color: '#14B8A6', weeks: [1, 2] },
+        { id: 'p2', name: 'SQL Deep Dive', color: '#3B82F6', weeks: [3, 4, 5, 6] },
+        { id: 'p3', name: 'Python Analytics', color: '#8B5CF6', weeks: [7, 8, 9, 10] },
+        { id: 'p4', name: 'Power BI', color: '#F97316', weeks: [11, 12, 13, 14] },
+        { id: 'p5', name: 'Advanced Excel', color: '#F59E0B', weeks: [15, 16] },
+        { id: 'p6', name: 'Portfolio & Career', color: '#10B981', weeks: [17, 18, 19, 20] },
+      ],
+      'Data Engineering': [
+        { id: 'e1', name: 'Cloud Infra', color: '#6366F1', weeks: [1, 2] },
+        { id: 'e2', name: 'Data Modeling', color: '#3B82F6', weeks: [3, 4] },
+      ]
+    };
+
+    const PHASES = ROADMAPS['Data Analytics'];
 
     const WEEKS = [
       { w: 1, phase: 'p1', title: 'What is Data Analytics?', tools: ['Notes', 'YouTube'], goals: 'Analyst vs Engineer vs Scientist roles; Analytics lifecycle; Tool landscape', handson: 'Write 1-page role comparison; Map 5 JDs to skills' },
@@ -1811,14 +1843,14 @@
     ];
 
     const PROJECTS = [
-      { id: 'proj1', phase: 'p1', color: '#14B8A6', num: '01', title: 'KPI Dashboard — Retail Sales', tools: ['Excel'], dataset: 'Sample Superstore (Kaggle)', q: 'Which product categories drive the most profit?', insight: 'Furniture has ~50% lower margin than Technology', status: 'Not Started' },
-      { id: 'proj2', phase: 'p2', color: '#3B82F6', num: '02', title: 'Cohort Retention Analysis', tools: ['SQL'], dataset: 'E-commerce transactions', q: 'What % of new customers return in month 2?', insight: 'Only 18% retention — email campaigns needed', status: 'Not Started' },
-      { id: 'proj3', phase: 'p2', color: '#3B82F6', num: '03', title: 'SQL Funnel Analysis', tools: ['SQL', 'Power BI'], dataset: 'Funnel events table', q: 'Where do users drop off in the checkout flow?', insight: '65% drop at payment page', status: 'Not Started' },
-      { id: 'proj4', phase: 'p3', color: '#8B5CF6', num: '04', title: 'Python EDA — HR Analytics', tools: ['Python', 'Pandas'], dataset: 'IBM HR Analytics (Kaggle)', q: 'What factors predict employee attrition?', insight: 'Overtime + low satisfaction = 40% higher attrition', status: 'Not Started' },
-      { id: 'proj5', phase: 'p4', color: '#F97316', num: '05', title: 'Sales Performance Dashboard', tools: ['Power BI', 'DAX'], dataset: 'AdventureWorks / own data', q: 'Which region is underperforming vs target?', insight: 'East region 12% below Q3 target', status: 'Not Started' },
-      { id: 'proj6', phase: 'p4', color: '#F97316', num: '06', title: 'Marketing Campaign Analysis', tools: ['Power BI', 'Python'], dataset: 'Marketing dataset (Kaggle)', q: 'Which campaign channel has the best ROI?', insight: 'Email ROI 4.2x vs Social 1.8x', status: 'Not Started' },
-      { id: 'proj7', phase: 'p5', color: '#F59E0B', num: '07', title: 'Excel Financial Dashboard', tools: ['Excel'], dataset: 'Public company financials', q: '3-year revenue & margin trend analysis', insight: 'Margins compressing 2% YoY since 2022', status: 'Not Started' },
-      { id: 'proj8', phase: 'p6', color: '#10B981', num: '08', title: 'CAPSTONE — Full Analytics Project', tools: ['SQL', 'Python', 'Power BI'], dataset: 'Self-chosen open dataset', q: 'Define your own business question!', insight: 'TBD — this is your proof-of-work', status: 'Not Started' },
+      { id: 'proj1', phase: 'p1', color: '#14B8A6', num: '01', title: 'KPI Dashboard — Retail Sales', tools: ['Excel'], dataset: 'Sample Superstore', kaggle: 'https://www.kaggle.com/datasets/pankajbhowmik/superstore-data', tasks: ['Define KPIs', 'Clean Data', 'Build Pivot Tables', 'Final Dash'], q: 'Which product categories drive the most profit?', insight: 'Furniture has ~50% lower margin than Technology', status: 'Not Started' },
+      { id: 'proj2', phase: 'p2', color: '#3B82F6', num: '02', title: 'Cohort Retention Analysis', tools: ['SQL'], dataset: 'E-commerce transactions', kaggle: 'https://www.kaggle.com/datasets/mkeadhane/ecommerce-behavior-data-from-multi-category-store', tasks: ['Setup Postgres', 'Retention Query', 'Visualization'], q: 'What % of new customers return in month 2?', insight: 'Only 18% retention — email campaigns needed', status: 'Not Started' },
+      { id: 'proj3', phase: 'p2', color: '#3B82F6', num: '03', title: 'SQL Funnel Analysis', tools: ['SQL', 'Power BI'], dataset: 'Funnel events table', kaggle: 'https://www.kaggle.com/datasets/mkeadhane/ecommerce-behavior-data-from-multi-category-store', tasks: ['Event Tracking SQL', 'Funnel Visualization'], q: 'Where do users drop off in the checkout flow?', insight: '65% drop at payment page', status: 'Not Started' },
+      { id: 'proj4', phase: 'p3', color: '#8B5CF6', num: '04', title: 'Python EDA — HR Analytics', tools: ['Python', 'Pandas'], dataset: 'IBM HR Analytics', kaggle: 'https://www.kaggle.com/datasets/pavansubhasht/ibm-hr-analytics-attrition-dataset', tasks: ['Pandas Cleaning', 'Statistical Testing', 'EDA Plots'], q: 'What factors predict employee attrition?', insight: 'Overtime + low satisfaction = 40% higher attrition', status: 'Not Started' },
+      { id: 'proj5', phase: 'p4', color: '#F97316', num: '05', title: 'Sales Performance Dashboard', tools: ['Power BI', 'DAX'], dataset: 'AdventureWorks', kaggle: 'https://www.kaggle.com/datasets/ukveteran/adventure-works', tasks: ['Power Query', 'DAX Measures', 'Report Design'], q: 'Which region is underperforming vs target?', insight: 'East region 12% below Q3 target', status: 'Not Started' },
+      { id: 'proj6', phase: 'p4', color: '#F97316', num: '06', title: 'Marketing Campaign Analysis', tools: ['Power BI', 'Python'], dataset: 'Marketing dataset', kaggle: 'https://www.kaggle.com/datasets/rodsaldanha/arketing-campaign', tasks: ['Campaign Attribution', 'ROI Analysis'], q: 'Which campaign channel has the best ROI?', insight: 'Email ROI 4.2x vs Social 1.8x', status: 'Not Started' },
+      { id: 'proj7', phase: 'p5', color: '#F59E0B', num: '07', title: 'Excel Financial Dashboard', tools: ['Excel'], dataset: 'Public company financials', kaggle: 'https://www.kaggle.com/datasets/dgomonov/new-york-city-airbnb-open-data', tasks: ['Financial Modeling', 'Margin Trends'], q: '3-year revenue & margin trend analysis', insight: 'Margins compressing 2% YoY since 2022', status: 'Not Started' },
+      { id: 'proj8', phase: 'p6', color: '#10B981', num: '08', title: 'CAPSTONE — Full Analytics Project', tools: ['SQL', 'Python', 'Power BI'], dataset: 'Self-chosen open dataset', kaggle: 'https://www.kaggle.com', tasks: ['Problem Definition', 'Data Sourcing', 'Analysis', 'Presentation'], q: 'Define your own business question!', insight: 'TBD — this is your proof-of-work', status: 'Not Started' },
     ];
 
     const RESOURCES = [
@@ -1860,8 +1892,9 @@
     async function saveState() {
       const user = auth.currentUser;
       if (!user) return;
+      const targetUid = (state.role === 'host' && viewingUserId) ? viewingUserId : user.uid;
       try {
-        await db.collection('users').doc(user.uid).set(state);
+        await db.collection('users').doc(targetUid).set(state);
         showToast();
       } catch (e) {
         console.error("Error saving state:", e);
@@ -1872,8 +1905,11 @@
     // ── INIT ─────────────────────────────────────────────────────────────────────
     // Defaults set after Firebase load
     function initApp() {
-      SKILLS.forEach(s => { if (state.skillNow[s.key] === undefined) state.skillNow[s.key] = s.now; });
-      PROJECTS.forEach(p => { if (!state.projectStatus[p.id]) state.projectStatus[p.id] = p.status; });
+      SKILLS.forEach(s => { if (state.skillNow[s.key] === undefined) state.skillNow[s.key] = 0; });
+      PROJECTS.forEach(p => { 
+        if (!state.projectStatus[p.id]) state.projectStatus[p.id] = p.status; 
+        if (!state.projectTasks[p.id]) state.projectTasks[p.id] = p.tasks.map(() => 0);
+      });
 
       document.getElementById('today-date').textContent = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
       document.getElementById('log-date').value = new Date().toISOString().split('T')[0];
@@ -2096,22 +2132,43 @@
 
     // ── ROADMAP ──────────────────────────────────────────────────────────────────
     let activePhaseFilter = null;
+    let viewingUserId = null; // null means self
+    let allUsers = [];
 
-    function renderRoadmap() {
+    async function renderRoadmap() {
+      const isHost = state.role === 'host';
+      const sidebar = document.getElementById('host-employee-list');
+      const assignWrap = document.getElementById('host-assign-wrap');
+      
+      if (isHost) {
+        sidebar.style.display = 'block';
+        assignWrap.style.display = 'block';
+        await fetchEmployees();
+      } else {
+        sidebar.style.display = 'none';
+        assignWrap.style.display = 'none';
+      }
+
+      const activeRoadmap = state.assignedRoadmap || 'Data Analytics';
+      const activePhases = ROADMAPS[activeRoadmap] || ROADMAPS['Data Analytics'];
+
       const bar = document.getElementById('phase-filter-bar');
-      bar.innerHTML = PHASES.map(p => `
+      bar.innerHTML = activePhases.map(p => `
     <div class="phase-seg" style="background:${activePhaseFilter === p.id ? p.color : p.color + '33'};"
       onclick="filterPhase('${p.id}')">
-      <div style="font-size:11px;color:#fff;font-weight:700;">P${PHASES.indexOf(p) + 1}</div>
+      <div style="font-size:11px;color:#fff;font-weight:700;">P${activePhases.indexOf(p) + 1}</div>
       <div class="phase-name">${p.name.split(' ')[0]}</div>
     </div>
   `).join('') + `<div class="phase-seg" style="background:var(--card2);" onclick="filterPhase(null)"><div style="font-size:10px;color:var(--text2);">All</div></div>`;
 
       const grid = document.getElementById('week-grid');
-      const weeks = activePhaseFilter ? WEEKS.filter(w => w.phase === activePhaseFilter) : WEEKS;
-      const phase = p => PHASES.find(ph => ph.id === p);
+      // Filter weeks based on current roadmap phases
+      const validWeeks = [].concat(...activePhases.map(p => p.weeks));
+      let weeks = WEEKS.filter(w => validWeeks.includes(w.w));
+      if (activePhaseFilter) weeks = weeks.filter(w => w.phase === activePhaseFilter);
+
       grid.innerHTML = weeks.map(w => {
-        const ph = phase(w.phase);
+        const ph = activePhases.find(ph => ph.weeks.includes(w.w)) || { name: '?', color: '#ccc' };
         const status = state.weekStatus[w.w] || 'todo';
         return `
       <div class="week-card ${status === 'active' ? 'current' : ''} ${status === 'done' ? 'done' : ''}">
@@ -2136,11 +2193,56 @@
       }).join('');
     }
 
+    async function fetchEmployees() {
+      const snap = await db.collection('users').get();
+      const container = document.getElementById('employee-list-content');
+      allUsers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      
+      container.innerHTML = allUsers.map(u => {
+        const done = Object.values(u.weekStatus || {}).filter(s => s === 'done').length;
+        const pct = Math.round((done / 20) * 100);
+        const statusColor = pct > 70 ? 'var(--green)' : pct > 30 ? 'var(--gold)' : 'var(--red)';
+        const isActive = (viewingUserId === u.id) || (viewingUserId === null && u.id === auth.currentUser.uid);
+        
+        return `
+          <div onclick="switchViewUser('${u.id}')" style="padding:10px; border-radius:8px; background:${isActive ? 'var(--navy3)' : 'var(--card2)'}; border:1px solid ${isActive ? 'var(--blue)' : 'var(--border)'}; cursor:pointer; display:flex; align-items:center; gap:10px;">
+            <div style="width:8px; height:8px; border-radius:50%; background:${statusColor}; box-shadow: 0 0 5px ${statusColor};"></div>
+            <div style="flex:1;">
+              <div style="font-size:12px; font-weight:600;">${u.firstName} ${u.lastName}</div>
+              <div style="font-size:10px; color:var(--text3);">${u.assignedRoadmap || 'No Roadmap'} · ${pct}%</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function switchViewUser(uid) {
+      if (uid === auth.currentUser.uid) {
+        viewingUserId = null;
+        await loadFromFirestore(uid);
+      } else {
+        viewingUserId = uid;
+        const u = allUsers.find(user => user.id === uid);
+        state = { ...defaultState, ...u };
+        document.getElementById('assign-roadmap-select').value = state.assignedRoadmap || '';
+        renderRoadmap();
+        updateUserUI(); // Temporarily show employee name in UI
+      }
+    }
+
+    async function assignRoadmapToUser(roadmapName) {
+      if (!viewingUserId && state.role !== 'host') return;
+      state.assignedRoadmap = roadmapName;
+      await saveState();
+      renderRoadmap();
+    }
+
     function filterPhase(pid) { activePhaseFilter = pid; renderRoadmap(); }
     function setWeekStatus(w, s) { state.weekStatus[w] = s; saveState(); renderRoadmap(); updateKPIs(); }
 
     // ── SKILLS ───────────────────────────────────────────────────────────────────
     function renderSkills() {
+      const levels = ['None', 'Beginner', 'Intermediate', 'Expert'];
       const domainFilter = {
         all: null, sql: 'SQL', python: 'Python', powerbi: 'Power BI',
         excel: 'Excel', core: 'Analytics Core'
@@ -2159,19 +2261,18 @@
           <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
         </div>
         <div class="domain-name">${domain}</div>
-        <div class="domain-avg">avg level: ${avg} / 5</div>
+        <div class="domain-avg">Avg Level: ${levels[Math.round(avg)]}</div>
       </div>
-      <div style="display:grid;grid-template-columns:220px 1fr 70px 70px 70px;gap:12px;padding:6px 0;border-bottom:1px solid var(--border);">
+      <div style="display:grid;grid-template-columns:220px 1fr 120px 100px;gap:12px;padding:6px 0;border-bottom:1px solid var(--border);">
         <div style="font-size:11px;color:var(--text3);">Skill</div>
         <div style="font-size:11px;color:var(--text3);">Progress Bar</div>
-        <div style="font-size:11px;color:var(--text3);text-align:center;">Before</div>
-        <div style="font-size:11px;color:var(--text3);text-align:center;">Now</div>
+        <div style="font-size:11px;color:var(--text3);text-align:center;">Current Level</div>
         <div style="font-size:11px;color:var(--text3);text-align:center;">Target</div>
       </div>
     `;
         domainSkills.forEach(s => {
           const now = state.skillNow[s.key] || 0;
-          const pct = (now / 5) * 100;
+          const pct = (now / 3) * 100;
           html += `
         <div class="skill-row" id="skillrow-${s.key}">
           <div class="skill-name">${s.name}</div>
@@ -2179,14 +2280,13 @@
             <div class="skill-bar-wrap">
               <div class="skill-bar-fill" style="width:${pct}%;background:${s.color};"></div>
             </div>
-            <div style="font-size:10px;color:var(--text3);margin-top:4px;">${now}/5 → target: ${s.target}/5</div>
           </div>
-          <div style="text-align:center;font-size:13px;font-family:'JetBrains Mono',monospace;color:var(--text3);">${s.before}</div>
           <div style="text-align:center;">
-            <input class="skill-level-input" type="number" min="0" max="5" value="${now}"
-              onchange="updateSkill('${s.key}',this.value)" oninput="updateSkill('${s.key}',this.value)" style="color:${s.color};">
+            <select class="form-select" onchange="updateSkill('${s.key}',this.value)" style="font-size:11px;padding:4px;height:auto;background:var(--card2);">
+              ${levels.map((l, i) => `<option value="${i}" ${now === i ? 'selected' : ''}>${l}</option>`).join('')}
+            </select>
           </div>
-          <div style="text-align:center;font-size:13px;font-family:'JetBrains Mono',monospace;color:var(--green);">${s.target}</div>
+          <div style="text-align:center;font-size:13px;font-family:'JetBrains Mono',monospace;color:var(--green);">${levels[Math.min(3, s.target - 2)] || 'Expert'}</div>
         </div>
       `;
         });
@@ -2196,17 +2296,10 @@
     }
 
     function updateSkill(key, val) {
-      const v = Math.min(5, Math.max(0, parseInt(val) || 0));
+      const v = parseInt(val) || 0;
       state.skillNow[key] = v;
       saveState();
-      const s = SKILLS.find(sk => sk.key === key);
-      if (s) {
-        const row = document.getElementById('skillrow-' + key);
-        if (row) {
-          const bar = row.querySelector('.skill-bar-fill');
-          if (bar) bar.style.width = ((v / 5) * 100) + '%';
-        }
-      }
+      renderSkills();
       updateKPIs();
     }
 
@@ -2215,8 +2308,11 @@
       updateKPIs();
       const grid = document.getElementById('project-grid');
       const statusColors = { 'Not Started': 'var(--text3)', 'In Progress': 'var(--gold)', 'Completed': 'var(--green)', 'Blocked': 'var(--red)' };
+      
       grid.innerHTML = PROJECTS.map(p => {
         const status = state.projectStatus[p.id] || 'Not Started';
+        const taskStates = state.projectTasks[p.id] || p.tasks.map(() => 0);
+        
         return `
       <div class="project-card" style="--phase-color:${p.color};">
         <div class="project-num">
@@ -2225,12 +2321,28 @@
         </div>
         <div class="project-title">${p.title}</div>
         <div class="project-q">"${p.q}"</div>
-        <div class="project-tools">${p.tools.map(t => `<span class="tool-pill" style="border-color:${p.color}44;color:${p.color};">${t}</span>`).join('')}</div>
-        <div class="project-dataset">dataset: ${p.dataset}</div>
-        <div style="margin-top:10px;padding:10px;background:var(--navy2);border-radius:8px;font-size:11px;color:var(--text2);margin-bottom:12px;">
-          <span style="color:var(--teal2);">Expected insight:</span> ${p.insight}
+        
+        <div style="margin: 12px 0;">
+          <a href="${p.kaggle}" target="_blank" class="btn" style="padding: 6px 12px; font-size: 11px; background: var(--card2); display: inline-flex; align-items: center; gap: 6px; text-decoration: none; color: var(--text2);">
+            <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M18.825 2.5c-1.325 0-2.39 1.065-2.39 2.39s1.065 2.39 2.39 2.39 2.39-1.065 2.39-2.39-1.065-2.39-2.39-2.39zM10.75 3.5c-3.175 0-5.75 2.575-5.75 5.75s2.575 5.75 5.75 5.75 5.75-2.575 5.75-5.75-2.575-5.75-5.75-5.75zM10.75 5.5c1.8 0 3.25 1.45 3.25 3.25s-1.45 3.25-3.25 3.25-3.25-1.45-3.25-3.25 1.45-3.25 3.25-3.25zM18.825 8.5c-.75 0-1.425.325-1.9.85l-4.575-2.675c.025-.15.05-.3.05-.475 0-1.325-1.065-2.39-2.39-2.39s-2.39 1.065-2.39 2.39 1.065 2.39 2.39 2.39c.175 0 .325-.025.475-.05l4.575 2.675c-.525.475-.85 1.15-.85 1.9 0 1.325 1.065 2.39 2.39 2.39s2.39-1.065 2.39-2.39-1.065-2.39-2.39-2.39zm-8.075-1.3c-.75 0-1.375.625-1.375 1.375s.625 1.375 1.375 1.375 1.375-.625 1.375-1.375-.625-1.375-1.375-1.375z"/></svg>
+            Kaggle Dataset
+          </a>
         </div>
-        <select class="status-select" onchange="updateProjectStatus('${p.id}',this.value)">
+
+        <div class="project-roadmap" style="background: var(--navy2); padding: 12px; border-radius: 8px; margin-bottom: 12px;">
+          <div style="font-size: 10px; color: var(--text3); text-transform: uppercase; margin-bottom: 8px; font-weight: 700;">Project Roadmap</div>
+          ${p.tasks.map((task, idx) => `
+            <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px; cursor: pointer; font-size: 11px; color: ${taskStates[idx] ? 'var(--text3)' : 'var(--text)'};">
+              <input type="checkbox" ${taskStates[idx] ? 'checked' : ''} onchange="toggleProjectTask('${p.id}', ${idx})" style="accent-color: var(--phase-color);">
+              <span style="${taskStates[idx] ? 'text-decoration: line-through;' : ''}">${task}</span>
+            </label>
+          `).join('')}
+        </div>
+
+        <div class="project-tools">${p.tools.map(t => `<span class="tool-pill" style="border-color:${p.color}44;color:${p.color};">${t}</span>`).join('')}</div>
+        <div class="project-dataset">Data: ${p.dataset}</div>
+        
+        <select class="status-select" onchange="updateProjectStatus('${p.id}',this.value)" style="margin-top: 10px;">
           <option ${status === 'Not Started' ? 'selected' : ''}>Not Started</option>
           <option ${status === 'In Progress' ? 'selected' : ''}>In Progress</option>
           <option ${status === 'Completed' ? 'selected' : ''}>Completed</option>
@@ -2241,8 +2353,18 @@
       }).join('');
     }
 
+    function toggleProjectTask(projId, taskIdx) {
+      if (!state.projectTasks[projId]) state.projectTasks[projId] = PROJECTS.find(p => p.id === projId).tasks.map(() => 0);
+      state.projectTasks[projId][taskIdx] = state.projectTasks[projId][taskIdx] ? 0 : 1;
+      saveState();
+      renderProjects();
+    }
+
     function updateProjectStatus(id, val) {
-      state.projectStatus[id] = val; saveState(); updateKPIs();
+      state.projectStatus[id] = val;
+      saveState();
+      updateKPIs();
+      renderProjects();
     }
 
     // ── WEEKLY REVIEW ─────────────────────────────────────────────────────────────
@@ -2260,11 +2382,31 @@
       const w = state.selectedReviewWeek;
       document.getElementById('review-week-label').textContent = w;
       const r = state.weekReviews[w] || {};
+      const isLocked = r.saved && state.role !== 'host';
+
       ['topics', 'handson', 'win', 'blocker', 'focus'].forEach(f => {
-        document.getElementById('review-' + f).value = r[f] || '';
+        const el = document.getElementById('review-' + f);
+        el.value = r[f] || '';
+        el.disabled = isLocked;
       });
-      document.getElementById('review-hours').value = r.hours || '';
-      document.getElementById('review-rating').value = r.rating || '';
+      
+      const hoursEl = document.getElementById('review-hours');
+      const ratingEl = document.getElementById('review-rating');
+      hoursEl.value = r.hours || '';
+      ratingEl.value = r.rating || '';
+      hoursEl.disabled = isLocked;
+      ratingEl.disabled = isLocked;
+
+      const saveBtn = document.getElementById('review-save-btn');
+      if (isLocked) {
+        saveBtn.innerHTML = 'Locked (Contact Host to Edit)';
+        saveBtn.disabled = true;
+        saveBtn.style.opacity = 0.5;
+      } else {
+        saveBtn.innerHTML = 'Save Weekly Review →';
+        saveBtn.disabled = false;
+        saveBtn.style.opacity = 1;
+      }
     }
 
     function selectReviewWeek(w) { state.selectedReviewWeek = w; renderWeekly(); }
@@ -2279,6 +2421,7 @@
         focus: document.getElementById('review-focus').value,
         hours: parseFloat(document.getElementById('review-hours').value) || 0,
         rating: parseInt(document.getElementById('review-rating').value) || 0,
+        saved: true
       };
       saveState(); renderWeekly(); showToast();
     }
