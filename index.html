@@ -1931,13 +1931,16 @@
       const welcomeTitle = document.querySelector('.welcome-title');
       const sidebarName = document.querySelector('.user-name');
       const avatar = document.querySelector('.avatar');
+      const roleBadge = document.querySelector('.user-role');
       
       const fName = state.firstName || 'User';
       const lName = state.lastName || '';
+      const role = state.role || myRole || 'user';
       
       if (welcomeTitle) welcomeTitle.textContent = `Welcome back, ${fName} 👋`;
       if (sidebarName) sidebarName.textContent = `${fName} ${lName}`;
       if (avatar) avatar.textContent = (fName[0] || '') + (lName[0] || '');
+      if (roleBadge) roleBadge.textContent = role.charAt(0).toUpperCase() + role.slice(1);
     }
 
     // ── DATA ─────────────────────────────────────────────────────────────────────
