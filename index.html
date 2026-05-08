@@ -1518,9 +1518,11 @@
             <div class="form-group"><label class="form-label">Tool</label><select class="form-select" id="log-tool"><option>SQL</option><option>Python</option><option>Power BI</option><option>Excel</option><option>Tableau</option></select></div>
             <div class="form-group"><label class="form-label">Hours</label><input type="number" class="form-input" id="log-hours" step="0.5"></div>
             <div class="form-group"><label class="form-label">Mood</label><div style="display:flex;gap:8px;"><span class="mood-btn" onclick="setMood(1,this)">😴</span><span class="mood-btn active" onclick="setMood(3,this)">🙂</span><span class="mood-btn" onclick="setMood(5,this)">🔥</span></div></div>
-            <div class="form-group" style="grid-column:1/-1;"><label class="form-label">Learned</label><textarea class="form-textarea" id="log-learned"></textarea></div>
-            <div class="form-group" style="grid-column:1/-1;"><label class="form-label">Hands-on</label><textarea class="form-textarea" id="log-handson"></textarea></div>
-            <div class="form-group" style="grid-column:1/-1;"><label class="form-label">Blockers</label><textarea class="form-textarea" id="log-blockers"></textarea></div>
+            <div class="form-group" style="grid-column:1/-1;"><label class="form-label">Topics & Key Concepts</label><textarea class="form-textarea" id="log-learned" placeholder="What core concepts did you study today?"></textarea></div>
+            <div class="form-group" style="grid-column:1/-1;"><label class="form-label">Wins & A-ha Moments</label><textarea class="form-textarea" id="log-wins" placeholder="Any breakthroughs or successful implementations?"></textarea></div>
+            <div class="form-group" style="grid-column:1/-1;"><label class="form-label">Hands-on Work</label><textarea class="form-textarea" id="log-handson" placeholder="Describe the specific labs, scripts, or projects you worked on."></textarea></div>
+            <div class="form-group" style="grid-column:1/-1;"><label class="form-label">Blockers & Challenges</label><textarea class="form-textarea" id="log-blockers" placeholder="What slowed you down?"></textarea></div>
+            <div class="form-group" style="grid-column:1/-1;"><label class="form-label">Focus for Tomorrow</label><input type="text" class="form-input" id="log-tomorrow" placeholder="What's the #1 priority for your next session?"></div>
             <div style="grid-column:1/-1; display:flex; gap:12px;">
               <button class="btn btn-primary" style="flex:1;" onclick="addLogEntry()">Save Session</button>
               <button class="btn" style="background:var(--card2);" onclick="toggleLogForm()">Cancel</button>
@@ -1558,8 +1560,8 @@
       <div class="page" id="page-weekly">
         <div class="section-header">
           <div>
-            <h2 class="section-title">Weekly Performance Review</h2>
-            <p class="section-sub">Summarized reflection of your weekly growth</p>
+            <h2 class="section-title">Weekly Performance Summary</h2>
+            <p class="section-sub">Auto-generated overview based on your daily logs</p>
           </div>
           <div style="display:flex; gap:12px;">
             <div id="host-edit-toggle-wrap" style="display:none;">
@@ -1574,7 +1576,10 @@
           <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:32px; border-bottom:1px solid var(--border); padding-bottom:20px;">
             <div>
               <div style="font-size:12px; color:var(--text3); text-transform:uppercase; font-weight:800; letter-spacing:1px; margin-bottom:4px;">Review Period</div>
-              <div style="font-size:24px; font-weight:800; color:var(--text);">Week <span id="review-week-label">1</span></div>
+              <div style="font-size:24px; font-weight:800; color:var(--text); display:flex; align-items:center; gap:12px;">
+                Week <span id="review-week-label">1</span>
+                <span id="auto-gen-badge" style="font-size:10px; padding:2px 8px; border-radius:4px; background:var(--blue)22; color:var(--blue2); border:1px solid var(--blue)44;">Auto-Generated</span>
+              </div>
             </div>
             <div style="text-align:right;">
               <div style="font-size:12px; color:var(--text3); text-transform:uppercase; font-weight:800; letter-spacing:1px; margin-bottom:4px;">Weekly Rating</div>
@@ -1964,8 +1969,10 @@
         tool: document.getElementById('log-tool').value,
         hours: parseFloat(document.getElementById('log-hours').value) || 0,
         learned: document.getElementById('log-learned').value.trim(),
+        wins: document.getElementById('log-wins').value.trim(),
         handson: document.getElementById('log-handson').value.trim(),
         blockers: document.getElementById('log-blockers').value.trim(),
+        tomorrow: document.getElementById('log-tomorrow').value.trim(),
         mood: state.selectedMood || 3,
         id: Date.now(),
       };
@@ -1979,7 +1986,7 @@
       renderLogEntries();
       updateKPIs();
       // Clear form
-      ['log-topic', 'log-learned', 'log-handson', 'log-blockers'].forEach(id => { 
+      ['log-topic', 'log-learned', 'log-wins', 'log-handson', 'log-blockers', 'log-tomorrow'].forEach(id => { 
         const el = document.getElementById(id);
         if (el) el.value = ''; 
       });
@@ -2495,7 +2502,8 @@
         if (saveBtn) saveBtn.style.display = 'block';
       } else {
         if (saveBtn) saveBtn.style.display = 'none';
-        if (actionBtn) actionBtn.style.display = (r.saved || state.role === 'host') ? 'none' : 'block';
+        // User cannot interact anymore, only Host can toggle Edit Mode
+        if (actionBtn) actionBtn.style.display = 'none';
       }
     }
 
@@ -2531,22 +2539,33 @@
     function autoPopulateWeekly(wNum) {
       if (!state.weekReviews[wNum]) state.weekReviews[wNum] = {};
       const r = state.weekReviews[wNum];
-      if (r.saved) return; // Don't overwrite saved reviews
+      
+      // If the Host has manually saved/locked this, don't overwrite it
+      if (r.locked) return;
+
+      const logs = state.logEntries.filter(e => parseInt(e.week) === wNum);
+      if (logs.length === 0) return;
 
       const weekDef = WEEKS.find(wk => wk.w === wNum);
-      const logTopics = state.logEntries
-        .filter(e => parseInt(e.week) === wNum)
-        .map(e => e.topic)
-        .join(', ');
       
-      const logHandsOn = state.logEntries
-        .filter(e => parseInt(e.week) === wNum)
-        .map(e => e.handson)
-        .filter(h => h)
-        .join('; ');
-
-      if (!r.topics && weekDef) r.topics = `Planned: ${weekDef.goals}. Logged: ${logTopics}`;
-      if (!r.handson && weekDef) r.handson = `Planned: ${weekDef.handson}. Logged: ${logHandsOn}`;
+      // Aggregate Data
+      r.topics = [...new Set(logs.map(e => e.topic))].join(', ');
+      r.handson = logs.map(e => e.handson).filter(h => h).join('\n• ');
+      r.win = logs.map(e => e.wins).filter(w => w).join('\n• ');
+      r.blocker = logs.map(e => e.blockers).filter(b => b).join('\n• ');
+      
+      // Focus is the "Tomorrow" plan from the most recent log of that week
+      r.focus = logs[0].tomorrow || "Continue following the roadmap.";
+      
+      // Calculate average mood for rating (1-5 scale)
+      const avgMood = logs.reduce((s, e) => s + (e.mood || 3), 0) / logs.length;
+      r.rating = Math.round(avgMood);
+      
+      // Total Hours
+      r.hours = logs.reduce((s, e) => s + (e.hours || 0), 0).toFixed(1);
+      
+      // Automatically "mark as saved" in background but don't lock for Host
+      r.saved = true;
     }
 
     function saveWeekReview() {
