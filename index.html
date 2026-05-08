@@ -829,10 +829,10 @@
 
     .skill-row {
       display: grid;
-      grid-template-columns: 220px 1fr 60px 60px 60px;
+      grid-template-columns: 220px 1fr 140px 100px;
       gap: 16px;
       align-items: center;
-      padding: 10px 0;
+      padding: 12px 0;
       border-bottom: 1px solid var(--border);
     }
 
@@ -2460,12 +2460,30 @@
     }
 
     function handleGlobalSearch(query) {
-      if (!query) return;
+      if (!query) {
+        // Reset view if empty
+        document.querySelectorAll('.week-card, .skill-row, .project-card, .resource-card').forEach(el => el.style.display = '');
+        return;
+      }
       const q = query.toLowerCase();
+      
+      // Page Switching Logic
       if (q.includes('sql') || q.includes('python')) showPage('roadmap');
       if (q.includes('proj')) showPage('projects');
       if (q.includes('resource') || q.includes('link')) showPage('resources');
       if (q.includes('skill')) showPage('skills');
+
+      // Filtering Logic
+      const elements = document.querySelectorAll('.week-card, .skill-row, .project-card, .resource-card');
+      elements.forEach(el => {
+        const text = el.textContent.toLowerCase();
+        if (text.includes(q)) {
+          el.style.display = '';
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' }); // Scroll to first match
+        } else {
+          el.style.display = 'none';
+        }
+      });
     }
 
     // ── ROADMAP ──────────────────────────────────────────────────────────────────
@@ -2712,11 +2730,11 @@
         <div class="domain-name">${domain}</div>
         <div class="domain-avg">Avg Level: ${levels[Math.round(avg)]}</div>
       </div>
-      <div style="display:grid;grid-template-columns:220px 1fr 120px 100px;gap:12px;padding:6px 0;border-bottom:1px solid var(--border);">
-        <div style="font-size:11px;color:var(--text3);">Skill</div>
-        <div style="font-size:11px;color:var(--text3);">Progress Bar</div>
-        <div style="font-size:11px;color:var(--text3);text-align:center;">Current Level</div>
-        <div style="font-size:11px;color:var(--text3);text-align:center;">Target</div>
+      <div style="display:grid; grid-template-columns: 220px 1fr 140px 100px; gap:16px; padding:6px 0; border-bottom:1px solid var(--border);">
+        <div style="font-size:11px; color:var(--text3);">Skill</div>
+        <div style="font-size:11px; color:var(--text3);">Progress Bar</div>
+        <div style="font-size:11px; color:var(--text3); text-align:center;">Current Level</div>
+        <div style="font-size:11px; color:var(--text3); text-align:center;">Target</div>
       </div>
     `;
         domainSkills.forEach(s => {
