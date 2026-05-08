@@ -143,7 +143,28 @@
 
     body.focus-mode .sidebar,
     body.focus-mode .topbar {
+      display: none !important;
+    }
+    
+    .exit-focus-btn {
       display: none;
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 9999;
+      background: var(--blue);
+      color: #fff;
+      border: none;
+      border-radius: 50px;
+      padding: 12px 24px;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      cursor: pointer;
+      font-family: 'Syne', sans-serif;
+    }
+
+    body.focus-mode .exit-focus-btn {
+      display: block;
     }
 
     body.focus-mode .main {
@@ -1832,6 +1853,8 @@
       <span id="save-toast-text">Progress saved!</span>
     </div>
 
+    <button class="exit-focus-btn" onclick="toggleFocusMode()">Exit Focus Mode</button>
+
   </div> <!-- end main-content -->
 
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -2601,13 +2624,16 @@
         return;
       }
 
-      if (USE_MOCK_DATA) {
+      // Check if it's a mock user (IDs starting with 'u')
+      const isMock = uid.startsWith('u');
+      
+      if (isMock) {
         const u = allUsers.find(user => user.id === uid);
         if (u) u.assignedRoadmap = roadmap;
         if (viewingUserId === uid) {
           state.assignedRoadmap = roadmap;
         }
-        showToast(`Mock: Assigned ${roadmap} to ${u.firstName}`);
+        showToast(`Mock: Assigned ${roadmap} to ${u ? u.firstName : 'User'}`);
         await fetchEmployees();
         if (viewingUserId === uid) renderRoadmap();
         return;
