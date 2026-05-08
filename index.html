@@ -141,6 +141,22 @@
       color: var(--blue2);
     }
 
+    body.focus-mode .sidebar,
+    body.focus-mode .topbar {
+      display: none;
+    }
+
+    body.focus-mode .main {
+      margin-left: 0;
+      padding-top: 0;
+    }
+
+    body.focus-mode .page {
+      padding: 40px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
     .nav-item .icon {
       width: 18px;
       height: 18px;
@@ -230,6 +246,31 @@
       font-weight: 700;
     }
 
+    .global-search-wrap {
+      flex: 1;
+      max-width: 400px;
+      position: relative;
+      margin: 0 40px;
+    }
+
+    .global-search-input {
+      width: 100%;
+      background: var(--navy3);
+      border: 1px solid var(--border);
+      border-radius: 99px;
+      padding: 8px 16px 8px 40px;
+      color: var(--text);
+      font-size: 13px;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .global-search-input:focus {
+      border-color: var(--blue);
+      background: var(--navy4);
+      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    }
+
     .topbar-right {
       display: flex;
       align-items: center;
@@ -309,16 +350,47 @@
     .welcome-sub {
       color: var(--text2);
       font-size: 14px;
-    }
+}
 
     .progress-ring-wrap {
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: 20px;
+    }
+
+    .milestone-circle {
+      width: 80px;
+      height: 80px;
+      position: relative;
+      display: grid;
+      place-items: center;
+    }
+
+    .milestone-circle svg {
+      width: 100%;
+      height: 100%;
+      transform: rotate(-90deg);
+    }
+
+    .milestone-circle circle {
+      fill: none;
+      stroke-width: 6;
+      stroke-linecap: round;
+    }
+
+    .milestone-circle .bg {
+      stroke: var(--border);
+    }
+
+    .milestone-circle .progress {
+      stroke: var(--blue);
+      stroke-dasharray: 226;
+      stroke-dashoffset: 226;
+      transition: stroke-dashoffset 1s ease-out;
     }
 
     .progress-text {
-      text-align: right;
+      text-align: left;
     }
 
     .progress-pct {
@@ -1377,9 +1449,19 @@
     <div class="main">
       <div class="topbar">
         <div class="page-title" id="page-title">Dashboard</div>
+        <div class="global-search-wrap">
+          <svg style="position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--text3);" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          <input type="text" class="global-search-input" placeholder="Search roadmap, projects, resources..." oninput="handleGlobalSearch(this.value)">
+        </div>
         <div class="topbar-right">
-          <div style="font-size:12px;color:var(--text3);font-family:'JetBrains Mono',monospace;" id="today-date"></div>
-          <button class="btn btn-primary" onclick="saveAll()">Save Progress</button>
+          <button class="btn" onclick="toggleFocusMode()" id="focus-mode-btn">
+            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="vertical-align:middle; margin-right:4px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
+            Focus Mode
+          </button>
+          <div class="streak-badge">
+            <span>🔥</span> <span id="streak-count">0</span>
+          </div>
+          <button class="btn btn-primary" onclick="toggleLogForm()">+ Log Session</button>
         </div>
       </div>
 
@@ -1387,86 +1469,77 @@
       <div class="page active" id="page-dashboard">
         <div class="welcome-banner">
           <div>
-            <div class="welcome-title">Welcome back, Arjun 👋</div>
-            <div class="welcome-sub">You're a Python & SQL dev — you're already 40% there. Let's close the gap.</div>
-            <div style="margin-top:12px;display:flex;gap:10px;">
-              <button class="btn btn-primary"
-                onclick="showPage('daily',document.querySelector('.nav-item:nth-child(5)'))">Log Today's Session
-                →</button>
-              <button class="btn" onclick="showPage('roadmap',document.querySelector('.nav-item:nth-child(3)'))">View
-                Roadmap</button>
-            </div>
+            <h1 class="welcome-title">Welcome back, Arjun 👋</h1>
+            <p class="welcome-sub">You've completed 75% of your daily goal. Keep the momentum!</p>
           </div>
           <div class="progress-ring-wrap">
             <div class="progress-text">
               <div class="progress-pct" id="overall-pct">0%</div>
-              <div class="progress-label">Overall Progress</div>
-              <div style="font-size:11px;color:var(--text3);margin-top:4px;font-family:'JetBrains Mono',monospace;">0 /
-                20 weeks</div>
+              <div class="progress-label">Total Completion</div>
+            </div>
+            <div class="milestone-circle">
+              <svg viewBox="0 0 80 80">
+                <circle class="bg" cx="40" cy="40" r="36" />
+                <circle class="progress" id="milestone-progress-bar" cx="40" cy="40" r="36" />
+              </svg>
             </div>
           </div>
         </div>
 
         <div class="kpi-grid">
-          <div class="kpi-card" style="--accent-color: var(--blue)">
-            <div class="kpi-label">Hours Logged</div>
-            <div class="kpi-value" id="kpi-hours" style="color:var(--blue2)">0.0</div>
-            <div class="kpi-sub">total study time</div>
-            <div class="kpi-trend"><span class="trend-up">↑</span> <span id="kpi-hours-sub"
-                style="color:var(--text3)">start logging</span></div>
+          <div class="kpi-card" style="--accent-color: var(--blue);">
+            <div class="kpi-label">Total Learning</div>
+            <div class="kpi-value"><span id="kpi-hours">0</span><small style="font-size:12px;margin-left:4px;color:var(--text3)">h</small></div>
+            <div class="kpi-trend trend-up">+2.4h from last week</div>
           </div>
-          <div class="kpi-card" style="--accent-color: var(--orange)">
-            <div class="kpi-label">Day Streak 🔥</div>
-            <div class="kpi-value" id="kpi-streak" style="color:var(--orange2)">0</div>
-            <div class="kpi-sub">consecutive days</div>
-            <div class="kpi-trend" id="kpi-streak-sub" style="color:var(--text3);font-size:11px;">log daily to build
-              streak</div>
+          <div class="kpi-card" style="--accent-color: var(--orange);">
+            <div class="kpi-label">Current Streak</div>
+            <div class="kpi-value" id="kpi-streak">0</div>
+            <div class="kpi-trend trend-up">Personal Best: 12</div>
           </div>
-          <div class="kpi-card" style="--accent-color: var(--green)">
+          <div class="kpi-card" style="--accent-color: var(--teal);">
             <div class="kpi-label">Projects Done</div>
-            <div class="kpi-value" id="kpi-projects" style="color:var(--green2)">0</div>
-            <div class="kpi-sub">out of 8 projects</div>
-            <div class="kpi-trend"><span style="color:var(--text3);font-size:11px;">0 in progress</span></div>
+            <div class="kpi-value" id="kpi-projects">0</div>
+            <div class="kpi-trend" id="proj-count-label">0 / 8 complete</div>
           </div>
-          <div class="kpi-card" style="--accent-color: var(--purple)">
-            <div class="kpi-label">Skills Leveled</div>
-            <div class="kpi-value" id="kpi-skills" style="color:var(--purple2)">0</div>
-            <div class="kpi-sub">skills at 3+ level</div>
-            <div class="kpi-trend"><span style="color:var(--text3);font-size:11px;">out of 29 total</span></div>
+          <div class="kpi-card" style="--accent-color: var(--purple);">
+            <div class="kpi-label">Skills Level 3+</div>
+            <div class="kpi-value" id="kpi-skills">0</div>
+            <div class="kpi-trend">Out of 35 skills</div>
           </div>
         </div>
 
-        <div class="two-col">
+        <div class="two-col" style="grid-template-columns: 1.5fr 1fr;">
           <div class="card">
-            <div class="card-title">Phase Progress <span class="tag">6 phases</span></div>
-            <div id="phase-progress-bars"></div>
+            <div class="card-title">Today's Schedule <span class="tag">Outcome-Driven</span></div>
+            <div id="today-schedule-list" style="padding-top:10px;">
+            </div>
           </div>
           <div class="card">
-            <div class="card-title">Activity Heatmap <span class="tag">last 12 weeks</span></div>
-            <div class="heatmap-wrap" id="heatmap"></div>
-            <div class="heatmap-labels">
-              <span class="heatmap-label">12w ago</span>
-              <span class="heatmap-label">6w ago</span>
-              <span class="heatmap-label">today</span>
+            <div class="card-title">Leaderboard <span class="tag">Weekly Top</span></div>
+            <div id="leaderboard-list" style="display:flex; flex-direction:column; gap:12px;">
             </div>
           </div>
         </div>
 
         <div class="card">
-          <div class="card-title">Recent Log Entries <span class="tag">last 5 sessions</span></div>
-          <div id="recent-logs-dash"></div>
+          <div class="card-title">Activity Heatmap <span class="tag">last 12 weeks</span></div>
+          <div class="heatmap-wrap" id="heatmap"></div>
+          <div class="heatmap-labels">
+            <span class="heatmap-label">12w ago</span>
+            <span class="heatmap-label">6w ago</span>
+            <span class="heatmap-label">today</span>
+          </div>
         </div>
       </div>
 
       <!-- ROADMAP PAGE -->
       <div class="page" id="page-roadmap">
         <div style="display:flex; gap:24px; align-items:start;">
-          <!-- HOST SIDEBAR -->
           <div id="host-employee-list" style="width:280px; display:none; flex-shrink:0;">
             <div class="card" style="padding:16px;">
               <div class="card-title" style="font-size:12px; margin-bottom:12px;">Employee Progress</div>
               <div id="employee-list-content" style="display:flex; flex-direction:column; gap:8px;">
-                <!-- Employees injected here -->
               </div>
             </div>
           </div>
@@ -2101,8 +2174,17 @@
       const pct = allRoadmapWeeks.length > 0 ? Math.round((doneWeeks / allRoadmapWeeks.length) * 100) : 0;
       document.getElementById('overall-pct').textContent = pct + '%';
 
+      // Update Milestone Circle
+      const circle = document.getElementById('milestone-progress-bar');
+      if (circle) {
+        const offset = 226 - (226 * pct) / 100;
+        circle.style.strokeDashoffset = offset;
+      }
+
       const projLabel = document.getElementById('proj-count-label');
       if (projLabel) projLabel.textContent = `${doneProjs} / ${associatedProjIds.length} complete`;
+
+      renderMasaiFeatures();
     }
 
     function renderPhaseProgressBars() {
@@ -2169,6 +2251,77 @@
         </div>
       </div>
     `).join('') + `</div>`;
+    }
+
+    function renderMasaiFeatures() {
+      renderSchedule();
+      renderLeaderboard();
+    }
+
+    function renderSchedule() {
+      const container = document.getElementById('today-schedule-list');
+      if (!container) return;
+      const currentWeekNum = Object.keys(state.weekStatus).find(w => state.weekStatus[w] === 'active') || 1;
+      const week = WEEKS.find(w => w.w == currentWeekNum) || WEEKS[0];
+
+      const tasks = [
+        { time: '09:00 AM', title: 'Daily Warmup', type: 'Mindset', status: 'done' },
+        { time: '11:00 AM', title: week.title, type: 'Core Learning', status: 'active' },
+        { time: '02:00 PM', title: 'Hands-on Lab', type: 'Practical', status: 'upcoming' },
+        { time: '05:00 PM', title: 'Daily Log Submission', type: 'Admin', status: 'upcoming' }
+      ];
+
+      container.innerHTML = tasks.map((t, i) => `
+        <div style="display:flex; gap:16px; padding-bottom:20px; border-left:2px solid ${t.status === 'done' ? 'var(--blue)' : 'var(--border)'}; margin-left:10px; position:relative;">
+          <div style="position:absolute; left:-9px; top:0; width:16px; height:16px; border-radius:50%; background:${t.status === 'active' ? 'var(--blue)' : t.status === 'done' ? 'var(--blue)' : 'var(--navy4)'}; border:3px solid ${t.status === 'active' ? 'rgba(59,130,246,0.3)' : 'var(--navy2)'};"></div>
+          <div style="flex:1; padding-left:15px; margin-top:-4px;">
+            <div style="font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text3);">${t.time}</div>
+            <div style="font-size:14px; font-weight:700; color:${t.status === 'upcoming' ? 'var(--text2)' : 'var(--text)'};">${t.title}</div>
+            <span style="font-size:10px; padding:2px 6px; background:var(--card2); border-radius:4px; color:var(--text3); text-transform:uppercase;">${t.type}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderLeaderboard() {
+      const container = document.getElementById('leaderboard-list');
+      if (!container) return;
+      const mockUsers = [
+        { name: 'Arjun Tomar', xp: 2450, avatar: 'AT', color: 'var(--blue)' },
+        { name: 'Priya Singh', xp: 2100, avatar: 'PS', color: 'var(--teal)' },
+        { name: 'Rohan Verma', xp: 1850, avatar: 'RV', color: 'var(--purple)' }
+      ];
+
+      container.innerHTML = mockUsers.map((u, i) => `
+        <div style="display:flex; align-items:center; gap:12px; padding:8px; background:var(--navy3); border-radius:10px;">
+          <div style="font-family:'Syne',sans-serif; font-weight:800; font-size:14px; color:var(--text3); width:20px;">#${i+1}</div>
+          <div style="width:32px; height:32px; border-radius:50%; background:${u.color}; display:grid; place-items:center; font-size:11px; font-weight:700;">${u.avatar}</div>
+          <div style="flex:1;">
+            <div style="font-size:13px; font-weight:600;">${u.name}</div>
+            <div style="font-size:10px; color:var(--text3);">${u.xp} XP</div>
+          </div>
+          <div style="width:40px; height:4px; background:var(--border); border-radius:2px; overflow:hidden;">
+            <div style="width:${(u.xp/3000)*100}%; height:100%; background:${u.color};"></div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function toggleFocusMode() {
+      document.body.classList.toggle('focus-mode');
+      const btn = document.getElementById('focus-mode-btn');
+      if (!btn) return;
+      const isFocus = document.body.classList.contains('focus-mode');
+      btn.innerHTML = isFocus ? 'Exit Focus' : '<svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="vertical-align:middle; margin-right:4px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg> Focus Mode';
+    }
+
+    function handleGlobalSearch(query) {
+      if (!query) return;
+      const q = query.toLowerCase();
+      if (q.includes('sql') || q.includes('python')) showPage('roadmap');
+      if (q.includes('proj')) showPage('projects');
+      if (q.includes('resource') || q.includes('link')) showPage('resources');
+      if (q.includes('skill')) showPage('skills');
     }
 
     // ── ROADMAP ──────────────────────────────────────────────────────────────────
