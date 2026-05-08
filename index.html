@@ -1904,19 +1904,16 @@
     }
 
     auth.onAuthStateChanged(async (user) => {
-      if (USE_MOCK_DATA) {
-        document.body.classList.add('auth');
-        myRole = 'host';
-        state = { ...defaultState, ...MOCK_USERS[0] };
-        updateUserUI();
-        initApp();
-        return;
-      }
       if (user) {
         document.body.classList.add('auth');
         // Initial load to get myRole
         const doc = await db.collection('users').doc(user.uid).get();
-        if (doc.exists) myRole = doc.data().role || 'user';
+        if (doc.exists) {
+          const data = doc.data();
+          myRole = data.role || 'user';
+          // Admin override for testing
+          if (user.email === 'rudra@bestpeers.com') myRole = 'host';
+        }
         loadFromFirestore(user.uid);
       } else {
         document.body.classList.remove('auth');
@@ -1944,7 +1941,7 @@
     }
 
     // ── DATA ─────────────────────────────────────────────────────────────────────
-    const USE_MOCK_DATA = true; // Set to true for UI testing
+    const USE_MOCK_DATA = false; // Set to false to use real Firestore data
     
     const MOCK_USERS = [
       { id: 'u1', firstName: 'Arjun', lastName: 'Tomar', role: 'host', assignedRoadmap: 'Data Analytics', weekStatus: { 1: 'done', 2: 'done', 3: 'active' }, weekReviews: {}, skillNow: {}, projectStatus: {}, projectTasks: {}, logEntries: [] },
@@ -1956,11 +1953,9 @@
     const defaultState = {
       firstName: '',
       lastName: '',
-      role: 'user',
+      role: 'user', // Default role
       assignedRoadmap: 'Data Analytics',
       weekStatus: {},
-      skillNow: {},
-      projectStatus: {},
       projectTasks: {}, // {projId: [0, 1, 0]}
       logEntries: [],
       weekReviews: {},
@@ -2521,8 +2516,13 @@
       if (USE_MOCK_DATA) {
         snapDocs = MOCK_USERS;
       } else {
-        const snap = await db.collection('users').get();
-        snapDocs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        try {
+          const snap = await db.collection('users').get();
+          snapDocs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        } catch (e) {
+          console.error("Error fetching employees:", e);
+          snapDocs = MOCK_USERS; // Fallback to mock if fetch fails
+        }
       }
       
       const progressList = document.getElementById('employee-progress-list');
@@ -2545,7 +2545,8 @@
         const done = allRoadmapWeeks.filter(w => (u.weekStatus || {})[w] === 'done').length;
         const pct = allRoadmapWeeks.length > 0 ? Math.round((done / allRoadmapWeeks.length) * 100) : 0;
         
-        const isActive = (viewingUserId === u.id) || (viewingUserId === null && u.id === 'u1'); // u1 is the mock host
+        const currentUid = auth.currentUser ? auth.currentUser.uid : 'u1';
+        const isActive = (viewingUserId === u.id) || (viewingUserId === null && u.id === currentUid);
         
         return `
           <div class="employee-row ${isActive ? 'active' : ''}" onclick="switchViewUser('${u.id}')">
