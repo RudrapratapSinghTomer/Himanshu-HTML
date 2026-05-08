@@ -1904,6 +1904,14 @@
     }
 
     auth.onAuthStateChanged(async (user) => {
+      if (USE_MOCK_DATA) {
+        document.body.classList.add('auth');
+        myRole = 'host';
+        state = { ...defaultState, ...MOCK_USERS[0] };
+        updateUserUI();
+        initApp();
+        return;
+      }
       if (user) {
         document.body.classList.add('auth');
         // Initial load to get myRole
@@ -1933,6 +1941,15 @@
     }
 
     // ── DATA ─────────────────────────────────────────────────────────────────────
+    const USE_MOCK_DATA = true; // Set to true for UI testing
+    
+    const MOCK_USERS = [
+      { id: 'u1', firstName: 'Arjun', lastName: 'Tomar', role: 'host', assignedRoadmap: 'Data Analytics', weekStatus: { 1: 'done', 2: 'done', 3: 'active' }, weekReviews: {}, skillNow: {}, projectStatus: {}, projectTasks: {}, logEntries: [] },
+      { id: 'u2', firstName: 'Priya', lastName: 'Singh', role: 'user', assignedRoadmap: 'Data Analytics', weekStatus: { 1: 'done', 2: 'todo' }, weekReviews: {}, skillNow: {}, projectStatus: {}, projectTasks: {}, logEntries: [] },
+      { id: 'u3', firstName: 'Rohan', lastName: 'Verma', role: 'user', assignedRoadmap: 'Data Engineering', weekStatus: { 1: 'active' }, weekReviews: {}, skillNow: {}, projectStatus: {}, projectTasks: {}, logEntries: [] },
+      { id: 'u4', firstName: 'Neha', lastName: 'Sharma', role: 'user', assignedRoadmap: 'Data Analytics', weekStatus: { 1: 'done', 2: 'done', 3: 'done', 4: 'done' }, weekReviews: {}, skillNow: {}, projectStatus: {}, projectTasks: {}, logEntries: [] }
+    ];
+
     const defaultState = {
       firstName: '',
       lastName: '',
@@ -2497,12 +2514,19 @@
     }
 
     async function fetchEmployees() {
-      const snap = await db.collection('users').get();
+      let snapDocs = [];
+      if (USE_MOCK_DATA) {
+        snapDocs = MOCK_USERS;
+      } else {
+        const snap = await db.collection('users').get();
+        snapDocs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      }
+      
       const progressList = document.getElementById('employee-progress-list');
       const userSelect = document.getElementById('admin-user-select');
       const countTag = document.getElementById('employee-count-tag');
       
-      allUsers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      allUsers = snapDocs;
       countTag.textContent = `${allUsers.length} Employees`;
 
       // Update User Select
@@ -2518,7 +2542,7 @@
         const done = allRoadmapWeeks.filter(w => (u.weekStatus || {})[w] === 'done').length;
         const pct = allRoadmapWeeks.length > 0 ? Math.round((done / allRoadmapWeeks.length) * 100) : 0;
         
-        const isActive = (viewingUserId === u.id) || (viewingUserId === null && u.id === auth.currentUser.uid);
+        const isActive = (viewingUserId === u.id) || (viewingUserId === null && u.id === 'u1'); // u1 is the mock host
         
         return `
           <div class="employee-row ${isActive ? 'active' : ''}" onclick="switchViewUser('${u.id}')">
@@ -2534,6 +2558,15 @@
     }
 
     async function switchViewUser(uid) {
+      if (USE_MOCK_DATA) {
+        if (uid === 'u1') viewingUserId = null;
+        else viewingUserId = uid;
+        const u = allUsers.find(user => user.id === uid);
+        state = { ...defaultState, ...u };
+        renderRoadmap();
+        updateUserUI();
+        return;
+      }
       if (uid === auth.currentUser.uid) {
         viewingUserId = null;
         await loadFromFirestore(uid);
@@ -2561,6 +2594,18 @@
       
       if (!uid) {
         alert("Please select an employee first.");
+        return;
+      }
+
+      if (USE_MOCK_DATA) {
+        const u = allUsers.find(user => user.id === uid);
+        if (u) u.assignedRoadmap = roadmap;
+        if (viewingUserId === uid) {
+          state.assignedRoadmap = roadmap;
+        }
+        showToast(`Mock: Assigned ${roadmap} to ${u.firstName}`);
+        await fetchEmployees();
+        if (viewingUserId === uid) renderRoadmap();
         return;
       }
 
