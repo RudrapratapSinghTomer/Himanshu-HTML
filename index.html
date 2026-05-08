@@ -2019,10 +2019,12 @@
     const defaultState = {
       firstName: '',
       lastName: '',
-      role: 'user', // Default role
+      role: 'user',
       assignedRoadmap: 'Data Analytics',
       weekStatus: {},
-      projectTasks: {}, // {projId: [0, 1, 0]}
+      projectTasks: {},
+      projectStatus: {},
+      skillNow: {},
       logEntries: [],
       weekReviews: {},
       selectedMood: 3,
@@ -2174,6 +2176,13 @@
     // ── INIT ─────────────────────────────────────────────────────────────────────
     // Defaults set after Firebase load
     function initApp() {
+      if (!state.skillNow) state.skillNow = {};
+      if (!state.projectStatus) state.projectStatus = {};
+      if (!state.projectTasks) state.projectTasks = {};
+      if (!state.weekStatus) state.weekStatus = {};
+      if (!state.logEntries) state.logEntries = [];
+      if (!state.weekReviews) state.weekReviews = {};
+
       SKILLS.forEach(s => { if (state.skillNow[s.key] === undefined) state.skillNow[s.key] = 0; });
       PROJECTS.forEach(p => { 
         if (!state.projectStatus[p.id]) state.projectStatus[p.id] = p.status; 
