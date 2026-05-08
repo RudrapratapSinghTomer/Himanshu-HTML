@@ -2506,7 +2506,21 @@
       // Filter weeks based on current roadmap phases
       const validWeeks = [].concat(...activePhases.map(p => p.weeks));
       let weeks = WEEKS.filter(w => validWeeks.includes(w.w));
+      
+      // If Host is reviewing, show only active/done weeks
+      if (viewingUserId) {
+        weeks = weeks.filter(w => state.weekStatus[w.w] === 'active' || state.weekStatus[w.w] === 'done');
+      }
+
       if (activePhaseFilter) weeks = weeks.filter(w => w.phase === activePhaseFilter);
+
+      if (viewingUserId && weeks.length === 0) {
+        grid.innerHTML = `<div style="grid-column:1/-1; padding:40px; text-align:center; color:var(--text3); background:var(--card2); border-radius:12px; border:1px dashed var(--border);">
+          <div style="font-size:24px; margin-bottom:12px;">🚶‍♂️</div>
+          <p>This employee hasn't started any weeks yet.</p>
+        </div>`;
+        return;
+      }
 
       grid.innerHTML = weeks.map(w => {
         const ph = activePhases.find(ph => ph.weeks.includes(w.w)) || { name: '?', color: '#ccc' };
