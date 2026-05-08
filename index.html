@@ -2143,12 +2143,12 @@
         if (doc.exists) {
           state = { ...defaultState, ...doc.data(), loading: false };
           // If this is the logged-in user, also update 'me'
-          if (uid === auth.currentUser.uid) {
+          if (auth.currentUser && uid === auth.currentUser.uid) {
             me = { ...state };
           }
         } else {
           state = { ...defaultState, loading: false };
-          if (uid === auth.currentUser.uid) me = { ...state };
+          if (auth.currentUser && uid === auth.currentUser.uid) me = { ...state };
         }
         updateUserUI();
         initApp();
