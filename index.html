@@ -1333,6 +1333,90 @@
       opacity: 0;
       pointer-events: none;
     }
+
+    /* ── ROADMAP ADMIN ── */
+    .admin-card {
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(20, 184, 166, 0.05) 100%);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .admin-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .assign-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+      gap: 16px;
+      align-items: flex-end;
+    }
+
+    .employee-row {
+      display: grid;
+      grid-template-columns: 180px 140px 1fr 100px;
+      gap: 20px;
+      align-items: center;
+      padding: 12px 16px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin-bottom: 8px;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+
+    .employee-row:hover {
+      border-color: var(--blue);
+      background: var(--card2);
+      transform: translateX(4px);
+    }
+
+    .employee-row.active {
+      border-color: var(--blue);
+      background: rgba(59, 130, 246, 0.1);
+      box-shadow: 0 0 15px rgba(59, 130, 246, 0.1);
+    }
+
+    .employee-name {
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .employee-roadmap {
+      font-size: 12px;
+      color: var(--text3);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .progress-track {
+      height: 6px;
+      background: var(--navy3);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--blue), var(--teal));
+      border-radius: 3px;
+      transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .progress-pct-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--blue2);
+      text-align: right;
+    }
   </style>
 </head>
 
@@ -1535,28 +1619,50 @@
 
       <!-- ROADMAP PAGE -->
       <div class="page" id="page-roadmap">
-        <div style="display:flex; gap:24px; align-items:start;">
-          <div id="host-employee-list" style="width:280px; display:none; flex-shrink:0;">
-            <div class="card" style="padding:16px;">
-              <div class="card-title" style="font-size:12px; margin-bottom:12px;">Employee Progress</div>
-              <div id="employee-list-content" style="display:flex; flex-direction:column; gap:8px;">
-              </div>
+        <div id="host-admin-section" style="display:none; margin-bottom:32px;">
+          <div class="admin-card">
+            <div class="admin-title">
+              <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+              Assign & Manage Roadmaps
             </div>
-          </div>
-
-          <div style="flex:1; min-width:0;">
-            <div id="roadmap-controls" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-              <div class="phase-bar" id="phase-filter-bar" style="margin-bottom:0; flex:1;"></div>
-              <div id="host-assign-wrap" style="display:none; margin-left:16px;">
-                <select class="form-select" id="assign-roadmap-select" onchange="assignRoadmapToUser(this.value)" style="font-size:12px; padding:8px 12px; height:auto;">
-                  <option value="">Assign Roadmap...</option>
+            <div class="assign-grid">
+              <div class="form-group">
+                <label class="form-label">Select Employee</label>
+                <select class="form-select" id="admin-user-select" style="height:44px;">
+                  <option value="">Select an employee...</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Select Roadmap</label>
+                <select class="form-select" id="admin-roadmap-select" style="height:44px;">
                   <option value="Data Analytics">Data Analytics</option>
                   <option value="Data Engineering">Data Engineering</option>
                 </select>
               </div>
+              <button class="btn btn-primary" onclick="handleAdminAssign()" style="height:44px; padding:0 24px;">Assign Roadmap</button>
             </div>
-            <div class="week-grid" id="week-grid"></div>
           </div>
+
+          <div class="card" style="padding:24px;">
+            <div class="card-title" style="margin-bottom:20px;">
+              Employee Progress Overview
+              <span class="tag" id="employee-count-tag">0 Employees</span>
+            </div>
+            <div id="employee-progress-list">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+        </div>
+
+        <div id="user-roadmap-section">
+          <div class="section-header" style="margin-bottom:20px;">
+            <div>
+              <h2 class="section-title" id="roadmap-user-title">Your Learning Path</h2>
+              <p class="section-sub" id="roadmap-user-sub">Phase-wise progression and weekly goals</p>
+            </div>
+            <div class="phase-bar" id="phase-filter-bar" style="margin-bottom:0; min-width:400px;"></div>
+          </div>
+          <div class="week-grid" id="week-grid"></div>
         </div>
       </div>
 
@@ -2331,16 +2437,19 @@
 
     async function renderRoadmap() {
       const isHost = myRole === 'host';
-      const sidebar = document.getElementById('host-employee-list');
-      const assignWrap = document.getElementById('host-assign-wrap');
+      const adminSection = document.getElementById('host-admin-section');
+      const userTitle = document.getElementById('roadmap-user-title');
+      const userSub = document.getElementById('roadmap-user-sub');
       
       if (isHost) {
-        sidebar.style.display = 'block';
-        assignWrap.style.display = 'block';
+        adminSection.style.display = 'block';
+        userTitle.textContent = viewingUserId ? "Reviewing Progress" : "Your Learning Path";
+        userSub.textContent = viewingUserId ? "Detailed breakdown of the selected employee's roadmap" : "Phase-wise progression and weekly goals";
         await fetchEmployees();
       } else {
-        sidebar.style.display = 'none';
-        assignWrap.style.display = 'none';
+        adminSection.style.display = 'none';
+        userTitle.textContent = "Your Learning Path";
+        userSub.textContent = "Phase-wise progression and weekly goals";
       }
 
       const activeRoadmap = state.assignedRoadmap || 'Data Analytics';
@@ -2389,23 +2498,36 @@
 
     async function fetchEmployees() {
       const snap = await db.collection('users').get();
-      const container = document.getElementById('employee-list-content');
-      allUsers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      const progressList = document.getElementById('employee-progress-list');
+      const userSelect = document.getElementById('admin-user-select');
+      const countTag = document.getElementById('employee-count-tag');
       
-      container.innerHTML = allUsers.map(u => {
-        const done = Object.values(u.weekStatus || {}).filter(s => s === 'done').length;
-        const pct = Math.round((done / 20) * 100);
-        const statusColor = pct > 70 ? 'var(--green)' : pct > 30 ? 'var(--gold)' : 'var(--red)';
+      allUsers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      countTag.textContent = `${allUsers.length} Employees`;
+
+      // Update User Select
+      const currentSelected = userSelect.value;
+      userSelect.innerHTML = '<option value="">Select an employee...</option>' + 
+        allUsers.map(u => `<option value="${u.id}" ${u.id === currentSelected ? 'selected' : ''}>${u.firstName} ${u.lastName}</option>`).join('');
+
+      // Update Progress List
+      progressList.innerHTML = allUsers.map(u => {
+        const activeRoadmap = u.assignedRoadmap || 'Data Analytics';
+        const activePhases = ROADMAPS[activeRoadmap] || ROADMAPS['Data Analytics'];
+        const allRoadmapWeeks = [].concat(...activePhases.map(p => p.weeks));
+        const done = allRoadmapWeeks.filter(w => (u.weekStatus || {})[w] === 'done').length;
+        const pct = allRoadmapWeeks.length > 0 ? Math.round((done / allRoadmapWeeks.length) * 100) : 0;
+        
         const isActive = (viewingUserId === u.id) || (viewingUserId === null && u.id === auth.currentUser.uid);
-        const hasRequest = Object.values(u.weekReviews || {}).some(r => r.editRequested);
         
         return `
-          <div onclick="switchViewUser('${u.id}')" style="padding:10px; border-radius:8px; background:${isActive ? 'var(--navy3)' : 'var(--card2)'}; border:1px solid ${isActive ? 'var(--blue)' : 'var(--border)'}; cursor:pointer; display:flex; align-items:center; gap:10px;">
-            <div style="width:8px; height:8px; border-radius:50%; background:${statusColor}; box-shadow: 0 0 5px ${statusColor};"></div>
-            <div style="flex:1;">
-              <div style="font-size:12px; font-weight:600;">${u.firstName} ${u.lastName} ${hasRequest ? ' ⚠️' : ''}</div>
-              <div style="font-size:10px; color:var(--text3);">${u.assignedRoadmap || 'No Roadmap'} · ${pct}%</div>
+          <div class="employee-row ${isActive ? 'active' : ''}" onclick="switchViewUser('${u.id}')">
+            <div class="employee-name">${u.firstName} ${u.lastName}</div>
+            <div class="employee-roadmap">${u.assignedRoadmap || 'Not Assigned'}</div>
+            <div class="progress-track">
+              <div class="progress-fill" style="width:${pct}%;"></div>
             </div>
+            <div class="progress-pct-label">${pct}%</div>
           </div>
         `;
       }).join('');
@@ -2422,16 +2544,43 @@
         
         // If Host views a user with edit request, clear the request so they can edit
         Object.keys(state.weekReviews).forEach(w => {
-          if (state.weekReviews[w].editRequested) {
+          if (state.weekReviews[w] && state.weekReviews[w].editRequested) {
             state.weekReviews[w].editRequested = false;
             state.weekReviews[w].saved = false; // Allow editing again
           }
         });
 
-        document.getElementById('assign-roadmap-select').value = state.assignedRoadmap || '';
         renderRoadmap();
         updateUserUI(); 
       }
+    }
+
+    async function handleAdminAssign() {
+      const uid = document.getElementById('admin-user-select').value;
+      const roadmap = document.getElementById('admin-roadmap-select').value;
+      
+      if (!uid) {
+        alert("Please select an employee first.");
+        return;
+      }
+
+      // If we are currently viewing this user, update state and save
+      if (viewingUserId === uid) {
+        state.assignedRoadmap = roadmap;
+        await saveState();
+      } else {
+        // Update directly in Firestore
+        try {
+          await db.collection('users').doc(uid).update({ assignedRoadmap: roadmap });
+          showToast(`Assigned ${roadmap} to employee.`);
+        } catch (e) {
+          console.error("Error assigning roadmap:", e);
+          alert("Error updating roadmap in cloud.");
+        }
+      }
+      
+      await fetchEmployees();
+      if (viewingUserId === uid) renderRoadmap();
     }
 
     function fixLinks() {
