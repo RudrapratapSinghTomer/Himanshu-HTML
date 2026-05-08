@@ -1489,93 +1489,45 @@
 
       <!-- DAILY LOG PAGE -->
       <div class="page" id="page-daily">
-        <div class="two-col" style="gap:28px;align-items:start">
+        <div class="section-header">
           <div>
-            <div class="card" style="margin-bottom:20px;">
-              <div class="card-title">Log Today's Session</div>
-              <div class="log-form">
-                <div class="form-row">
-                  <div class="form-group">
-                    <label class="form-label">Date</label>
-                    <input type="date" class="form-input" id="log-date">
-                  </div>
-                  <div class="form-group">
-                    <label class="form-label">Week #</label>
-                    <select class="form-select" id="log-week">
-                      <option value="">Select week...</option>
-                    </select>
-                  </div>
-                </div>
-                <div class="form-group">
-                  <label class="form-label">Topic Covered</label>
-                  <input type="text" class="form-input" id="log-topic" placeholder="e.g. Window functions in SQL...">
-                </div>
-                <div class="form-row">
-                  <div class="form-group">
-                    <label class="form-label">Tool Used</label>
-                    <select class="form-select" id="log-tool">
-                      <option value="SQL">SQL</option>
-                      <option value="Python">Python</option>
-                      <option value="Power BI">Power BI</option>
-                      <option value="Excel">Excel</option>
-                      <option value="Jupyter">Jupyter</option>
-                      <option value="dbt">dbt</option>
-                      <option value="Other">Other</option>
-                    </select>
-                  </div>
-                  <div class="form-group">
-                    <label class="form-label">Hours Spent</label>
-                    <input type="number" class="form-input" id="log-hours" min="0.5" max="12" step="0.5"
-                      placeholder="1.5">
-                  </div>
-                </div>
-                <div class="form-group">
-                  <label class="form-label">What I Learned</label>
-                  <textarea class="form-textarea" id="log-learned"
-                    placeholder="Key concepts, a-ha moments, new syntax learned..."></textarea>
-                </div>
-                <div class="form-group">
-                  <label class="form-label">Hands-On Completed</label>
-                  <textarea class="form-textarea" id="log-handson"
-                    placeholder="Projects built, exercises done, problems solved..."
-                    style="min-height:60px;"></textarea>
-                </div>
-                <div class="form-group">
-                  <label class="form-label">Blockers / Questions</label>
-                  <textarea class="form-textarea" id="log-blockers" placeholder="What confused you? What to revisit?"
-                    style="min-height:60px;"></textarea>
-                </div>
-                <div class="form-group">
-                  <label class="form-label">Session Mood</label>
-                  <div class="mood-grid">
-                    <button class="mood-btn" data-mood="1" onclick="selectMood(1)">😴<span
-                        class="mood-label">Drained</span></button>
-                    <button class="mood-btn" data-mood="2" onclick="selectMood(2)">😐<span
-                        class="mood-label">Meh</span></button>
-                    <button class="mood-btn" data-mood="3" onclick="selectMood(3)">🙂<span
-                        class="mood-label">Good</span></button>
-                    <button class="mood-btn" data-mood="4" onclick="selectMood(4)">😄<span
-                        class="mood-label">Great</span></button>
-                    <button class="mood-btn" data-mood="5" onclick="selectMood(5)">🔥<span class="mood-label">On
-                        Fire</span></button>
-                  </div>
-                </div>
-                <div class="form-group">
-                  <label class="form-label">Tomorrow's Plan</label>
-                  <input type="text" class="form-input" id="log-tomorrow" placeholder="What's next?">
-                </div>
-                <button class="btn btn-primary" style="width:100%;padding:12px;" onclick="addLogEntry()">Add Entry
-                  →</button>
-              </div>
-            </div>
+            <h2 class="section-title">Session History</h2>
+            <p class="section-sub">Detailed logs of your learning journey</p>
           </div>
-          <div>
-            <div class="card">
-              <div class="card-title">Session History <span class="tag" id="log-count-tag">0 entries</span></div>
-              <div id="log-entries-list" style="max-height:600px;overflow-y:auto;"></div>
+          <div id="log-count-tag" class="badge">0 entries</div>
+        </div>
+        <div class="card" style="margin-bottom:24px; padding:20px;">
+          <div style="display:flex; gap:16px; align-items:center; flex-wrap:wrap;">
+            <div style="flex:1; min-width:250px; position:relative;">
+              <input type="text" id="log-search" placeholder="Search topics..." class="form-input" oninput="renderLogEntries()" style="padding-left:40px; height:44px;">
+              <svg style="position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--text3);" width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            </div>
+            <select id="log-filter-tool" class="form-select" onchange="renderLogEntries()" style="width:160px; height:44px;">
+              <option value="">All Tools</option>
+              <option>SQL</option><option>Python</option><option>Power BI</option><option>Excel</option><option>Tableau</option>
+            </select>
+            <button class="btn btn-primary" onclick="toggleLogForm()">+ New Session</button>
+          </div>
+        </div>
+        <div id="log-form-container" class="card" style="display:none; margin-bottom:24px; padding:24px; border:1px solid var(--blue);">
+          <div class="card-title" style="margin-bottom:20px;">Log Today's Session</div>
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:20px;">
+            <div class="form-group"><label class="form-label">Date</label><input type="date" class="form-input" id="log-date"></div>
+            <div class="form-group"><label class="form-label">Week #</label><select class="form-select" id="log-week"></select></div>
+            <div class="form-group"><label class="form-label">Topic</label><input type="text" class="form-input" id="log-topic"></div>
+            <div class="form-group"><label class="form-label">Tool</label><select class="form-select" id="log-tool"><option>SQL</option><option>Python</option><option>Power BI</option><option>Excel</option><option>Tableau</option></select></div>
+            <div class="form-group"><label class="form-label">Hours</label><input type="number" class="form-input" id="log-hours" step="0.5"></div>
+            <div class="form-group"><label class="form-label">Mood</label><div style="display:flex;gap:8px;"><span class="mood-btn" onclick="setMood(1,this)">😴</span><span class="mood-btn active" onclick="setMood(3,this)">🙂</span><span class="mood-btn" onclick="setMood(5,this)">🔥</span></div></div>
+            <div class="form-group" style="grid-column:1/-1;"><label class="form-label">Learned</label><textarea class="form-textarea" id="log-learned"></textarea></div>
+            <div class="form-group" style="grid-column:1/-1;"><label class="form-label">Hands-on</label><textarea class="form-textarea" id="log-handson"></textarea></div>
+            <div class="form-group" style="grid-column:1/-1;"><label class="form-label">Blockers</label><textarea class="form-textarea" id="log-blockers"></textarea></div>
+            <div style="grid-column:1/-1; display:flex; gap:12px;">
+              <button class="btn btn-primary" style="flex:1;" onclick="addLogEntry()">Save Session</button>
+              <button class="btn" style="background:var(--card2);" onclick="toggleLogForm()">Cancel</button>
             </div>
           </div>
         </div>
+        <div id="log-entries-list"></div>
       </div>
 
       <!-- SKILLS PAGE -->
@@ -1604,41 +1556,79 @@
 
       <!-- WEEKLY REVIEW PAGE -->
       <div class="page" id="page-weekly">
-        <div class="review-week-grid" id="review-week-grid"></div>
-        <div class="card">
-          <div class="card-title">Week <span id="review-week-label">1</span> Review</div>
-          <div class="review-form">
-            <div class="form-group">
-              <label class="form-label">Topics Completed This Week</label>
-              <textarea class="form-textarea" id="review-topics" placeholder="What did you cover?"></textarea>
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">Weekly Performance Review</h2>
+            <p class="section-sub">Summarized reflection of your weekly growth</p>
+          </div>
+          <div style="display:flex; gap:12px;">
+            <div id="host-edit-toggle-wrap" style="display:none;">
+              <button class="btn btn-secondary" id="host-edit-mode-btn" onclick="toggleHostEditMode()">Edit Mode: OFF</button>
             </div>
-            <div class="form-group">
-              <label class="form-label">Hands-On Completed</label>
-              <textarea class="form-textarea" id="review-handson"
-                placeholder="Projects, exercises, challenges..."></textarea>
+          </div>
+        </div>
+
+        <div class="review-week-grid" id="review-week-grid" style="margin-bottom:24px;"></div>
+
+        <div class="card" id="weekly-review-container" style="padding:32px; min-height:400px;">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:32px; border-bottom:1px solid var(--border); padding-bottom:20px;">
+            <div>
+              <div style="font-size:12px; color:var(--text3); text-transform:uppercase; font-weight:800; letter-spacing:1px; margin-bottom:4px;">Review Period</div>
+              <div style="font-size:24px; font-weight:800; color:var(--text);">Week <span id="review-week-label">1</span></div>
             </div>
-            <div class="form-group">
-              <label class="form-label">Biggest Win 🏆</label>
-              <textarea class="form-textarea" id="review-win" placeholder="What are you proud of?"></textarea>
+            <div style="text-align:right;">
+              <div style="font-size:12px; color:var(--text3); text-transform:uppercase; font-weight:800; letter-spacing:1px; margin-bottom:4px;">Weekly Rating</div>
+              <div id="review-rating-display" style="font-size:24px;">⭐⭐⭐⭐⭐</div>
             </div>
-            <div class="form-group">
-              <label class="form-label">Main Blocker 🚧</label>
-              <textarea class="form-textarea" id="review-blocker" placeholder="What slowed you down?"></textarea>
+          </div>
+
+          <div class="review-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap:40px;">
+            <div>
+              <div class="review-section">
+                <label class="form-label" style="color:var(--blue2);">Topics & Concepts Covered</label>
+                <div id="display-topics" style="padding:16px; background:var(--card2); border-radius:8px; font-size:13px; line-height:1.6; min-height:80px;"></div>
+                <textarea id="edit-topics" class="form-textarea" style="display:none;"></textarea>
+              </div>
+              <div class="review-section" style="margin-top:24px;">
+                <label class="form-label" style="color:var(--green2);">Hands-on Projects & Exercises</label>
+                <div id="display-handson" style="padding:16px; background:var(--card2); border-radius:8px; font-size:13px; line-height:1.6; min-height:80px;"></div>
+                <textarea id="edit-handson" class="form-textarea" style="display:none;"></textarea>
+              </div>
             </div>
-            <div class="form-group review-full">
-              <label class="form-label">Next Week Focus 🎯</label>
-              <textarea class="form-textarea" id="review-focus" placeholder="What's the plan for next week?"></textarea>
+            <div>
+              <div class="review-section">
+                <label class="form-label" style="color:var(--gold);">Key Wins & A-ha Moments</label>
+                <div id="display-win" style="padding:16px; background:var(--card2); border-radius:8px; font-size:13px; line-height:1.6; min-height:80px;"></div>
+                <textarea id="edit-win" class="form-textarea" style="display:none;"></textarea>
+              </div>
+              <div class="review-section" style="margin-top:24px;">
+                <label class="form-label" style="color:var(--red);">Blockers & Challenges</label>
+                <div id="display-blocker" style="padding:16px; background:var(--card2); border-radius:8px; font-size:13px; line-height:1.6; min-height:80px;"></div>
+                <textarea id="edit-blocker" class="form-textarea" style="display:none;"></textarea>
+              </div>
+              <div class="review-section" style="margin-top:24px;">
+                <label class="form-label" style="color:var(--blue);">Focus for Next Week</label>
+                <div id="display-focus" style="padding:16px; background:var(--card2); border-radius:8px; font-size:13px; line-height:1.6; min-height:80px;"></div>
+                <textarea id="edit-focus" class="form-textarea" style="display:none;"></textarea>
+              </div>
             </div>
-            <div class="form-group">
-              <label class="form-label">Hours This Week</label>
-              <input type="number" class="form-input" id="review-hours" min="0" max="60" placeholder="0">
+          </div>
+
+          <div style="margin-top:40px; padding-top:24px; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+            <div style="display:flex; gap:32px;">
+              <div>
+                <div style="font-size:11px; color:var(--text3); text-transform:uppercase; font-weight:800; margin-bottom:4px;">Total Effort</div>
+                <div style="font-size:20px; font-weight:700; color:var(--blue2);"><span id="review-hours-display">0</span> hrs</div>
+                <input type="number" id="edit-hours" class="form-input" style="display:none; width:80px;">
+              </div>
+              <div>
+                <div style="font-size:11px; color:var(--text3); text-transform:uppercase; font-weight:800; margin-bottom:4px;">Status</div>
+                <div id="review-status-badge" class="badge">Draft</div>
+              </div>
             </div>
-            <div class="form-group">
-              <label class="form-label">Self Rating (1–10)</label>
-              <input type="number" class="form-input" id="review-rating" min="1" max="10" placeholder="7">
-            </div>
-            <div class="review-full">
-              <button class="btn btn-primary" id="review-save-btn" style="width:100%;padding:12px;" onclick="saveWeekReview()">Save Weekly Review →</button>
+            <div>
+              <button class="btn btn-primary" id="review-action-btn" onclick="submitWeeklyReview()">Submit Review ✓</button>
+              <button class="btn btn-primary" id="review-save-btn" style="display:none;" onclick="saveWeekReview()">Save Changes</button>
             </div>
           </div>
         </div>
@@ -1971,52 +1961,75 @@
         learned: document.getElementById('log-learned').value.trim(),
         handson: document.getElementById('log-handson').value.trim(),
         blockers: document.getElementById('log-blockers').value.trim(),
-        mood: state.selectedMood,
-        tomorrow: document.getElementById('log-tomorrow').value.trim(),
+        mood: state.selectedMood || 3,
         id: Date.now(),
       };
       if (!entry.topic) { alert('Please add a topic'); return; }
       state.logEntries.unshift(entry);
+      
+      // Auto-populate weekly review
+      if (entry.week) autoPopulateWeekly(parseInt(entry.week));
+      
       saveState();
       renderLogEntries();
       updateKPIs();
       // Clear form
-      ['log-topic', 'log-learned', 'log-handson', 'log-blockers', 'log-tomorrow'].forEach(id => { document.getElementById(id).value = ''; });
+      ['log-topic', 'log-learned', 'log-handson', 'log-blockers'].forEach(id => { 
+        const el = document.getElementById(id);
+        if (el) el.value = ''; 
+      });
       document.getElementById('log-hours').value = '';
-      showToast();
+      if (typeof toggleLogForm === 'function') toggleLogForm();
+      showToast("Session logged successfully!");
     }
 
     function renderLogEntries() {
       const container = document.getElementById('log-entries-list');
+      const searchTerm = document.getElementById('log-search').value.toLowerCase();
+      const toolFilter = document.getElementById('log-filter-tool').value;
+      
+      let filtered = state.logEntries.filter(e => {
+        const matchesSearch = e.topic.toLowerCase().includes(searchTerm) || e.learned.toLowerCase().includes(searchTerm);
+        const matchesTool = !toolFilter || e.tool === toolFilter;
+        return matchesSearch && matchesTool;
+      });
+
       const tag = document.getElementById('log-count-tag');
-      tag.textContent = `${state.logEntries.length} entries`;
-      if (!state.logEntries.length) {
-        container.innerHTML = '<div style="color:var(--text3);font-size:13px;text-align:center;padding:32px;">No entries yet. Log your first session!</div>';
+      tag.textContent = `${filtered.length} entries`;
+
+      if (!filtered.length) {
+        container.innerHTML = '<div style="color:var(--text3);font-size:13px;text-align:center;padding:64px;">No matching entries found.</div>';
         return;
       }
+
       const moodEmoji = ['', '😴', '😐', '🙂', '😄', '🔥'];
-      container.innerHTML = state.logEntries.slice(0, 30).map(e => `
-    <div style="padding:14px 0;border-bottom:1px solid var(--border);display:grid;grid-template-columns:80px 1fr auto;gap:12px;align-items:start;">
-      <div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);">${formatDate(e.date)}</div>
-        <div style="font-size:10px;color:var(--text3);margin-top:3px;">Wk ${e.week || '?'}</div>
-      </div>
-      <div>
-        <div style="font-size:13px;font-weight:600;margin-bottom:3px;">${e.topic}</div>
-        <div style="display:flex;gap:6px;margin-bottom:5px;">
-          <span style="font-size:10px;padding:2px 7px;border-radius:4px;background:var(--card2);color:var(--text2);font-family:'JetBrains Mono',monospace;">${e.tool}</span>
-          <span style="font-size:10px;padding:2px 7px;border-radius:4px;background:var(--card2);color:var(--text3);">${moodEmoji[e.mood || 3]} mood ${e.mood || 3}</span>
+      container.innerHTML = filtered.map(e => `
+        <div class="card log-item" style="padding:20px; margin-bottom:16px; border-left:4px solid ${state.role === 'host' ? 'var(--blue)' : 'var(--teal)'}; transition: transform 0.2s;">
+          <div style="display:grid; grid-template-columns: 1fr auto; gap:16px;">
+            <div>
+              <div style="display:flex; gap:8px; align-items:center; margin-bottom:8px;">
+                <span style="font-family:'JetBrains Mono',monospace; font-size:11px; background:var(--card2); padding:2px 8px; border-radius:4px; color:var(--text3);">${formatDate(e.date)}</span>
+                <span style="font-size:11px; color:var(--text3);">Week ${e.week || '?'}</span>
+                <span style="font-size:11px; padding:2px 8px; border-radius:4px; background:var(--navy3); color:var(--blue2); font-weight:700;">${e.tool}</span>
+              </div>
+              <div style="font-size:16px; font-weight:700; margin-bottom:8px; color:var(--text);">${e.topic}</div>
+              <div style="font-size:13px; color:var(--text2); line-height:1.5; margin-bottom:12px;">${e.learned}</div>
+              
+              <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+                ${e.handson ? `<div><div style="font-size:10px; color:var(--text3); text-transform:uppercase; font-weight:800; margin-bottom:4px;">Hands-on</div><div style="font-size:12px; color:var(--green2);">✓ ${e.handson}</div></div>` : ''}
+                ${e.blockers ? `<div><div style="font-size:10px; color:var(--text3); text-transform:uppercase; font-weight:800; margin-bottom:4px;">Blockers</div><div style="font-size:12px; color:var(--red);">⚡ ${e.blockers}</div></div>` : ''}
+              </div>
+            </div>
+            <div style="text-align:right; display:flex; flex-direction:column; justify-content:space-between; align-items:flex-end;">
+              <div>
+                <div style="font-family:'Syne',sans-serif; font-size:24px; font-weight:800; color:var(--blue2);">${e.hours.toFixed(1)}<span style="font-size:12px; font-weight:400; color:var(--text3); margin-left:4px;">hrs</span></div>
+                <div style="font-size:16px; margin-top:4px;">${moodEmoji[e.mood || 3]}</div>
+              </div>
+              ${state.role === 'host' ? `<button onclick="deleteEntry(${e.id})" style="background:var(--red)11; color:var(--red); border:1px solid var(--red)33; padding:4px 8px; border-radius:6px; font-size:11px; cursor:pointer; margin-top:10px;">Delete Entry</button>` : ''}
+            </div>
+          </div>
         </div>
-        ${e.handson ? `<div style="font-size:11px;color:var(--text2);">✓ ${e.handson}</div>` : ''}
-        ${e.blockers ? `<div style="font-size:11px;color:var(--orange2);">⚡ ${e.blockers}</div>` : ''}
-      </div>
-      <div style="text-align:right;">
-        <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--blue2);">${e.hours.toFixed(1)}</div>
-        <div style="font-size:10px;color:var(--text3);">hrs</div>
-        ${state.role === 'host' ? `<button onclick="deleteEntry(${e.id})" style="margin-top:6px;font-size:10px;color:var(--text3);background:none;border:none;cursor:pointer;padding:2px 6px;border-radius:4px;border:1px solid var(--border);">✕</button>` : ''}
-      </div>
-    </div>
-  `).join('');
+      `).join('');
     }
 
     function deleteEntry(id) {
@@ -2121,6 +2134,11 @@
         html += '</div>';
       }
       el.innerHTML = html;
+    }
+
+    function toggleLogForm() {
+      const el = document.getElementById('log-form-container');
+      el.style.display = el.style.display === 'none' ? 'block' : 'none';
     }
 
     function renderRecentLogs() {
@@ -2409,45 +2427,71 @@
     </div>`;
       }).join('');
 
+    let hostEditMode = false;
+    function toggleHostEditMode() {
+      hostEditMode = !hostEditMode;
+      document.getElementById('host-edit-mode-btn').textContent = `Edit Mode: ${hostEditMode ? 'ON' : 'OFF'}`;
+      renderWeekly();
+    }
+
+    function renderWeekly() {
       const w = state.selectedReviewWeek;
       document.getElementById('review-week-label').textContent = w;
       const r = state.weekReviews[w] || {};
-      const isLocked = r.saved && state.role !== 'host' && !r.editRequested;
-
-      ['topics', 'handson', 'win', 'blocker', 'focus'].forEach(f => {
-        const el = document.getElementById('review-' + f);
-        el.value = r[f] || '';
-        el.disabled = isLocked;
-      });
       
-      const hoursEl = document.getElementById('review-hours');
-      const ratingEl = document.getElementById('review-rating');
-      hoursEl.value = r.hours || '';
-      ratingEl.value = r.rating || '';
-      hoursEl.disabled = isLocked;
-      ratingEl.disabled = isLocked;
+      const isHost = state.role === 'host';
+      document.getElementById('host-edit-toggle-wrap').style.display = isHost ? 'block' : 'none';
+      
+      const editMode = hostEditMode && isHost;
+      const fields = ['topics', 'handson', 'win', 'blocker', 'focus'];
+      
+      fields.forEach(f => {
+        const displayEl = document.getElementById('display-' + f);
+        const editEl = document.getElementById('edit-' + f);
+        const val = r[f] || 'No data recorded yet.';
+        
+        displayEl.textContent = val;
+        if (editEl) editEl.value = val;
+        
+        displayEl.style.display = editMode ? 'none' : 'block';
+        if (editEl) editEl.style.display = editMode ? 'block' : 'none';
+      });
 
+      const hoursDisplay = document.getElementById('review-hours-display');
+      const hoursEdit = document.getElementById('edit-hours');
+      const totalHours = state.logEntries.filter(e => parseInt(e.week) === w).reduce((s, e) => s + (e.hours || 0), 0);
+      hoursDisplay.textContent = r.hours || totalHours.toFixed(1);
+      if (hoursEdit) {
+        hoursEdit.value = r.hours || totalHours.toFixed(1);
+        hoursDisplay.style.display = editMode ? 'none' : 'block';
+        hoursEdit.style.display = editMode ? 'block' : 'none';
+      }
+
+      const ratingDisplay = document.getElementById('review-rating-display');
+      const stars = '⭐'.repeat(r.rating || 5);
+      ratingDisplay.textContent = stars;
+
+      const statusBadge = document.getElementById('review-status-badge');
+      statusBadge.textContent = r.saved ? 'Locked' : 'Draft';
+      statusBadge.className = 'badge ' + (r.saved ? 'badge-blue' : '');
+
+      const actionBtn = document.getElementById('review-action-btn');
       const saveBtn = document.getElementById('review-save-btn');
-      if (isLocked) {
-        saveBtn.innerHTML = 'Review Locked · Request Edit →';
-        saveBtn.onclick = requestReviewEdit;
-        saveBtn.disabled = false;
-        saveBtn.style.opacity = 1;
-        saveBtn.classList.remove('btn-primary');
-        saveBtn.classList.add('btn-secondary');
+      
+      if (editMode) {
+        actionBtn.style.display = 'none';
+        saveBtn.style.display = 'block';
       } else {
-        saveBtn.innerHTML = 'Save Weekly Review →';
-        saveBtn.onclick = saveWeekReview;
-        saveBtn.disabled = false;
-        saveBtn.style.opacity = 1;
-        saveBtn.classList.add('btn-primary');
-        saveBtn.classList.remove('btn-secondary');
-      }
+        saveBtn.style.display = 'none';
+        actionBtn.style.display = (r.saved || state.role === 'host') ? 'none' : 'block';
+    }
 
-      if (r.editRequested && state.role !== 'host') {
-        saveBtn.innerHTML = 'Edit Request Pending...';
-        saveBtn.disabled = true;
-      }
+    function submitWeeklyReview() {
+      const w = state.selectedReviewWeek;
+      if (!state.weekReviews[w]) state.weekReviews[w] = {};
+      state.weekReviews[w].saved = true;
+      saveState(); renderWeekly();
+      alert("Weekly review submitted and locked.");
     }
 
     function requestReviewEdit() {
@@ -2487,17 +2531,21 @@
 
     function saveWeekReview() {
       const w = state.selectedReviewWeek;
-      state.weekReviews[w] = {
-        topics: document.getElementById('review-topics').value,
-        handson: document.getElementById('review-handson').value,
-        win: document.getElementById('review-win').value,
-        blocker: document.getElementById('review-blocker').value,
-        focus: document.getElementById('review-focus').value,
-        hours: parseFloat(document.getElementById('review-hours').value) || 0,
-        rating: parseInt(document.getElementById('review-rating').value) || 0,
-        saved: true
-      };
-      saveState(); renderWeekly(); showToast();
+      if (!state.weekReviews[w]) state.weekReviews[w] = {};
+      const r = state.weekReviews[w];
+      
+      ['topics', 'handson', 'win', 'blocker', 'focus'].forEach(f => {
+        const editEl = document.getElementById('edit-' + f);
+        if (editEl) r[f] = editEl.value;
+      });
+      
+      const hoursEdit = document.getElementById('edit-hours');
+      if (hoursEdit) r.hours = parseFloat(hoursEdit.value);
+      
+      saveState();
+      hostEditMode = false;
+      renderWeekly();
+      alert("Review updated by Host.");
     }
 
     // ── RESOURCES ────────────────────────────────────────────────────────────────
