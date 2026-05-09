@@ -64,13 +64,18 @@ auth.onAuthStateChanged(async (user) => {
           renderDashboard();
         }
       } else {
-        // New user initialization
-        db.collection('users').doc(user.uid).set({
-          ...defaultState,
-          email: user.email,
-          uid: user.uid,
+        // New user: Create initial profile doc
+        const emailPrefix = user.email.split('@')[0];
+        const firstName = emailPrefix.charAt(0).toUpperCase() + emailPrefix.slice(1);
+        const initialDoc = { 
+          ...defaultState, 
+          firstName: firstName, 
+          email: user.email, 
+          role: 'user',
+          id: user.uid,
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
+        };
+        db.collection('users').doc(user.uid).set(initialDoc);
       }
     });
 
@@ -106,28 +111,41 @@ auth.onAuthStateChanged(async (user) => {
   }
 });
 
-function updateUserUI() {
-  const u = (me && me.firstName) ? me : state;
-  const fName = u.firstName || 'User';
-  const lName = u.lastName || '';
-  const welcomeTitle = document.querySelector('.welcome-title');
-  const welcomeSub = document.querySelector('.welcome-sub');
-  const sidebarName = document.querySelector('.user-name');
-  const avatar = document.querySelector('.avatar');
-  const roleBadge = document.querySelector('.user-role');
+function getActivePhases() {
+  const roadmapName = state.assignedRoadmap || 'Data Analytics';
+  return ROADMAPS_DB[roadmapName] || ROADMAPS_DB['Data Analytics'] || [];
+}
 
-  if (welcomeTitle) welcomeTitle.textContent = `Welcome back, ${fName} 👋`;
-  if (welcomeSub) {
-    const activePhases = getActivePhases();
-    const allWeeks = [].concat(...activePhases.map(p => p.weeks));
-    const doneWeeks = allWeeks.filter(w => state.weekStatus[w] === 'done').length;
-    const pct = allWeeks.length > 0 ? Math.round((doneWeeks / allWeeks.length) * 100) : 0;
-    welcomeSub.innerHTML = `Today is <span id="today-date" style="color:var(--blue2); font-weight:600;">${new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</span> · You've completed ${pct}% of your roadmap. Keep the momentum!`;
-  }
-  if (sidebarName) sidebarName.textContent = `${fName} ${lName}`;
-  if (avatar) avatar.textContent = (fName[0] || '') + (lName[0] || '');
-  if (roleBadge) roleBadge.textContent = (u.role || myRole || 'user').toUpperCase();
-  document.querySelectorAll('.host-only').forEach(el => el.style.display = (myRole === 'host') ? 'flex' : 'none');
+function updateUserUI() {
+  try {
+    const u = (me && me.firstName) ? me : state;
+    const emailPrefix = (auth.currentUser?.email || 'User').split('@')[0];
+    const fName = u.firstName || emailPrefix.charAt(0).toUpperCase() + emailPrefix.slice(1);
+    const lName = u.lastName || '';
+    
+    const welcomeTitle = document.querySelector('.welcome-title');
+    const welcomeSub = document.querySelector('.welcome-sub');
+    const sidebarName = document.querySelector('.user-name');
+    const avatar = document.querySelector('.avatar');
+    const roleBadge = document.querySelector('.user-role');
+
+    if (welcomeTitle) welcomeTitle.textContent = `Welcome back, ${fName} 👋`;
+    
+    try {
+      if (welcomeSub) {
+        const activePhases = getActivePhases();
+        const allWeeks = [].concat(...activePhases.map(p => p.weeks));
+        const doneWeeks = allWeeks.filter(w => state.weekStatus[w] === 'done').length;
+        const pct = allWeeks.length > 0 ? Math.round((doneWeeks / allWeeks.length) * 100) : 0;
+        welcomeSub.innerHTML = `Today is <span id="today-date" style="color:var(--blue2); font-weight:600;">${new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</span> · You've completed ${pct}% of your roadmap. Keep the momentum!`;
+      }
+    } catch (e) { console.error("Sub-UI error:", e); }
+
+    if (sidebarName) sidebarName.textContent = `${fName} ${lName}`;
+    if (avatar) avatar.textContent = (fName[0] || '') + (lName[0] || '');
+    if (roleBadge) roleBadge.textContent = (u.role || myRole || 'user').toUpperCase();
+    document.querySelectorAll('.host-only').forEach(el => el.style.display = (myRole === 'host') ? 'flex' : 'none');
+  } catch (e) { console.error("Global UI Update Error:", e); }
 }
 
 async function saveState() {
@@ -387,6 +405,12 @@ async function addProjectItem() {
   await db.collection('projects').doc(id).set({ id, num: nextNum, title: 'New Project', tasks: ['Task 1'], color: '#4cc9f0' });
 }
 
+// ── UTILS ────────────────────────────────────────────────────────────────────
+function getActivePhases() {
+  const roadmapName = state.assignedRoadmap || 'Data Analytics';
+  return ROADMAPS_DB[roadmapName] || ROADMAPS_DB['Data Analytics'] || [];
+}
+
 // ── RENDERING ────────────────────────────────────────────────────────────────
 function renderDashboard() {
   updateKPIs(); renderPhaseProgressBars(); renderHeatmap(); renderRecentLogs(); renderSchedule(); renderLeaderboard();
@@ -483,6 +507,57 @@ function renderPhaseFilters(phases) {
   const container = document.getElementById('phase-filter-bar'); if (!container) return;
   const allBtn = `<button class="phase-btn ${!activePhaseFilter?'active':''}" onclick="setPhaseFilter(null)">All Phases</button>`;
   container.innerHTML = allBtn + phases.map(p => `<button class="phase-btn ${activePhaseFilter===p.name?'active':''}" onclick="setPhaseFilter('${p.name}')">${p.name}</button>`).join('');
+}
+
+function renderRoadmap() {
+  const container = document.getElementById('week-grid'); if (!container) return;
+  try {
+    const activePhases = getActivePhases();
+    const roadmapId = state.assignedRoadmap || 'Data Analytics';
+    
+    // Header update
+    const titleEl = document.getElementById('roadmap-user-title');
+    if (titleEl) titleEl.textContent = roadmapId + ' Path';
+
+    renderPhaseFilters(activePhases);
+
+    const filteredPhases = activePhaseFilter === 'all' ? activePhases : activePhases.filter(p => p.id === activePhaseFilter);
+    const allWeeks = [].concat(...filteredPhases.map(p => p.weeks));
+    
+    container.innerHTML = allWeeks.map(wNum => {
+      const w = WEEKS_DB.find(x => x.w === wNum) || { title: 'TBD', goals: '' };
+      const status = state.weekStatus[wNum] || 'todo';
+      const phase = activePhases.find(p => p.weeks.includes(wNum)) || { color: '#ccc' };
+      
+      return `
+        <div class="week-card ${status==='done'?'done':''}" style="border-top:4px solid ${phase.color}">
+          <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
+            <span class="badge" style="background:${phase.color}22; color:${phase.color};">WK ${wNum}</span>
+            <select onchange="setWeekStatus(${wNum}, this.value)" class="form-select" style="width:auto; height:24px; font-size:10px; padding:0 4px;">
+              <option value="todo" ${status==='todo'?'selected':''}>To Do</option>
+              <option value="doing" ${status==='doing'?'selected':''}>In Progress</option>
+              <option value="done" ${status==='done'?'selected':''}>Completed</option>
+            </select>
+          </div>
+          <div class="week-title">${w.title}</div>
+          <div class="week-goals">${w.goals}</div>
+          <div style="margin-top:auto; font-size:10px; color:var(--text3); border-top:1px solid var(--border); padding-top:8px;">
+             ${w.tools ? (Array.isArray(w.tools) ? w.tools.join(' · ') : w.tools) : ''}
+          </div>
+        </div>
+      `;
+    }).join('');
+  } catch (e) { 
+    console.error(e);
+    container.innerHTML = `<div style="color:var(--red); padding:20px;">Render Error: ${e.message}</div>`; 
+  }
+}
+
+let activePhaseFilter = 'all';
+function renderPhaseFilters(phases) {
+  const bar = document.getElementById('phase-filter-bar'); if (!bar) return;
+  bar.innerHTML = `<button class="phase-btn ${activePhaseFilter==='all'?'active':''}" onclick="setPhaseFilter('all')">All Phases</button>` + 
+    phases.map(p => `<button class="phase-btn ${activePhaseFilter===p.id?'active':''}" onclick="setPhaseFilter('${p.id}')">${p.name}</button>`).join('');
 }
 
 function setPhaseFilter(p) { activePhaseFilter = p; renderRoadmap(); }
