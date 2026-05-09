@@ -145,11 +145,11 @@ async function saveState() {
 }
 
 // ── DYNAMIC DATA ─────────────────────────────────────────────────────────────
-let ROADMAPS_DB = {};
-let WEEKS_DB = [];
-let PROJECTS_DB = [];
-let RESOURCES_DB = [];
-let SKILLS_DB = [];
+let ROADMAPS_DB = ROADMAPS;
+let WEEKS_DB = WEEKS;
+let PROJECTS_DB = PROJECTS;
+let RESOURCES_DB = RESOURCES;
+let SKILLS_DB = SKILLS;
 
 async function loadDynamicData() {
   // Listen to Global Roadmaps
@@ -158,37 +158,41 @@ async function loadDynamicData() {
       ROADMAPS_DB = doc.data();
       if (myRole === 'host') renderAdminContent();
       renderDashboard(); renderRoadmap();
-    } else { ROADMAPS_DB = ROADMAPS; }
+    }
   });
 
   // Listen to Weeks
   db.collection('weeks').onSnapshot(snap => {
-    WEEKS_DB = snap.docs.map(d => d.data()).sort((a,b) => a.w - b.w);
-    if (WEEKS_DB.length === 0) WEEKS_DB = WEEKS;
-    if (myRole === 'host') renderAdminContent();
-    renderDashboard(); renderRoadmap();
+    if (!snap.empty) {
+      WEEKS_DB = snap.docs.map(d => d.data()).sort((a,b) => a.w - b.w);
+      if (myRole === 'host') renderAdminContent();
+      renderDashboard(); renderRoadmap();
+    }
   });
 
   // Listen to Projects
   db.collection('projects').onSnapshot(snap => {
-    PROJECTS_DB = snap.docs.map(d => d.data()).sort((a,b) => a.num - b.num);
-    if (PROJECTS_DB.length === 0) PROJECTS_DB = PROJECTS;
-    if (myRole === 'host') renderAdminContent();
-    renderDashboard(); renderProjects();
+    if (!snap.empty) {
+      PROJECTS_DB = snap.docs.map(d => d.data()).sort((a,b) => a.num - b.num);
+      if (myRole === 'host') renderAdminContent();
+      renderDashboard(); renderProjects();
+    }
   });
 
   // Listen to Resources
   db.collection('resources').onSnapshot(snap => {
-    RESOURCES_DB = snap.docs.map(d => d.data());
-    if (RESOURCES_DB.length === 0) RESOURCES_DB = RESOURCES;
-    renderResources();
+    if (!snap.empty) {
+      RESOURCES_DB = snap.docs.map(d => d.data());
+      renderResources();
+    }
   });
 
   // Listen to Skills
   db.collection('skills').onSnapshot(snap => {
-    SKILLS_DB = snap.docs.map(d => d.data());
-    if (SKILLS_DB.length === 0) SKILLS_DB = SKILLS;
-    renderSkills();
+    if (!snap.empty) {
+      SKILLS_DB = snap.docs.map(d => d.data());
+      renderSkills();
+    }
   });
 }
 
@@ -221,6 +225,19 @@ function showPage(id, btn) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   pageEl.classList.add('active');
   if (btn) btn.classList.add('active');
+  
+  // Update Topbar Title
+  const titleEl = document.getElementById('page-title');
+  if (titleEl) {
+    const titles = {
+      dashboard: 'Dashboard', roadmap: 'Curriculum Roadmap', daily: 'Learning Logs',
+      skills: 'Skills Tracker', projects: 'Portfolio Projects', weekly: 'Weekly Performance',
+      resources: 'Knowledge Base', 'admin-users': 'User Management', 
+      'admin-content': 'Content Manager', profile: 'My Profile'
+    };
+    titleEl.textContent = titles[id] || 'Learning Portal';
+  }
+
   const renderers = {
     dashboard: renderDashboard, roadmap: renderRoadmap, skills: renderSkills,
     projects: renderProjects, weekly: renderWeekly, resources: renderResources,
@@ -228,6 +245,17 @@ function showPage(id, btn) {
     'admin-content': renderAdminContent, profile: renderProfile
   };
   if (renderers[id]) renderers[id]();
+}
+
+async function handleAdminAssign() {
+  const userId = document.getElementById('admin-user-select')?.value;
+  const roadmapId = document.getElementById('admin-roadmap-select')?.value;
+  if (!userId || !roadmapId) return showToast("Select user and roadmap", true);
+  
+  try {
+    await db.collection('users').doc(userId).update({ assignedRoadmap: roadmapId });
+    showToast("Roadmap assigned!");
+  } catch (e) { showToast("Assignment failed", true); }
 }
 
 function renderProfile() {
@@ -617,7 +645,7 @@ function renderLogEntries() {
     .orderBy('createdAt', 'desc')
     .onSnapshot(snap => {
       let filtered = snap.docs.map(d => d.data());
-      if (q) filtered = filtered.filter(e => e.topic.toLowerCase().includes(q) || e.learned.toLowerCase().includes(q));
+      if (q) filtered = filtered.filter(e => (e.topic||'').toLowerCase().includes(q) || (e.learned||'').toLowerCase().includes(q));
       if (tool) filtered = filtered.filter(e => e.tool === tool);
 
       if (filtered.length === 0) {
