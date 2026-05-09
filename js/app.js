@@ -15,7 +15,6 @@ const auth = firebase.auth();
 const db = firebase.firestore();
 
 // ── APP STATE ────────────────────────────────────────────────────────────────
-let isSignUp = false;
 let myRole = 'user'; 
 let state = { ...defaultState };
 let me = {};
@@ -28,36 +27,13 @@ window.onerror = (m, s, l, c, e) => { console.error("Global Error:", m, e); retu
 window.onunhandledrejection = (e) => { console.error("Unhandled Rejection:", e.reason); };
 
 // ── AUTH LOGIC ───────────────────────────────────────────────────────────────
-function toggleAuthMode() {
-  isSignUp = !isSignUp;
-  const submitBtn = document.getElementById('auth-submit');
-  const signupFields = document.getElementById('signup-fields');
-  const toggleEl = document.getElementById('auth-toggle');
-  if (submitBtn) submitBtn.textContent = isSignUp ? 'Sign Up' : 'Sign In';
-  if (signupFields) signupFields.style.display = isSignUp ? 'block' : 'none';
-  if (toggleEl) {
-    toggleEl.innerHTML = isSignUp ?
-      'Already have an account? <span onclick="toggleAuthMode()" style="color:var(--blue2);cursor:pointer;">Sign In</span>' :
-      'Don\'t have an account? <span onclick="toggleAuthMode()" style="color:var(--blue2);cursor:pointer;">Sign Up</span>';
-  }
-}
 
 async function handleAuth() {
   const email = document.getElementById('auth-email')?.value;
   const password = document.getElementById('auth-password')?.value;
-  const fname = document.getElementById('auth-fname')?.value;
-  const lname = document.getElementById('auth-lname')?.value;
   if (!email || !password) return alert('Fill all fields');
-  if (isSignUp && (!email.toLowerCase().endsWith('@bestpeers.com') || !fname || !lname)) {
-    return alert('Invalid signup details.');
-  }
   try {
-    if (isSignUp) {
-      const res = await auth.createUserWithEmailAndPassword(email, password);
-      await db.collection('users').doc(res.user.uid).set({ ...defaultState, firstName: fname, lastName: lname, email: email });
-    } else {
-      await auth.signInWithEmailAndPassword(email, password);
-    }
+    await auth.signInWithEmailAndPassword(email, password);
   } catch (e) { alert(e.message); }
 }
 
@@ -71,10 +47,6 @@ auth.onAuthStateChanged(async (user) => {
       if (doc.exists) {
         const data = doc.data();
         myRole = data.role || 'user';
-        if (user.email === 'rudra@bestpeers.com' && data.role !== 'host') {
-          myRole = 'host';
-          db.collection('users').doc(user.uid).update({ role: 'host' }).catch(console.error);
-        }
       }
       await loadFromFirestore(user.uid);
     } catch (e) { console.error("Auth init error:", e); initApp(); }
@@ -178,6 +150,23 @@ function updateKPIs() {
   Object.entries(kpis).forEach(([id, val]) => { const el = document.getElementById(id); if (el) el.textContent = val; });
   const circle = document.getElementById('milestone-progress-bar');
   if (circle) circle.style.strokeDashoffset = 226 - (226 * pct) / 100;
+
+  if (myRole === 'host') {
+    const totalProgress = allUsers.reduce((sum, u) => {
+      const uRoadmap = ROADMAPS[u.assignedRoadmap || 'Data Analytics'] || ROADMAPS['Data Analytics'];
+      const uAllWeeks = [].concat(...uRoadmap.map(p => p.weeks));
+      const uDoneWeeks = uAllWeeks.filter(w => (u.weekStatus && u.weekStatus[w]) === 'done').length;
+      return sum + (uAllWeeks.length > 0 ? (uDoneWeeks / uAllWeeks.length) : 0);
+    }, 0);
+    const avgProgress = allUsers.length > 0 ? Math.round((totalProgress / allUsers.length) * 100) : 0;
+    
+    const hostKPIs = {
+      'host-avg-progress': avgProgress + '%',
+      'host-active-count': allUsers.length,
+      'host-pending-reviews': allUsers.reduce((s, u) => s + Object.keys(u.weekReviews || {}).length, 0) // Simplified
+    };
+    Object.entries(hostKPIs).forEach(([id, val]) => { const el = document.getElementById(id); if (el) el.textContent = val; });
+  }
 }
 
 function updateStreak() {
@@ -288,11 +277,123 @@ async function switchViewUser(uid) {
 
 async function renderAdminUsers() { if (myRole !== 'host') return; await fetchEmployees(); }
 
+function renderHeatmap() {
+  const container = document.getElementById('heatmap'); if (!container) return;
+  let html = '';
+  for (let i = 0; i < 84; i++) { // 12 weeks * 7 days
+    const level = Math.floor(Math.random() * 4);
+    html += `<div class="heatmap-cell" style="opacity: ${0.2 + level * 0.25}; background: var(--teal);"></div>`;
+  }
+  container.innerHTML = html;
+}
+
+function renderSchedule() {
+  const container = document.getElementById('today-schedule-list'); if (!container) return;
+  const items = [
+    { time: '09:00 AM', task: 'Review SQL Window Functions', status: 'done' },
+    { time: '11:30 AM', task: 'Practice LeetCode (Medium)', status: 'active' },
+    { time: '03:00 PM', task: 'Project: Retail Sales Dashboard', status: 'todo' }
+  ];
+  container.innerHTML = items.map(i => `
+    <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px; padding:10px; background:var(--navy3); border-radius:8px;">
+      <div style="font-size:10px; color:var(--text3); width:60px;">${i.time}</div>
+      <div style="flex:1; font-size:13px; color:var(--text); ${i.status==='done'?'text-decoration:line-through;opacity:0.6':''}">${i.task}</div>
+      <div class="status-dot status-${i.status}" style="width:8px; height:8px; border-radius:50%;"></div>
+    </div>
+  `).join('');
+}
+
+function renderLeaderboard() {
+  const container = document.getElementById('leaderboard-list'); if (!container) return;
+  const users = [
+    { name: 'Priya S.', score: 1240, streak: 12 },
+    { name: 'Arjun T.', score: 1150, streak: 8 },
+    { name: 'Rohan V.', score: 980, streak: 5 }
+  ];
+  container.innerHTML = users.map((u, idx) => `
+    <div style="display:flex; align-items:center; gap:12px; padding:8px 0; border-bottom:1px solid var(--border);">
+      <div style="font-weight:800; color:var(--blue2); width:20px;">${idx+1}</div>
+      <div style="flex:1; font-size:13px;">${u.name}</div>
+      <div style="font-size:11px; color:var(--orange2);">🔥 ${u.streak}d</div>
+      <div style="font-size:12px; font-weight:600;">${u.score} pts</div>
+    </div>
+  `).join('');
+}
+
+function renderRecentLogs() {
+  // Can be used to show a summary on dashboard
+}
+
+async function addLogEntry() {
+  const date = document.getElementById('log-date')?.value;
+  const week = document.getElementById('log-week')?.value;
+  const topic = document.getElementById('log-topic')?.value;
+  const hours = parseFloat(document.getElementById('log-hours')?.value || 0);
+  const learned = document.getElementById('log-learned')?.value;
+  
+  if (!date || !topic || !hours) return alert('Please fill required fields (Date, Topic, Hours)');
+  
+  const entry = { date, week, topic, hours, learned, timestamp: Date.now() };
+  if (!state.logEntries) state.logEntries = [];
+  state.logEntries.unshift(entry);
+  
+  await saveState();
+  toggleLogForm();
+  renderLogEntries();
+  updateKPIs();
+  showToast("Session Logged!");
+}
+
+function handleGlobalSearch(q) {
+  const resultsDiv = document.getElementById('search-results');
+  if (!q || q.length < 2) { if (resultsDiv) resultsDiv.style.display = 'none'; return; }
+  
+  if (!resultsDiv) {
+    const div = document.createElement('div');
+    div.id = 'search-results';
+    div.style.cssText = 'position:absolute; top:100%; left:0; right:0; background:var(--navy3); border:1px solid var(--border); border-radius:12px; max-height:300px; overflow-y:auto; z-index:1000; margin-top:8px; box-shadow:var(--shadow);';
+    document.querySelector('.global-search-wrap').appendChild(div);
+  }
+  
+  const resultsDivFixed = document.getElementById('search-results');
+  resultsDivFixed.style.display = 'block';
+  
+  const matches = [
+    ...WEEKS.filter(w => w.title.toLowerCase().includes(q.toLowerCase())).map(w => ({ type: 'Roadmap', title: w.title, id: 'roadmap' })),
+    ...PROJECTS.filter(p => p.title.toLowerCase().includes(q.toLowerCase())).map(p => ({ type: 'Project', title: p.title, id: 'projects' })),
+    ...RESOURCES.filter(r => r.name.toLowerCase().includes(q.toLowerCase())).map(r => ({ type: 'Resource', title: r.name, id: 'resources' }))
+  ];
+  
+  if (matches.length === 0) {
+    resultsDivFixed.innerHTML = '<div style="padding:12px; font-size:12px; color:var(--text3);">No results found</div>';
+  } else {
+    resultsDivFixed.innerHTML = matches.map(m => `
+      <div onclick="showPage('${m.id}'); document.getElementById('search-results').style.display='none';" style="padding:10px 16px; cursor:pointer; border-bottom:1px solid var(--border); hover:background:var(--navy4);">
+        <div style="font-size:10px; color:var(--blue2); text-transform:uppercase;">${m.type}</div>
+        <div style="font-size:13px;">${m.title}</div>
+      </div>
+    `).join('');
+  }
+}
+
+function setMood(m, btn) {
+  state.selectedMood = m;
+  document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
 // ── UTILS ────────────────────────────────────────────────────────────────────
 function fixLinks() { document.querySelectorAll('a').forEach(a => { a.target = "_blank"; a.rel = "noopener"; }); }
 function showToast(m, e) { const t = document.getElementById('save-toast'); if (t) { t.querySelector('span').textContent = m; t.style.background = e?'var(--red)':'var(--navy2)'; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 3000); } }
 function getActivePhases() { return ROADMAPS[state.assignedRoadmap || 'Data Analytics'] || ROADMAPS['Data Analytics']; }
 function toggleFocusMode() { document.body.classList.toggle('focus-mode'); }
 function toggleLogForm() { const el = document.getElementById('log-form-container'); if (el) el.style.display = el.style.display==='none'?'block':'none'; }
-function handleAdminAssign() { /* simplified */ }
-function handleGlobalSearch(q) { /* simplified */ }
+function handleAdminAssign() { 
+  const uid = document.getElementById('admin-user-select')?.value;
+  const roadmap = document.getElementById('admin-roadmap-select')?.value;
+  if (!uid || !roadmap) return alert('Select user and roadmap');
+  
+  db.collection('users').doc(uid).update({ assignedRoadmap: roadmap })
+    .then(() => { showToast("Roadmap assigned!"); fetchEmployees(); })
+    .catch(e => alert(e.message));
+}

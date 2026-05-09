@@ -1,10 +1,5 @@
 // Static data for the Bestpeers Learning Dashboard
-const MOCK_USERS = [
-  { id: 'u1', firstName: 'Arjun', lastName: 'Tomar', role: 'host', assignedRoadmap: 'Data Analytics', weekStatus: { 1: 'done', 2: 'done', 3: 'active' }, weekReviews: {}, skillNow: {}, projectStatus: {}, projectTasks: {}, logEntries: [] },
-  { id: 'u2', firstName: 'Priya', lastName: 'Singh', role: 'user', assignedRoadmap: 'Data Analytics', weekStatus: { 1: 'done', 2: 'todo' }, weekReviews: {}, skillNow: {}, projectStatus: {}, projectTasks: {}, logEntries: [] },
-  { id: 'u3', firstName: 'Rohan', lastName: 'Verma', role: 'user', assignedRoadmap: 'Data Engineering', weekStatus: { 1: 'active' }, weekReviews: {}, skillNow: {}, projectStatus: {}, projectTasks: {}, logEntries: [] },
-  { id: 'u4', firstName: 'Neha', lastName: 'Sharma', role: 'user', assignedRoadmap: 'Data Analytics', weekStatus: { 1: 'done', 2: 'done', 3: 'done', 4: 'done' }, weekReviews: {}, skillNow: {}, projectStatus: {}, projectTasks: {}, logEntries: [] }
-];
+const MOCK_USERS = [];
 
 const defaultState = {
   firstName: '',

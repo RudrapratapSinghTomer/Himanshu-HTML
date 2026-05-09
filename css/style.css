@@ -1,30 +1,32 @@
 :root {
-  --navy: #0A0F1E;
-  --navy2: #111827;
-  --navy3: #1a2235;
-  --navy4: #232f45;
-  --blue: #3B82F6;
-  --blue2: #60A5FA;
-  --blue3: #BFDBFE;
-  --teal: #14B8A6;
-  --teal2: #5EEAD4;
+  --navy: #0F172A;
+  --navy2: #1E293B;
+  --navy3: #334155;
+  --navy4: #475569;
+  --blue: #6366F1; /* Indigo accent */
+  --blue2: #818CF8;
+  --blue3: #C7D2FE;
+  --teal: #10B981;
+  --teal2: #34D399;
   --purple: #8B5CF6;
   --purple2: #A78BFA;
-  --orange: #F97316;
-  --orange2: #FDBA74;
+  --orange: #F59E0B;
+  --orange2: #FBBF24;
   --gold: #F59E0B;
   --gold2: #FCD34D;
   --green: #10B981;
   --green2: #6EE7B7;
   --red: #EF4444;
-  --text: #F1F5F9;
-  --text2: #94A3B8;
-  --text3: #64748B;
-  --border: rgba(255, 255, 255, 0.08);
-  --border2: rgba(255, 255, 255, 0.14);
-  --card: rgba(255, 255, 255, 0.04);
-  --card2: rgba(255, 255, 255, 0.07);
-  --glass: rgba(255, 255, 255, 0.05);
+  --text: #F8FAFC;
+  --text2: #CBD5E1;
+  --text3: #94A3B8;
+  --border: rgba(255, 255, 255, 0.05);
+  --border2: rgba(255, 255, 255, 0.1);
+  --card: #1E293B;
+  --card2: #334155;
+  --glass: rgba(15, 23, 42, 0.8);
+  --shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+  --radius: 16px;
 }
 
 * {
@@ -58,12 +60,13 @@ body {
   left: 0;
   top: 0;
   bottom: 0;
-  width: 220px;
-  background: var(--navy2);
+  width: 260px;
+  background: var(--navy);
   border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
   z-index: 100;
+  padding: 0 12px;
 }
 
 .logo {
@@ -126,8 +129,9 @@ body {
 }
 
 .nav-item.active {
-  background: rgba(59, 130, 246, 0.15);
+  background: rgba(99, 102, 241, 0.1);
   color: var(--blue2);
+  font-weight: 600;
 }
 
 body.focus-mode .sidebar,
@@ -232,8 +236,9 @@ body.focus-mode .page {
 
 /* ── MAIN ── */
 .main {
-  margin-left: 220px;
+  margin-left: 260px;
   min-height: 100vh;
+  background: var(--navy2);
 }
 
 /* ── TOPBAR ── */
@@ -495,8 +500,9 @@ body.focus-mode .page {
 .card {
   background: var(--card);
   border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 20px 22px;
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: var(--shadow);
 }
 
 .card-title {
@@ -1262,49 +1268,62 @@ body.focus-mode .page {
 
 .login-logo {
   font-family: 'Syne', sans-serif;
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 800;
-  background: linear-gradient(135deg, var(--blue2), var(--teal2));
+  margin-bottom: 8px;
+  background: linear-gradient(135deg, #818CF8, #34D399);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  margin-bottom: 8px;
 }
 
 .login-sub {
   color: var(--text3);
   font-size: 14px;
-  margin-bottom: 32px;
+  margin-bottom: 40px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-weight: 600;
 }
 
-.login-form {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+.heatmap-wrap {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  grid-template-rows: repeat(7, 1fr);
+  gap: 4px;
+  margin-top: 10px;
+}
+
+.heatmap-cell {
+  aspect-ratio: 1;
+  border-radius: 2px;
+  background: var(--teal);
+  transition: transform 0.2s;
+}
+
+.heatmap-cell:hover {
+  transform: scale(1.2);
+  z-index: 10;
 }
 
 .login-input {
-  background: var(--navy3);
-  border: 1px solid var(--border);
+  width: 100%;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border2);
   border-radius: 12px;
-  padding: 14px;
-  color: var(--text);
-  font-family: 'Instrument Sans', sans-serif;
-  font-size: 15px;
+  padding: 14px 18px;
+  color: #fff;
+  font-size: 14px;
+  margin-bottom: 16px;
   outline: none;
-  transition: border-color 0.2s;
+  transition: all 0.2s;
 }
 
 .login-input:focus {
   border-color: var(--blue);
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .login-btn {
-  background: var(--blue);
-  color: #fff;
-  border: none;
-  border-radius: 12px;
-  padding: 14px;
-  font-size: 15px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
