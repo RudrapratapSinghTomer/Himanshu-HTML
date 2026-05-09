@@ -152,36 +152,44 @@ let RESOURCES_DB = [];
 let SKILLS_DB = [];
 
 async function loadDynamicData() {
-  try {
-    const [roadmapDoc, weeksSnap, projectsSnap, resourcesSnap, skillsSnap] = await Promise.all([
-      db.collection('config').doc('roadmaps').get(),
-      db.collection('weeks').get(),
-      db.collection('projects').get(),
-      db.collection('resources').get(),
-      db.collection('skills').get()
-    ]);
+  // Listen to Global Roadmaps
+  db.collection('config').doc('roadmaps').onSnapshot(doc => {
+    if (doc.exists) {
+      ROADMAPS_DB = doc.data();
+      if (myRole === 'host') renderAdminContent();
+      renderDashboard(); renderRoadmap();
+    } else { ROADMAPS_DB = ROADMAPS; }
+  });
 
-    if (roadmapDoc.exists) ROADMAPS_DB = roadmapDoc.data();
-    else ROADMAPS_DB = ROADMAPS; // Fallback to local
-
-    WEEKS_DB = weeksSnap.docs.map(d => d.data());
+  // Listen to Weeks
+  db.collection('weeks').onSnapshot(snap => {
+    WEEKS_DB = snap.docs.map(d => d.data()).sort((a,b) => a.w - b.w);
     if (WEEKS_DB.length === 0) WEEKS_DB = WEEKS;
+    if (myRole === 'host') renderAdminContent();
+    renderDashboard(); renderRoadmap();
+  });
 
-    PROJECTS_DB = projectsSnap.docs.map(d => d.data());
+  // Listen to Projects
+  db.collection('projects').onSnapshot(snap => {
+    PROJECTS_DB = snap.docs.map(d => d.data()).sort((a,b) => a.num - b.num);
     if (PROJECTS_DB.length === 0) PROJECTS_DB = PROJECTS;
+    if (myRole === 'host') renderAdminContent();
+    renderDashboard(); renderProjects();
+  });
 
-    RESOURCES_DB = resourcesSnap.docs.map(d => d.data());
+  // Listen to Resources
+  db.collection('resources').onSnapshot(snap => {
+    RESOURCES_DB = snap.docs.map(d => d.data());
     if (RESOURCES_DB.length === 0) RESOURCES_DB = RESOURCES;
+    renderResources();
+  });
 
-    SKILLS_DB = skillsSnap.docs.map(d => d.data());
+  // Listen to Skills
+  db.collection('skills').onSnapshot(snap => {
+    SKILLS_DB = snap.docs.map(d => d.data());
     if (SKILLS_DB.length === 0) SKILLS_DB = SKILLS;
-
-  } catch (e) {
-    console.error("Error loading dynamic data:", e);
-    // Fallbacks are already handled by using the constants from data.js
-    ROADMAPS_DB = ROADMAPS; WEEKS_DB = WEEKS; PROJECTS_DB = PROJECTS; 
-    RESOURCES_DB = RESOURCES; SKILLS_DB = SKILLS;
-  }
+    renderSkills();
+  });
 }
 
 async function initApp() {
@@ -242,30 +250,113 @@ async function saveProfile() {
 function renderAdminContent() {
   if (myRole !== 'host') return;
   
-  // Render Weeks
-  const weeksList = document.getElementById('admin-weeks-list');
-  if (weeksList) weeksList.innerHTML = WEEKS_DB.map(w => `
-    <div style="padding:12px; background:var(--navy3); border-radius:8px; border:1px solid var(--border);">
-      <div style="font-weight:700; font-size:12px; margin-bottom:4px;">Week ${w.w}</div>
-      <input type="text" value="${w.title}" onchange="updateDBItem('weeks', '${w.w}', 'title', this.value)" style="background:transparent; border:none; color:var(--text); font-size:14px; width:100%;">
-    </div>
-  `).join('');
+  // 1. Roadmaps Editor
+  const roadmapsList = document.getElementById('admin-roadmaps-list');
+  if (roadmapsList) {
+    roadmapsList.innerHTML = Object.entries(ROADMAPS_DB).map(([name, phases]) => `
+      <div class="card" style="padding:16px; background:var(--navy4); border:1px solid var(--border);">
+        <div style="font-weight:800; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
+          <span>${name}</span>
+          <span style="font-size:10px; color:var(--text3);">${phases.length} Phases</span>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          ${phases.map((p, pIdx) => `
+            <div style="font-size:12px; padding:12px; background:var(--navy3); border-radius:8px; border:1px solid var(--border);">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <input type="text" value="${p.name}" onchange="updateRoadmapPhase('${name}', ${pIdx}, 'name', this.value)" 
+                  style="background:transparent; border:none; color:var(--text); font-weight:700; width:70%; border-bottom:1px solid transparent; hover:border-border;">
+                <button class="btn-sm" style="background:var(--red)22; color:var(--red); font-size:9px;" onclick="deleteRoadmapPhase('${name}', ${pIdx})">Remove</button>
+              </div>
+              <div style="font-size:10px; color:var(--text3); margin-bottom:4px;">Weeks (Comma separated)</div>
+              <input type="text" value="${p.weeks.join(', ')}" onchange="updateRoadmapPhase('${name}', ${pIdx}, 'weeks', this.value)"
+                style="background:var(--navy4); border:1px solid var(--border); border-radius:4px; color:var(--text2); font-size:11px; width:100%; padding:4px 8px;">
+            </div>
+          `).join('')}
+          <button class="btn-sm" style="margin-top:8px; width:100%;" onclick="addRoadmapPhase('${name}')">+ Add Phase to ${name}</button>
+        </div>
+      </div>
+    `).join('');
+  }
 
-  // Render Projects
+  // 2. Weeks Editor
+  const weeksList = document.getElementById('admin-weeks-list');
+  if (weeksList) {
+    weeksList.innerHTML = WEEKS_DB.map(w => `
+      <div style="padding:12px; background:var(--navy3); border-radius:8px; border:1px solid var(--border); position:relative;">
+        <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+          <div style="font-weight:700; font-size:10px; color:var(--text3);">WEEK ${w.w}</div>
+          <button onclick="deleteDBItem('weeks', '${w.w}')" style="background:none; border:none; color:var(--red); cursor:pointer; font-size:14px;">&times;</button>
+        </div>
+        <input type="text" value="${w.title}" onchange="updateDBItem('weeks', '${w.w}', 'title', this.value)" 
+          style="background:transparent; border:none; color:var(--text); font-size:14px; width:100%; border-bottom:1px solid transparent; hover:border-border;">
+      </div>
+    `).join('');
+  }
+
+  // 3. Projects Editor
   const projectsList = document.getElementById('admin-projects-list');
-  if (projectsList) projectsList.innerHTML = PROJECTS_DB.map(p => `
-    <div style="padding:12px; background:var(--navy3); border-radius:8px; border:1px solid var(--border);">
-      <div style="font-weight:700; font-size:12px; margin-bottom:4px;">PROJ ${p.num}</div>
-      <input type="text" value="${p.title}" onchange="updateDBItem('projects', '${p.id}', 'title', this.value)" style="background:transparent; border:none; color:var(--text); font-size:14px; width:100%;">
-    </div>
-  `).join('');
+  if (projectsList) {
+    projectsList.innerHTML = PROJECTS_DB.map(p => `
+      <div style="padding:12px; background:var(--navy3); border-radius:8px; border:1px solid var(--border);">
+        <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+          <div style="font-weight:700; font-size:10px; color:var(--text3);">PROJ ${p.num}</div>
+          <button onclick="deleteDBItem('projects', '${p.id}')" style="background:none; border:none; color:var(--red); cursor:pointer; font-size:14px;">&times;</button>
+        </div>
+        <input type="text" value="${p.title}" onchange="updateDBItem('projects', '${p.id}', 'title', this.value)" 
+          style="background:transparent; border:none; color:var(--text); font-size:14px; width:100%; border-bottom:1px solid transparent; hover:border-border;">
+      </div>
+    `).join('');
+  }
+}
+
+async function updateRoadmapPhase(rName, pIdx, field, value) {
+  const roadmap = ROADMAPS_DB[rName];
+  if (field === 'weeks') {
+    roadmap[pIdx].weeks = value.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n));
+  } else {
+    roadmap[pIdx][field] = value;
+  }
+  await db.collection('config').doc('roadmaps').update({ [rName]: roadmap });
+  showToast("Roadmap updated");
+}
+
+async function addRoadmapPhase(rName) {
+  const roadmap = ROADMAPS_DB[rName];
+  roadmap.push({ name: 'New Phase', weeks: [] });
+  await db.collection('config').doc('roadmaps').update({ [rName]: roadmap });
+}
+
+async function deleteRoadmapPhase(rName, pIdx) {
+  if (!confirm('Delete this phase?')) return;
+  const roadmap = ROADMAPS_DB[rName];
+  roadmap.splice(pIdx, 1);
+  await db.collection('config').doc('roadmaps').update({ [rName]: roadmap });
 }
 
 async function updateDBItem(collection, id, field, value) {
   try {
-    await db.collection(collection).doc(id).update({ [field]: value });
-    showToast("Updated " + field);
-  } catch (e) { showToast("Failed to update", true); }
+    await db.collection(collection).doc(id).set({ [field]: value }, { merge: true });
+    showToast(`Updated ${collection}`);
+  } catch (e) { showToast("Update failed", true); }
+}
+
+async function deleteDBItem(collection, id) {
+  if (!confirm(`Delete item ${id} from ${collection}?`)) return;
+  try {
+    await db.collection(collection).doc(id).delete();
+    showToast("Deleted item");
+  } catch (e) { showToast("Delete failed", true); }
+}
+
+async function addWeekItem() {
+  const nextW = (WEEKS_DB.length > 0 ? Math.max(...WEEKS_DB.map(w => w.w)) : 0) + 1;
+  await db.collection('weeks').doc(nextW.toString()).set({ w: nextW, title: 'New Week Title' });
+}
+
+async function addProjectItem() {
+  const nextNum = (PROJECTS_DB.length > 0 ? Math.max(...PROJECTS_DB.map(p => p.num)) : 0) + 1;
+  const id = 'proj' + nextNum;
+  await db.collection('projects').doc(id).set({ id, num: nextNum, title: 'New Project', tasks: ['Task 1'], color: '#4cc9f0' });
 }
 
 // ── RENDERING ────────────────────────────────────────────────────────────────
@@ -273,29 +364,27 @@ function renderDashboard() {
   updateKPIs(); renderPhaseProgressBars(); renderHeatmap(); renderRecentLogs(); renderSchedule(); renderLeaderboard();
 }
 
-function renderPhaseProgressBars() {
-  const container = document.getElementById('phase-progress-container'); if (!container) return;
-  const activePhases = getActivePhases();
-  container.innerHTML = activePhases.map(p => {
-    const done = p.weeks.filter(w => state.weekStatus[w] === 'done').length;
-    const pct = Math.round((done / p.weeks.length) * 100);
-    return `<div style="margin-bottom:12px;"><div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px;"><span>${p.name}</span><span>${pct}%</span></div><div class="progress-track"><div class="progress-fill" style="width:${pct}%;background:var(--blue2);"></div></div></div>`;
-  }).join('');
-}
 
 function renderRecentLogs() {
   const container = document.getElementById('recent-logs-list'); if (!container) return;
-  const recent = (state.logEntries || []).slice(0, 3);
-  if (recent.length === 0) { container.innerHTML = '<div style="font-size:11px;color:var(--text3);padding:10px;">No logs yet.</div>'; return; }
-  container.innerHTML = recent.map(e => `
-    <div style="display:flex; justify-content:space-between; align-items:center; padding:10px; background:var(--navy3); border-radius:8px; margin-bottom:8px;">
-      <div>
-        <div style="font-size:13px; font-weight:600;">${e.topic}</div>
-        <div style="font-size:10px; color:var(--text3);">${e.date}</div>
-      </div>
-      <div class="badge" style="background:var(--navy4);">${e.hours}h</div>
-    </div>
-  `).join('');
+  const user = auth.currentUser; if (!user) return;
+  const targetUid = (myRole === 'host' && viewingUserId) ? viewingUserId : user.uid;
+
+  db.collection('users').doc(targetUid).collection('logs')
+    .orderBy('createdAt', 'desc').limit(3).get()
+    .then(snap => {
+      const recent = snap.docs.map(d => d.data());
+      if (recent.length === 0) { container.innerHTML = '<div style="font-size:11px;color:var(--text3);padding:10px;">No logs yet.</div>'; return; }
+      container.innerHTML = recent.map(e => `
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:10px; background:var(--navy3); border-radius:8px; margin-bottom:8px;">
+          <div>
+            <div style="font-size:13px; font-weight:600;">${e.topic}</div>
+            <div style="font-size:10px; color:var(--text3);">${e.date}</div>
+          </div>
+          <div class="badge" style="background:var(--navy4);">${e.hours}h</div>
+        </div>
+      `).join('');
+    });
 }
 
 function updateKPIs() {
@@ -305,7 +394,7 @@ function updateKPIs() {
   const pct = allWeeks.length > 0 ? Math.round((doneWeeks / allWeeks.length) * 100) : 0;
   
   const kpis = { 
-    'kpi-hours': (state.logEntries || []).reduce((s, e) => s + (e.hours || 0), 0).toFixed(1), 
+    'kpi-hours': (state.totalHours || 0).toFixed(1), 
     'kpi-projects': PROJECTS_DB.filter(p => state.projectStatus[p.id] === 'Completed').length, 
     'kpi-skills': SKILLS_DB.filter(s => (state.skillNow[s.key] || 0) >= 3).length, 
     'overall-pct': pct + '%' 
@@ -314,6 +403,9 @@ function updateKPIs() {
   Object.entries(kpis).forEach(([id, val]) => { const el = document.getElementById(id); if (el) el.textContent = val; });
   const circle = document.getElementById('circle-progress-done');
   if (circle) circle.style.strokeDashoffset = 226 - (226 * pct) / 100;
+  
+  const streakEl = document.getElementById('kpi-streak');
+  if (streakEl) streakEl.textContent = state.streak || 0;
 
   if (myRole === 'host') {
     const totalProgress = allUsers.reduce((sum, u) => {
@@ -333,30 +425,6 @@ function updateKPIs() {
   }
 }
 
-function updateStreak() {
-  if (!state.logEntries || state.logEntries.length === 0) {
-    state.streak = 0;
-  } else {
-    const dates = [...new Set(state.logEntries.map(e => e.date))].sort().reverse();
-    let streak = 0;
-    const today = new Date().toISOString().split('T')[0];
-    const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
-
-    if (dates[0] === today || dates[0] === yesterday) {
-      streak = 1;
-      for (let i = 0; i < dates.length - 1; i++) {
-        const d1 = new Date(dates[i]);
-        const d2 = new Date(dates[i+1]);
-        const diff = Math.round((d1 - d2) / (1000 * 60 * 60 * 24));
-        if (diff === 1) streak++;
-        else break;
-      }
-    }
-    state.streak = streak;
-  }
-  const el = document.getElementById('streak-count-topbar');
-  if (el) el.textContent = state.streak;
-}
 
 function renderPhaseProgressBars() {
   const el = document.getElementById('phase-progress-bars'); if (!el) return;
@@ -459,14 +527,6 @@ function toggleProjectTask(pid, tidx) {
 
 function updateProjectStatus(id, v) { state.projectStatus[id] = v; saveState(); renderProjects(); updateKPIs(); }
 
-function renderWeekly() {
-  const w = state.selectedReviewWeek || 1; const r = (state.weekReviews || {})[w] || {};
-  const grid = document.getElementById('review-week-grid');
-  if (grid) grid.innerHTML = Array.from({length:20}, (_, i) => `<div class="review-week-btn ${i+1===w?'active':''}" onclick="selectReviewWeek(${i+1})">WK ${i+1}</div>`).join('');
-  ['topics', 'handson', 'win', 'blocker', 'focus'].forEach(f => { const d = document.getElementById('display-' + f); if (d) d.textContent = r[f] || 'No entry.'; });
-}
-
-function selectReviewWeek(w) { state.selectedReviewWeek = w; renderWeekly(); }
 
 function renderResources() {
   const container = document.getElementById('resource-grid'); if (!container) return;
@@ -647,21 +707,29 @@ async function renderAdminUsers() { if (myRole !== 'host') return; await fetchEm
 
 function renderHeatmap() {
   const container = document.getElementById('heatmap'); if (!container) return;
-  const entries = state.logEntries || [];
-  const logMap = {};
-  entries.forEach(e => { if (e.date) logMap[e.date] = (logMap[e.date] || 0) + 1; });
+  const user = auth.currentUser; if (!user) return;
+  const targetUid = (myRole === 'host' && viewingUserId) ? viewingUserId : user.uid;
 
-  let html = '';
-  const now = new Date();
-  for (let i = 83; i >= 0; i--) {
-    const d = new Date();
-    d.setDate(now.getDate() - i);
-    const dateStr = d.toISOString().split('T')[0];
-    const count = logMap[dateStr] || 0;
-    const level = Math.min(count, 4); // max level 4
-    html += `<div class="heatmap-cell" style="opacity: ${0.1 + level * 0.22}; background: var(--teal);" title="${dateStr}: ${count} sessions"></div>`;
-  }
-  container.innerHTML = html;
+  // Fetch all logs to build heatmap map
+  db.collection('users').doc(targetUid).collection('logs').get().then(snap => {
+    const logMap = {};
+    snap.docs.forEach(doc => {
+      const e = doc.data();
+      if (e.date) logMap[e.date] = (logMap[e.date] || 0) + 1;
+    });
+
+    let html = '';
+    const now = new Date();
+    for (let i = 83; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(now.getDate() - i);
+      const dateStr = d.toISOString().split('T')[0];
+      const count = logMap[dateStr] || 0;
+      const level = Math.min(count, 4);
+      html += `<div class="heatmap-cell" style="opacity: ${0.1 + level * 0.22}; background: var(--teal);" title="${dateStr}: ${count} sessions"></div>`;
+    }
+    container.innerHTML = html;
+  });
 }
 
 function renderSchedule() {
@@ -716,30 +784,6 @@ function renderLeaderboard() {
   `).join('');
 }
 
-function renderRecentLogs() {
-  // Can be used to show a summary on dashboard
-}
-
-async function addLogEntry() {
-  const date = document.getElementById('log-date')?.value;
-  const week = document.getElementById('log-week')?.value;
-  const topic = document.getElementById('log-topic')?.value;
-  const hours = parseFloat(document.getElementById('log-hours')?.value || 0);
-  const learned = document.getElementById('log-learned')?.value;
-  
-  if (!date || !topic || !hours) return alert('Please fill required fields (Date, Topic, Hours)');
-  
-  const entry = { date, week, topic, hours, learned, timestamp: Date.now() };
-  if (!state.logEntries) state.logEntries = [];
-  state.logEntries.unshift(entry);
-  
-  await saveState();
-  toggleLogForm();
-  renderLogEntries();
-  updateKPIs();
-  showToast("Session Logged!");
-}
-
 function handleGlobalSearch(q) {
   const resultsDiv = document.getElementById('search-results');
   if (!q || q.length < 2) { if (resultsDiv) resultsDiv.style.display = 'none'; return; }
@@ -781,16 +825,6 @@ function showTab(page, tab, btn) {
   }
 }
 
-function submitWeeklyReview() {
-  const w = state.selectedReviewWeek || 1;
-  if (!state.weekReviews) state.weekReviews = {};
-  // In a real app, this would freeze the review
-  state.weekReviews[w] = { ...state.weekReviews[w], status: 'Submitted' };
-  saveState();
-  renderWeekly();
-  showToast("Review submitted!");
-}
-
 let hostEditMode = false;
 function toggleHostEditMode() {
   hostEditMode = !hostEditMode;
@@ -830,29 +864,32 @@ async function renderWeekly() {
          onclick="selectReviewWeek(${i+1})">WK ${i+1}</div>
   `).join('');
 
-  // Fetch total hours for this week from logs
+  // Listen to logs for this week in real-time
   const user = auth.currentUser; if (!user) return;
   const targetUid = (myRole === 'host' && viewingUserId) ? viewingUserId : user.uid;
   
-  const logsSnap = await db.collection('users').doc(targetUid).collection('logs')
-    .where('week', '==', w).get();
+  if (window.weeklyLogsUnsub) window.weeklyLogsUnsub();
   
-  const weekLogs = logsSnap.docs.map(d => d.data());
-  const weekHours = weekLogs.reduce((sum, entry) => sum + (entry.hours || 0), 0);
-  
-  const logsSummary = document.getElementById('weekly-logs-summary');
-  if (logsSummary) {
-    if (weekLogs.length === 0) {
-      logsSummary.innerHTML = '<span style="font-size:12px; color:var(--text3);">No daily logs found for this week.</span>';
-    } else {
-      logsSummary.innerHTML = weekLogs.map(l => `
-        <span class="tag" style="background:var(--navy3); border:1px solid var(--border);">${l.topic} (${l.hours}h)</span>
-      `).join('');
-    }
-  }
+  window.weeklyLogsUnsub = db.collection('users').doc(targetUid).collection('logs')
+    .where('week', '==', w)
+    .onSnapshot(snap => {
+      const weekLogs = snap.docs.map(d => d.data());
+      const weekHours = weekLogs.reduce((sum, entry) => sum + (entry.hours || 0), 0);
+      
+      const logsSummary = document.getElementById('weekly-logs-summary');
+      if (logsSummary) {
+        if (weekLogs.length === 0) {
+          logsSummary.innerHTML = '<span style="font-size:12px; color:var(--text3);">No daily logs found for this week.</span>';
+        } else {
+          logsSummary.innerHTML = weekLogs.map(l => `
+            <span class="tag" style="background:var(--navy3); border:1px solid var(--border);">${l.topic} (${l.hours}h)</span>
+          `).join('');
+        }
+      }
 
-  const hoursDisplay = document.getElementById('review-hours-display');
-  if (hoursDisplay) hoursDisplay.textContent = weekHours.toFixed(1);
+      const hoursDisplay = document.getElementById('review-hours-display');
+      if (hoursDisplay) hoursDisplay.textContent = weekHours.toFixed(1);
+    });
 
   const statusBadge = document.getElementById('review-status-badge');
   if (statusBadge) {
