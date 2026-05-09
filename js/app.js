@@ -216,9 +216,27 @@ function showPage(id, btn) {
   const renderers = {
     dashboard: renderDashboard, roadmap: renderRoadmap, skills: renderSkills,
     projects: renderProjects, weekly: renderWeekly, resources: renderResources,
-    daily: renderLogEntries, 'admin-users': renderAdminUsers, 'admin-content': renderAdminContent
+    daily: renderLogEntries, 'admin-users': renderAdminUsers, 
+    'admin-content': renderAdminContent, profile: renderProfile
   };
   if (renderers[id]) renderers[id]();
+}
+
+function renderProfile() {
+  const bio = document.getElementById('profile-bio');
+  const dept = document.getElementById('profile-dept');
+  const join = document.getElementById('profile-join');
+  if (bio) bio.value = state.bio || '';
+  if (dept) dept.value = state.department || '';
+  if (join) join.value = state.joiningDate || '';
+  updateUserUI(); // Update avatar/name on profile page
+}
+
+async function saveProfile() {
+  state.bio = document.getElementById('profile-bio')?.value;
+  state.department = document.getElementById('profile-dept')?.value;
+  state.joiningDate = document.getElementById('profile-join')?.value;
+  await saveState();
 }
 
 function renderAdminContent() {
@@ -490,6 +508,17 @@ async function saveLogEntry() {
     createdAt: firebase.firestore.FieldValue.serverTimestamp()
   };
   
+  // Streak logic
+  let newStreak = state.streak || 0;
+  const lastDate = state.lastLogDate;
+  const today = new Date().toISOString().split('T')[0];
+  if (lastDate !== today) {
+    const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
+    const yStr = yesterday.toISOString().split('T')[0];
+    if (lastDate === yStr) newStreak++;
+    else newStreak = 1;
+  }
+
   try {
     const batch = db.batch();
     const logRef = db.collection('users').doc(targetUid).collection('logs').doc();
@@ -498,7 +527,8 @@ async function saveLogEntry() {
     const userRef = db.collection('users').doc(targetUid);
     batch.set(userRef, { 
       totalHours: firebase.firestore.FieldValue.increment(hours),
-      lastLogDate: entry.date
+      lastLogDate: today,
+      streak: newStreak
     }, { merge: true });
     
     await batch.commit();
