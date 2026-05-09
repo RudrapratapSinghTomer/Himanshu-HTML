@@ -1339,6 +1339,96 @@
       font-weight: 600;
     }
 
+    /* ── RESOURCES ── */
+    .resource-filter {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 24px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+    }
+    .filter-btn {
+      padding: 8px 16px;
+      border-radius: 50px;
+      background: var(--navy3);
+      border: 1px solid var(--border);
+      color: var(--text3);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+    .filter-btn:hover {
+      background: var(--card2);
+      color: var(--text);
+    }
+    .filter-btn.active {
+      background: var(--blue);
+      border-color: var(--blue);
+      color: #fff;
+    }
+    .resource-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+    }
+    .resource-item {
+      background: var(--navy2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      display: flex;
+      gap: 16px;
+      transition: all 0.3s;
+    }
+    .resource-item:hover {
+      border-color: var(--blue);
+      transform: translateY(-4px);
+      box-shadow: 0 10px 30px rgba(59, 130, 246, 0.1);
+    }
+    .resource-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+    .resource-title {
+      font-weight: 700;
+      font-size: 16px;
+      margin-bottom: 4px;
+    }
+    .resource-meta {
+      font-size: 12px;
+      color: var(--text3);
+      margin-bottom: 8px;
+    }
+    .resource-tags {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .resource-tag {
+      font-size: 10px;
+      padding: 2px 8px;
+      background: var(--navy3);
+      color: var(--text3);
+      border-radius: 4px;
+    }
+    .resource-priority {
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      padding: 4px 8px;
+      border-radius: 6px;
+    }
+    .priority-must { background: rgba(239, 68, 68, 0.1); color: var(--red); }
+    .priority-high { background: rgba(59, 130, 246, 0.1); color: var(--blue2); }
+    .priority-nice { background: rgba(16, 185, 129, 0.1); color: var(--green); }
+
     #main-content {
       opacity: 0;
       pointer-events: none;
@@ -1549,7 +1639,7 @@
             <path
               d="M13.5 2C13.5 2 14.5 6.5 12 9c-2.5 2.5-7 2-7 2s1 4 4 5.5S15 16 15 16s.5 3 -2 5c0 0 7-1 8-7s-3-8-3-8 1.5 2 1 4c-1-2-2-5-5.5-8z" />
           </svg>
-          <span id="streak-count">0</span>d
+          <span id="streak-count-sidebar">0</span>d
         </div>
         <button onclick="logout()"
           style="position:absolute; right:10px; top:-20px; background:var(--navy3); border:1px solid var(--border); color:var(--text3); border-radius:4px; padding:2px 6px; font-size:10px; cursor:pointer;">Logout</button>
@@ -1570,7 +1660,7 @@
             Focus Mode
           </button>
           <div class="streak-badge">
-            <span>🔥</span> <span id="streak-count">0</span>
+            <span>🔥</span> <span id="streak-count-topbar">0</span>
           </div>
           <button class="btn btn-primary" onclick="toggleLogForm()">+ Log Session</button>
         </div>
@@ -1581,7 +1671,7 @@
         <div class="welcome-banner">
           <div>
             <h1 class="welcome-title">Welcome back, Arjun 👋</h1>
-            <p class="welcome-sub">You've completed 75% of your daily goal. Keep the momentum!</p>
+            <p class="welcome-sub">Today is <span id="today-date" style="color:var(--blue2); font-weight:600;"></span> · You've completed 75% of your daily goal. Keep the momentum!</p>
           </div>
           <div class="progress-ring-wrap">
             <div class="progress-text">
@@ -1918,15 +2008,25 @@
     // ── AUTH LOGIC ───────────────────────────────────────────────────────────────
     let isSignUp = false;
     let myRole = 'user'; // Track real logged-in role
+    let state = {};
+    let me = {};
+    let allUsers = [];
+    let viewingUserId = null;
 
     function toggleAuthMode() {
       isSignUp = !isSignUp;
-      document.getElementById('auth-submit').textContent = isSignUp ? 'Sign Up' : 'Sign In';
+      const submitBtn = document.getElementById('auth-submit');
+      if (submitBtn) submitBtn.textContent = isSignUp ? 'Sign Up' : 'Sign In';
+      
       const signupFields = document.getElementById('signup-fields');
       if (signupFields) signupFields.style.display = isSignUp ? 'block' : 'none';
-      document.getElementById('auth-toggle').innerHTML = isSignUp ?
-        'Already have an account? <span onclick="toggleAuthMode()" style="color:var(--blue2);cursor:pointer;">Sign In</span>' :
-        'Don\'t have an account? <span onclick="toggleAuthMode()" style="color:var(--blue2);cursor:pointer;">Sign Up</span>';
+      
+      const toggleEl = document.getElementById('auth-toggle');
+      if (toggleEl) {
+        toggleEl.innerHTML = isSignUp ?
+          'Already have an account? <span onclick="toggleAuthMode()" style="color:var(--blue2);cursor:pointer;">Sign In</span>' :
+          'Don\'t have an account? <span onclick="toggleAuthMode()" style="color:var(--blue2);cursor:pointer;">Sign Up</span>';
+      }
     }
 
     async function handleAuth() {
@@ -1948,7 +2048,7 @@
         if (isSignUp) {
           const res = await auth.createUserWithEmailAndPassword(email, password);
           // Set initial profile for new user
-          const newState = { ...defaultState, firstName: fname, lastName: lname, role: 'user' };
+          const newState = { ...defaultState, firstName: fname, lastName: lname, role: 'user', email: email };
           await db.collection('users').doc(res.user.uid).set(newState);
         } else {
           await auth.signInWithEmailAndPassword(email, password);
@@ -1971,7 +2071,12 @@
           const data = doc.data();
           myRole = data.role || 'user';
           // Admin override for testing
-          if (user.email === 'rudra@bestpeers.com') myRole = 'host';
+          if (user.email === 'rudra@bestpeers.com') {
+            myRole = 'host';
+            if (data.role !== 'host') {
+              db.collection('users').doc(user.uid).update({ role: 'host' }).catch(console.error);
+            }
+          }
         }
         loadFromFirestore(user.uid);
       } else {
@@ -2189,15 +2294,28 @@
         if (!state.projectTasks[p.id]) state.projectTasks[p.id] = p.tasks.map(() => 0);
       });
 
-      document.getElementById('today-date').textContent = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
-      document.getElementById('log-date').value = new Date().toISOString().split('T')[0];
+      const todayDateEl = document.getElementById('today-date');
+      if (todayDateEl) {
+        todayDateEl.textContent = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+      }
+      
+      const logDateEl = document.getElementById('log-date');
+      if (logDateEl) {
+        logDateEl.value = new Date().toISOString().split('T')[0];
+      }
 
       const logWeekSel = document.getElementById('log-week');
       if (logWeekSel) {
         logWeekSel.innerHTML = '<option value="">Select week...</option>';
-        for (let i = 1; i <= 20; i++) { const o = document.createElement('option'); o.value = i; o.textContent = `Week ${i}`; logWeekSel.appendChild(o); }
+        for (let i = 1; i <= 20; i++) {
+          const o = document.createElement('option');
+          o.value = i;
+          o.textContent = `Week ${i}`;
+          logWeekSel.appendChild(o);
+        }
       }
       renderDashboard();
+      fetchEmployees(); // Populate allUsers for leaderboard
       fixLinks();
     }
 
@@ -2205,12 +2323,28 @@
 
     // ── NAVIGATION ───────────────────────────────────────────────────────────────
     function showPage(id, btn) {
+      const pageEl = document.getElementById('page-' + id);
+      if (!pageEl) return;
+
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
       document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-      document.getElementById('page-' + id).classList.add('active');
+      
+      pageEl.classList.add('active');
       if (btn) btn.classList.add('active');
-      const titles = { dashboard: 'Dashboard', roadmap: 'Roadmap', daily: 'Daily Log', skills: 'Skills Tracker', projects: 'Projects', weekly: 'Weekly Review', resources: 'Resources' };
-      document.getElementById('page-title').textContent = titles[id] || id;
+      
+      const titles = { 
+        dashboard: 'Dashboard', 
+        roadmap: 'Roadmap', 
+        daily: 'Daily Log', 
+        skills: 'Skills Tracker', 
+        projects: 'Projects', 
+        weekly: 'Weekly Review', 
+        resources: 'Resources',
+        'admin-users': 'User Management'
+      };
+      
+      const titleEl = document.getElementById('page-title');
+      if (titleEl) titleEl.textContent = titles[id] || id;
       if (id === 'dashboard') renderDashboard();
       if (id === 'roadmap') renderRoadmap();
       if (id === 'skills') renderSkills();
@@ -2218,6 +2352,7 @@
       if (id === 'weekly') renderWeekly();
       if (id === 'resources') renderResources();
       if (id === 'daily') renderLogEntries();
+      if (id === 'admin-users') renderAdminUsers();
       fixLinks();
     }
 
@@ -2237,21 +2372,33 @@
 
     // ── LOG ENTRY ────────────────────────────────────────────────────────────────
     function addLogEntry() {
+      const dateEl = document.getElementById('log-date');
+      const weekEl = document.getElementById('log-week');
+      const topicEl = document.getElementById('log-topic');
+      const toolEl = document.getElementById('log-tool');
+      const hoursEl = document.getElementById('log-hours');
+      const learnedEl = document.getElementById('log-learned');
+      const winsEl = document.getElementById('log-wins');
+      const handsonEl = document.getElementById('log-handson');
+      const blockersEl = document.getElementById('log-blockers');
+      const tomorrowEl = document.getElementById('log-tomorrow');
+
+      if (!topicEl || !topicEl.value.trim()) { alert('Please add a topic'); return; }
+
       const entry = {
-        date: document.getElementById('log-date').value || new Date().toISOString().split('T')[0],
-        week: document.getElementById('log-week').value,
-        topic: document.getElementById('log-topic').value.trim(),
-        tool: document.getElementById('log-tool').value,
-        hours: parseFloat(document.getElementById('log-hours').value) || 0,
-        learned: document.getElementById('log-learned').value.trim(),
-        wins: document.getElementById('log-wins').value.trim(),
-        handson: document.getElementById('log-handson').value.trim(),
-        blockers: document.getElementById('log-blockers').value.trim(),
-        tomorrow: document.getElementById('log-tomorrow').value.trim(),
+        date: (dateEl && dateEl.value) || new Date().toISOString().split('T')[0],
+        week: (weekEl && weekEl.value) || '',
+        topic: topicEl.value.trim(),
+        tool: (toolEl && toolEl.value) || 'General',
+        hours: (hoursEl && parseFloat(hoursEl.value)) || 0,
+        learned: (learnedEl && learnedEl.value.trim()) || '',
+        wins: (winsEl && winsEl.value.trim()) || '',
+        handson: (handsonEl && handsonEl.value.trim()) || '',
+        blockers: (blockersEl && blockersEl.value.trim()) || '',
+        tomorrow: (tomorrowEl && tomorrowEl.value.trim()) || '',
         mood: state.selectedMood || 3,
         id: Date.now(),
       };
-      if (!entry.topic) { alert('Please add a topic'); return; }
       if (!state.logEntries) state.logEntries = [];
       if (!state.weekReviews) state.weekReviews = {};
       state.logEntries.unshift(entry);
@@ -2263,28 +2410,31 @@
       renderLogEntries();
       updateKPIs();
       // Clear form
-      ['log-topic', 'log-learned', 'log-wins', 'log-handson', 'log-blockers', 'log-tomorrow'].forEach(id => { 
+      ['log-topic', 'log-learned', 'log-wins', 'log-handson', 'log-blockers', 'log-tomorrow', 'log-hours'].forEach(id => { 
         const el = document.getElementById(id);
         if (el) el.value = ''; 
       });
-      document.getElementById('log-hours').value = '';
       if (typeof toggleLogForm === 'function') toggleLogForm();
       showToast("Session logged successfully!");
     }
 
     function renderLogEntries() {
       const container = document.getElementById('log-entries-list');
-      const searchTerm = document.getElementById('log-search').value.toLowerCase();
-      const toolFilter = document.getElementById('log-filter-tool').value;
+      if (!container) return;
+      const searchEl = document.getElementById('log-search');
+      const filterEl = document.getElementById('log-filter-tool');
       
-      let filtered = state.logEntries.filter(e => {
-        const matchesSearch = e.topic.toLowerCase().includes(searchTerm) || e.learned.toLowerCase().includes(searchTerm);
+      const searchTerm = (searchEl && searchEl.value.toLowerCase()) || '';
+      const toolFilter = (filterEl && filterEl.value) || '';
+      
+      let filtered = (state.logEntries || []).filter(e => {
+        const matchesSearch = (e.topic || '').toLowerCase().includes(searchTerm) || (e.learned || '').toLowerCase().includes(searchTerm);
         const matchesTool = !toolFilter || e.tool === toolFilter;
         return matchesSearch && matchesTool;
       });
 
       const tag = document.getElementById('log-count-tag');
-      tag.textContent = `${filtered.length} entries`;
+      if (tag) tag.textContent = `${filtered.length} entries`;
 
       if (!filtered.length) {
         container.innerHTML = '<div style="color:var(--text3);font-size:13px;text-align:center;padding:64px;">No matching entries found.</div>';
@@ -2346,11 +2496,11 @@
 
     function updateKPIs() {
       const activePhases = getActivePhases();
-      const totalWeeks = [].concat(...activePhases.map(p => p.weeks)).length;
       const associatedProjIds = PROJECTS.filter(p => activePhases.some(ph => ph.id === p.phase)).map(p => p.id);
       
       const totalHours = (state.logEntries || []).reduce((s, e) => s + (e.hours || 0), 0);
-      document.getElementById('kpi-hours').textContent = totalHours.toFixed(1);
+      const kpiHoursEl = document.getElementById('kpi-hours');
+      if (kpiHoursEl) kpiHoursEl.textContent = totalHours.toFixed(1);
 
       const dates = [...new Set((state.logEntries || []).map(e => e.date))].sort();
       let streak = 0;
@@ -2363,20 +2513,29 @@
           else break;
         }
       }
-      document.getElementById('kpi-streak').textContent = streak;
-      document.getElementById('streak-count').textContent = streak;
+      const kpiStreakEl = document.getElementById('kpi-streak');
+      if (kpiStreakEl) kpiStreakEl.textContent = streak;
+      
+      const streakSidebarEl = document.getElementById('streak-count-sidebar');
+      if (streakSidebarEl) streakSidebarEl.textContent = streak;
+      
+      const streakTopbarEl = document.getElementById('streak-count-topbar');
+      if (streakTopbarEl) streakTopbarEl.textContent = streak;
 
       const doneProjs = associatedProjIds.filter(id => state.projectStatus[id] === 'Completed').length;
-      document.getElementById('kpi-projects').textContent = doneProjs;
+      const kpiProjectsEl = document.getElementById('kpi-projects');
+      if (kpiProjectsEl) kpiProjectsEl.textContent = doneProjs;
 
       const skillsAt3 = SKILLS.filter(s => (state.skillNow[s.key] || 0) >= 3).length;
-      document.getElementById('kpi-skills').textContent = skillsAt3;
+      const kpiSkillsEl = document.getElementById('kpi-skills');
+      if (kpiSkillsEl) kpiSkillsEl.textContent = skillsAt3;
 
       const allRoadmapWeeks = [].concat(...activePhases.map(p => p.weeks));
       const doneWeeks = allRoadmapWeeks.filter(w => state.weekStatus[w] === 'done').length;
       
       const pct = allRoadmapWeeks.length > 0 ? Math.round((doneWeeks / allRoadmapWeeks.length) * 100) : 0;
-      document.getElementById('overall-pct').textContent = pct + '%';
+      const overallPctEl = document.getElementById('overall-pct');
+      if (overallPctEl) overallPctEl.textContent = pct + '%';
 
       // Update Milestone Circle
       const circle = document.getElementById('milestone-progress-bar');
@@ -2393,6 +2552,7 @@
 
     function renderPhaseProgressBars() {
       const el = document.getElementById('phase-progress-bars');
+      if (!el) return;
       const phases = getActivePhases();
       el.innerHTML = phases.map(p => {
         const done = p.weeks.filter(w => state.weekStatus[w] === 'done').length;
@@ -2413,7 +2573,8 @@
 
     function renderHeatmap() {
       const el = document.getElementById('heatmap');
-      const dates = state.logEntries.map(e => e.date);
+      if (!el) return;
+      const dates = (state.logEntries || []).map(e => e.date);
       const today = new Date();
       const rows = 7; const cols = 12;
       let html = '';
@@ -2439,7 +2600,8 @@
 
     function renderRecentLogs() {
       const el = document.getElementById('recent-logs-dash');
-      if (!state.logEntries.length) {
+      if (!el) return;
+      if (!(state.logEntries && state.logEntries.length)) {
         el.innerHTML = '<div style="color:var(--text3);font-size:13px;padding:20px 0;text-align:center;">No sessions logged yet. Start your journey!</div>';
         return;
       }
@@ -2559,14 +2721,14 @@
       const userSub = document.getElementById('roadmap-user-sub');
       
       if (isHost) {
-        adminSection.style.display = 'block';
-        userTitle.textContent = viewingUserId ? "Reviewing Progress" : "Your Learning Path";
-        userSub.textContent = viewingUserId ? "Detailed breakdown of the selected employee's roadmap" : "Phase-wise progression and weekly goals";
+        if (adminSection) adminSection.style.display = 'block';
+        if (userTitle) userTitle.textContent = viewingUserId ? "Reviewing Progress" : "Your Learning Path";
+        if (userSub) userSub.textContent = viewingUserId ? "Detailed breakdown of the selected employee's roadmap" : "Phase-wise progression and weekly goals";
         await fetchEmployees();
       } else {
-        adminSection.style.display = 'none';
-        userTitle.textContent = "Your Learning Path";
-        userSub.textContent = "Phase-wise progression and weekly goals";
+        if (adminSection) adminSection.style.display = 'none';
+        if (userTitle) userTitle.textContent = "Your Learning Path";
+        if (userSub) userSub.textContent = "Phase-wise progression and weekly goals";
       }
 
       const activeRoadmap = state.assignedRoadmap || 'Data Analytics';
@@ -2654,7 +2816,7 @@
       const countTag = document.getElementById('employee-count-tag');
       
       allUsers = snapDocs;
-      countTag.textContent = `${allUsers.length} Employees`;
+      if (countTag) countTag.textContent = `${allUsers.length} Employees`;
 
       // Update User Select
       const currentSelected = userSelect.value;
@@ -3105,15 +3267,16 @@
       const userCount = document.getElementById('admin-user-count');
       const reqCount = document.getElementById('pending-request-count');
       
-      userCount.textContent = `${allUsers.length} Users`;
+      if (userCount) userCount.textContent = `${allUsers.length} Users`;
       
       // Render Users
-      userList.innerHTML = allUsers.map(u => `
+      if (userList) {
+        userList.innerHTML = allUsers.map(u => `
         <div class="card" style="padding:16px; border:1px solid var(--border); display:flex; align-items:center; gap:16px; background:var(--navy3);">
-          <div class="avatar" style="width:40px;height:40px;font-size:14px;">${(u.firstName[0]||'')+(u.lastName[0]||'')}</div>
+          <div class="avatar" style="width:40px;height:40px;font-size:14px;">${((u.firstName && u.firstName[0]) || '') + ((u.lastName && u.lastName[0]) || '')}</div>
           <div style="flex:1;">
             <div style="font-weight:600;">${u.firstName} ${u.lastName}</div>
-            <div style="font-size:12px;color:var(--text3);">${u.email || 'No email'} • Role: ${u.role || 'user'}</div>
+            <div style="font-size:12px;color:var(--text3);">${u.email || u.id || 'No email'} • Role: ${u.role || 'user'}</div>
           </div>
           <button class="btn" style="padding:6px 12px;font-size:12px;" onclick="promptEditUser('${u.id}')">Edit Profile</button>
         </div>
@@ -3129,11 +3292,12 @@
         });
       });
       
-      reqCount.textContent = requests.length;
-      if (requests.length === 0) {
-        reqList.innerHTML = '<div style="text-align:center;color:var(--text3);font-size:13px;padding:20px;">No pending requests</div>';
-      } else {
-        reqList.innerHTML = requests.map(r => `
+      if (reqCount) reqCount.textContent = requests.length;
+      if (reqList) {
+        if (requests.length === 0) {
+          reqList.innerHTML = '<div style="text-align:center;color:var(--text3);font-size:13px;padding:20px;">No pending requests</div>';
+        } else {
+          reqList.innerHTML = requests.map(r => `
           <div class="card" style="padding:14px; border:1px solid var(--orange); background:rgba(249,115,22,0.05);">
             <div style="font-weight:600;font-size:14px;">${r.name}</div>
             <div style="font-size:12px;color:var(--text2);margin:4px 0;">Requested review for Week ${r.week}</div>
@@ -3211,6 +3375,21 @@
       await saveState();
       showToast("Review request sent to Host!");
       renderRoadmap();
+    }
+
+    function showToast(msg = "Progress saved!") {
+      const toast = document.getElementById('save-toast');
+      const text = document.getElementById('save-toast-text');
+      if (toast && text) {
+        text.textContent = msg;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 3000);
+      }
+    }
+
+    function setResourceFilter(filter) {
+      state.activeResourceFilter = filter;
+      renderResources();
     }
 
     // ── INITIAL RENDER ────────────────────────────────────────────────────────────
