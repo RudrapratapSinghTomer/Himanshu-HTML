@@ -817,85 +817,93 @@ function toggleHostEditMode() {
   if (actionBtn) actionBtn.style.display = hostEditMode ? 'none' : 'block';
 }
 
-async function saveWeekReview() {
+async function renderWeekly() {
+  const w = state.selectedReviewWeek || 1; 
+  const r = (state.weekReviews || {})[w] || { status: 'Draft' };
+  
+  const weekLabel = document.getElementById('review-week-label');
+  if (weekLabel) weekLabel.textContent = w;
+
+  const grid = document.getElementById('review-week-grid');
+  if (grid) grid.innerHTML = Array.from({length:20}, (_, i) => `
+    <div class="review-week-btn ${i+1===w?'active':''} ${state.weekReviews?.[i+1]?.status === 'Submitted' ? 'submitted' : ''}" 
+         onclick="selectReviewWeek(${i+1})">WK ${i+1}</div>
+  `).join('');
+
+  // Fetch total hours for this week from logs
+  const user = auth.currentUser; if (!user) return;
+  const targetUid = (myRole === 'host' && viewingUserId) ? viewingUserId : user.uid;
+  
+  const logsSnap = await db.collection('users').doc(targetUid).collection('logs')
+    .where('week', '==', w).get();
+  
+  const weekLogs = logsSnap.docs.map(d => d.data());
+  const weekHours = weekLogs.reduce((sum, entry) => sum + (entry.hours || 0), 0);
+  
+  const logsSummary = document.getElementById('weekly-logs-summary');
+  if (logsSummary) {
+    if (weekLogs.length === 0) {
+      logsSummary.innerHTML = '<span style="font-size:12px; color:var(--text3);">No daily logs found for this week.</span>';
+    } else {
+      logsSummary.innerHTML = weekLogs.map(l => `
+        <span class="tag" style="background:var(--navy3); border:1px solid var(--border);">${l.topic} (${l.hours}h)</span>
+      `).join('');
+    }
+  }
+
+  const hoursDisplay = document.getElementById('review-hours-display');
+  if (hoursDisplay) hoursDisplay.textContent = weekHours.toFixed(1);
+
+  const statusBadge = document.getElementById('review-status-badge');
+  if (statusBadge) {
+    statusBadge.textContent = r.status || 'Draft';
+    statusBadge.className = 'badge ' + (r.status === 'Submitted' ? 'success' : 'warning');
+  }
+
+  const isSubmitted = r.status === 'Submitted';
+  const displayEls = ['topics', 'handson', 'win', 'blocker', 'focus'];
+  
+  displayEls.forEach(f => {
+    const d = document.getElementById('display-' + f);
+    const e = document.getElementById('edit-' + f);
+    if (d && e) {
+      if (isSubmitted) {
+        d.style.display = 'block';
+        e.style.display = 'none';
+        d.textContent = r[f] || 'No entry.';
+      } else {
+        d.style.display = 'none';
+        e.style.display = 'block';
+        e.value = r[f] || '';
+        e.placeholder = `Describe your ${f} for week ${w}...`;
+      }
+    }
+  });
+
+  const actionBtn = document.getElementById('review-action-btn');
+  if (actionBtn) {
+    actionBtn.style.display = isSubmitted ? 'none' : 'block';
+    actionBtn.textContent = 'Submit Review ✓';
+  }
+}
+
+async function submitWeeklyReview() {
   const w = state.selectedReviewWeek || 1;
   if (!state.weekReviews) state.weekReviews = {};
   const r = state.weekReviews[w] || {};
-  
+
   ['topics', 'handson', 'win', 'blocker', 'focus'].forEach(f => {
     const val = document.getElementById('edit-' + f)?.value;
     r[f] = val;
   });
+
+  r.status = 'Submitted';
+  r.submittedAt = new Date().toISOString();
   
   state.weekReviews[w] = r;
   await saveState();
-  toggleHostEditMode();
   renderWeekly();
-}
-
-function setMood(m, btn) {
-  state.selectedMood = m;
-  document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-}
-
-// ── UTILS ────────────────────────────────────────────────────────────────────
-function fixLinks() { document.querySelectorAll('a').forEach(a => { a.target = "_blank"; a.rel = "noopener"; }); }
-function showToast(m, e) { const t = document.getElementById('save-toast'); if (t) { t.querySelector('span').textContent = m; t.style.background = e?'var(--red)':'var(--navy2)'; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 3000); } }
-function getActivePhases() { return ROADMAPS_DB[state.assignedRoadmap || 'Data Analytics'] || ROADMAPS_DB['Data Analytics']; }
-function toggleFocusMode() { document.body.classList.toggle('focus-mode'); }
-function toggleLogForm() { const el = document.getElementById('log-form-container'); if (el) el.style.display = el.style.display==='none'?'block':'none'; }
-function handleAdminAssign() { 
-  const uid = document.getElementById('admin-user-select')?.value;
-  const roadmap = document.getElementById('admin-roadmap-select')?.value;
-  if (!uid || !roadmap) return alert('Select user and roadmap');
-  
-  db.collection('users').doc(uid).update({ assignedRoadmap: roadmap })
-    .then(() => { showToast("Roadmap assigned!"); fetchEmployees(); })
-    .catch(e => alert(e.message));
-}
-async function saveLogEntry() {
-  const week = document.getElementById('log-week')?.value;
-  const tool = document.getElementById('log-tool')?.value;
-  const topic = document.getElementById('log-topic')?.value;
-  const hours = parseFloat(document.getElementById('log-hours')?.value || 0);
-  const learned = document.getElementById('log-learned')?.value;
-  
-  if (!topic || !learned) { showToast("Please fill all fields", true); return; }
-  
-  const entry = {
-    date: new Date().toISOString().split('T')[0],
-    week: parseInt(week),
-    tool,
-    topic,
-    hours,
-    learned,
-    mood: state.selectedMood || 3
-  };
-  
-  if (!state.logEntries) state.logEntries = [];
-  state.logEntries.unshift(entry);
-  
-  // Update streak logic
-  const lastDate = state.lastLogDate;
-  const today = new Date().toISOString().split('T')[0];
-  if (lastDate !== today) {
-    const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
-    const yStr = yesterday.toISOString().split('T')[0];
-    if (lastDate === yStr) state.streak = (state.streak || 0) + 1;
-    else state.streak = 1;
-    state.lastLogDate = today;
-  }
-
-  await saveState();
-  toggleLogForm();
-  renderLogEntries();
-  renderDashboard();
-  showToast("Session logged!");
-  
-  // Clear form
-  document.getElementById('log-topic').value = '';
-  document.getElementById('log-learned').value = '';
+  showToast("Weekly review submitted!");
 }
 
 function handleSignOut() {
