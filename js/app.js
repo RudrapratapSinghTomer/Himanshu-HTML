@@ -410,6 +410,79 @@ function toggleLogForm() { const el = document.getElementById('log-form-containe
 function showToast(msg, isErr) { alert(msg); }
 function fixLinks() {}
 function renderWeekly() {}
-function handleGlobalSearch() {}
+function handleGlobalSearch(query) {
+  const container = document.getElementById('global-search-results');
+  if (!container) return;
+
+  if (!query || query.trim().length < 2) {
+    container.classList.remove('active');
+    container.innerHTML = '';
+    return;
+  }
+
+  const q = query.toLowerCase();
+  const results = [];
+
+  // 1. Search Roadmap (WEEKS_DB)
+  WEEKS_DB.forEach(w => {
+    if (w.title.toLowerCase().includes(q) || (w.goals && w.goals.toLowerCase().includes(q))) {
+      results.push({
+        type: 'Roadmap',
+        title: `Week ${w.w}: ${w.title}`,
+        page: 'roadmap',
+        icon: '📚'
+      });
+    }
+  });
+
+  // 2. Search Projects (PROJECTS_DB)
+  PROJECTS_DB.forEach(p => {
+    if (p.title.toLowerCase().includes(q) || (p.tasks && p.tasks.some(t => t.toLowerCase().includes(q)))) {
+      results.push({
+        type: 'Project',
+        title: p.title,
+        page: 'projects',
+        icon: '🚀'
+      });
+    }
+  });
+
+  // 3. Search Resources (RESOURCES_DB)
+  RESOURCES_DB.forEach(r => {
+    if (r.name.toLowerCase().includes(q) || (r.domain && r.domain.toLowerCase().includes(q))) {
+      results.push({
+        type: 'Resource',
+        title: r.name,
+        page: 'resources',
+        icon: '🔗'
+      });
+    }
+  });
+
+  if (results.length === 0) {
+    container.innerHTML = '<div class="no-results">No matches found for "' + query + '"</div>';
+  } else {
+    container.innerHTML = results.slice(0, 10).map(r => `
+      <div class="search-result-item" onclick="showPage('${r.page}', document.querySelector('.nav-item[onclick*=\\'${r.page}\\']')); document.getElementById('global-search-results').classList.remove('active');">
+        <div class="result-icon">${r.icon}</div>
+        <div class="result-content">
+          <div class="result-type">${r.type}</div>
+          <div class="result-title">${r.title}</div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  container.classList.add('active');
+}
+
+// Click outside to close search results
+document.addEventListener('click', (e) => {
+  const container = document.getElementById('global-search-results');
+  const searchWrap = document.querySelector('.global-search-wrap');
+  if (container && !searchWrap.contains(e.target)) {
+    container.classList.remove('active');
+  }
+});
 function toggleHostEditMode() {}
 function renderAdminContent() {}
