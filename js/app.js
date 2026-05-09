@@ -39,21 +39,70 @@ async function handleAuth() {
 
 function logout() { auth.signOut().then(() => window.location.reload()); }
 
+// ── REAL-TIME LISTENERS ──────────────────────────────────────────────────────
+let userUnsub = null;
+let allUsersUnsub = null;
+let configUnsub = null;
+
 auth.onAuthStateChanged(async (user) => {
+  if (userUnsub) userUnsub();
+  if (allUsersUnsub) allUsersUnsub();
+  if (configUnsub) configUnsub();
+
   if (user) {
     document.body.classList.add('auth');
-    try {
-      const doc = await db.collection('users').doc(user.uid).get();
+    
+    // 1. Listen to Self
+    userUnsub = db.collection('users').doc(user.uid).onSnapshot(doc => {
       if (doc.exists) {
         const data = doc.data();
         myRole = data.role || 'user';
+        state = { ...defaultState, ...data };
+        me = { ...state };
+        if (!viewingUserId) {
+          updateUserUI();
+          renderDashboard();
+        }
+      } else {
+        // New user initialization
+        db.collection('users').doc(user.uid).set({
+          ...defaultState,
+          email: user.email,
+          uid: user.uid,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
       }
-      await loadFromFirestore(user.uid);
-    } catch (e) { console.error("Auth init error:", e); initApp(); }
+    });
+
+    // 2. Listen to App Config (Roadmaps, etc.)
+    configUnsub = db.collection('config').onSnapshot(snap => {
+      snap.forEach(doc => {
+        if (doc.id === 'roadmaps') ROADMAPS_DB = doc.data();
+      });
+      renderRoadmap();
+    });
+
+    // 3. Listen to All Users (Host Only)
+    // We check role after first self-load
+    setTimeout(() => {
+      if (myRole === 'host') {
+        allUsersUnsub = db.collection('users').onSnapshot(snap => {
+          allUsers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+          updateKPIs();
+          if (document.getElementById('page-admin-users')?.classList.contains('active')) renderAdminUsers();
+          if (viewingUserId) {
+            const updated = allUsers.find(u => u.id === viewingUserId);
+            if (updated) { state = { ...defaultState, ...updated }; updateUserUI(); renderDashboard(); }
+          }
+        });
+      }
+    }, 1000);
+
+    initApp();
   } else {
     document.body.classList.remove('auth');
-    myRole = 'user'; state = { ...defaultState }; me = {};
-    updateUserUI(); initApp();
+    myRole = 'user'; state = { ...defaultState }; me = {}; allUsers = [];
+    updateUserUI();
   }
 });
 
@@ -81,20 +130,17 @@ function updateUserUI() {
   document.querySelectorAll('.host-only').forEach(el => el.style.display = (myRole === 'host') ? 'flex' : 'none');
 }
 
-async function loadFromFirestore(uid) {
-  try {
-    const doc = await db.collection('users').doc(uid).get();
-    if (doc.exists) state = { ...defaultState, ...doc.data() };
-  } catch (e) { console.error("Load Progress error:", e); }
-  finally { if (auth.currentUser && uid === auth.currentUser.uid) me = { ...state }; updateUserUI(); initApp(); }
-}
-
 async function saveState() {
   const user = auth.currentUser; if (!user) return;
   const targetUid = (myRole === 'host' && viewingUserId) ? viewingUserId : user.uid;
   try {
-    await db.collection('users').doc(targetUid).set(state, { merge: true });
-    showToast("Synced!");
+    // If we are editing ourselves, we update 'state'
+    // If we are host editing someone else, 'state' already holds that user's data
+    await db.collection('users').doc(targetUid).set({
+      ...state,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge: true });
+    showToast("Saved to Cloud");
   } catch (e) { showToast("Sync failed", true); }
 }
 
@@ -170,9 +216,38 @@ function showPage(id, btn) {
   const renderers = {
     dashboard: renderDashboard, roadmap: renderRoadmap, skills: renderSkills,
     projects: renderProjects, weekly: renderWeekly, resources: renderResources,
-    daily: renderLogEntries, 'admin-users': renderAdminUsers
+    daily: renderLogEntries, 'admin-users': renderAdminUsers, 'admin-content': renderAdminContent
   };
   if (renderers[id]) renderers[id]();
+}
+
+function renderAdminContent() {
+  if (myRole !== 'host') return;
+  
+  // Render Weeks
+  const weeksList = document.getElementById('admin-weeks-list');
+  if (weeksList) weeksList.innerHTML = WEEKS_DB.map(w => `
+    <div style="padding:12px; background:var(--navy3); border-radius:8px; border:1px solid var(--border);">
+      <div style="font-weight:700; font-size:12px; margin-bottom:4px;">Week ${w.w}</div>
+      <input type="text" value="${w.title}" onchange="updateDBItem('weeks', '${w.w}', 'title', this.value)" style="background:transparent; border:none; color:var(--text); font-size:14px; width:100%;">
+    </div>
+  `).join('');
+
+  // Render Projects
+  const projectsList = document.getElementById('admin-projects-list');
+  if (projectsList) projectsList.innerHTML = PROJECTS_DB.map(p => `
+    <div style="padding:12px; background:var(--navy3); border-radius:8px; border:1px solid var(--border);">
+      <div style="font-weight:700; font-size:12px; margin-bottom:4px;">PROJ ${p.num}</div>
+      <input type="text" value="${p.title}" onchange="updateDBItem('projects', '${p.id}', 'title', this.value)" style="background:transparent; border:none; color:var(--text); font-size:14px; width:100%;">
+    </div>
+  `).join('');
+}
+
+async function updateDBItem(collection, id, field, value) {
+  try {
+    await db.collection(collection).doc(id).update({ [field]: value });
+    showToast("Updated " + field);
+  } catch (e) { showToast("Failed to update", true); }
 }
 
 // ── RENDERING ────────────────────────────────────────────────────────────────
@@ -392,37 +467,92 @@ function renderResourceFilters() {
 
 function setResourceFilter(f) { state.activeResourceFilter = f; renderResources(); }
 
+async function saveLogEntry() {
+  const week = document.getElementById('log-week')?.value;
+  const tool = document.getElementById('log-tool')?.value;
+  const topic = document.getElementById('log-topic')?.value;
+  const hours = parseFloat(document.getElementById('log-hours')?.value || 0);
+  const learned = document.getElementById('log-learned')?.value;
+  
+  if (!topic || !learned) { showToast("Please fill all fields", true); return; }
+  
+  const user = auth.currentUser; if (!user) return;
+  const targetUid = (myRole === 'host' && viewingUserId) ? viewingUserId : user.uid;
+
+  const entry = {
+    date: new Date().toISOString().split('T')[0],
+    week: parseInt(week),
+    tool,
+    topic,
+    hours,
+    learned,
+    mood: state.selectedMood || 3,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  };
+  
+  try {
+    const batch = db.batch();
+    const logRef = db.collection('users').doc(targetUid).collection('logs').doc();
+    batch.set(logRef, entry);
+    
+    const userRef = db.collection('users').doc(targetUid);
+    batch.set(userRef, { 
+      totalHours: firebase.firestore.FieldValue.increment(hours),
+      lastLogDate: entry.date
+    }, { merge: true });
+    
+    await batch.commit();
+    
+    toggleLogForm();
+    showToast("Session logged!");
+    
+    // Clear form
+    document.getElementById('log-topic').value = '';
+    document.getElementById('log-learned').value = '';
+  } catch (e) { showToast("Failed to log session", true); }
+}
+
+let logsUnsub = null;
 function renderLogEntries() {
   const container = document.getElementById('log-entries-list'); if (!container) return;
   const q = document.getElementById('log-search')?.value.toLowerCase() || '';
   const tool = document.getElementById('log-filter-tool')?.value || '';
   
-  let filtered = (state.logEntries || []);
-  if (q) filtered = filtered.filter(e => e.topic.toLowerCase().includes(q) || e.learned.toLowerCase().includes(q));
-  if (tool) filtered = filtered.filter(e => e.tool === tool);
+  const user = auth.currentUser; if (!user) return;
+  const targetUid = (myRole === 'host' && viewingUserId) ? viewingUserId : user.uid;
 
-  if (filtered.length === 0) {
-    container.innerHTML = '<div style="padding:40px; text-align:center; color:var(--text3);">No entries found.</div>';
-    return;
-  }
-
-  container.innerHTML = filtered.map(e => `
-    <div class="card" style="padding:20px; margin-bottom:16px; border-left:4px solid var(--teal); position:relative;">
-      <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
-        <div style="font-size:11px; color:var(--text3);">${e.date} · Week ${e.week}</div>
-        <div class="tag">${e.tool || 'General'}</div>
-      </div>
-      <div style="font-size:16px; font-weight:700; margin-bottom:8px; color:var(--text);">${e.topic}</div>
-      <div style="font-size:13px; color:var(--text2); line-height:1.6; margin-bottom:12px;">${e.learned}</div>
-      <div style="display:flex; gap:12px; font-size:11px; color:var(--text3);">
-        <span>⏱️ ${e.hours}h</span>
-        ${e.mood ? `<span>🎭 Mood: ${['','😴','','🙂','','🔥'][e.mood] || '🙂'}</span>` : ''}
-      </div>
-    </div>
-  `).join('');
+  if (logsUnsub) logsUnsub();
   
-  const tag = document.getElementById('log-count-tag');
-  if (tag) tag.textContent = `${filtered.length} entries`;
+  logsUnsub = db.collection('users').doc(targetUid).collection('logs')
+    .orderBy('createdAt', 'desc')
+    .onSnapshot(snap => {
+      let filtered = snap.docs.map(d => d.data());
+      if (q) filtered = filtered.filter(e => e.topic.toLowerCase().includes(q) || e.learned.toLowerCase().includes(q));
+      if (tool) filtered = filtered.filter(e => e.tool === tool);
+
+      if (filtered.length === 0) {
+        container.innerHTML = '<div style="padding:40px; text-align:center; color:var(--text3);">No entries found.</div>';
+        return;
+      }
+
+      container.innerHTML = filtered.map(e => `
+        <div class="card" style="padding:20px; margin-bottom:16px; border-left:4px solid var(--teal); position:relative;">
+          <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+            <div style="font-size:11px; color:var(--text3);">${e.date} · Week ${e.week}</div>
+            <div class="tag">${e.tool || 'General'}</div>
+          </div>
+          <div style="font-size:16px; font-weight:700; margin-bottom:8px; color:var(--text);">${e.topic}</div>
+          <div style="font-size:13px; color:var(--text2); line-height:1.6; margin-bottom:12px;">${e.learned}</div>
+          <div style="display:flex; gap:12px; font-size:11px; color:var(--text3);">
+            <span>⏱️ ${e.hours}h</span>
+            ${e.mood ? `<span>🎭 Mood: ${['','😴','','🙂','','🔥'][e.mood] || '🙂'}</span>` : ''}
+          </div>
+        </div>
+      `).join('');
+      
+      const tag = document.getElementById('log-count-tag');
+      if (tag) tag.textContent = `${filtered.length} entries`;
+    });
 }
 
 async function fetchEmployees() {

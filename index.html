@@ -106,6 +106,13 @@
           </svg>
           User Management
         </button>
+        <button class="nav-item host-only" onclick="showPage('admin-content',this)" style="display:none;">
+          <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+              d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+          </svg>
+          Content Manager
+        </button>
       </div>
       <div class="user-card" style="position:relative;">
         <div class="avatar">DA</div>
@@ -554,6 +561,43 @@
 
     <button class="exit-focus-btn" onclick="toggleFocusMode()">Exit Focus Mode</button>
 
+    <!-- ADMIN CONTENT MANAGER PAGE -->
+    <div id="page-admin-content" class="page">
+      <div class="page-header">
+        <div>
+          <h2 class="page-title">Content Manager</h2>
+          <p class="page-sub">Manage roadmaps, weeks, and projects across the platform.</p>
+        </div>
+      </div>
+
+      <div class="card" style="padding:24px; margin-bottom:30px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+          <h3 style="font-size:18px; font-weight:700;">Global Roadmaps</h3>
+          <button class="btn-sm" onclick="saveRoadmapConfig()">Save All Changes</button>
+        </div>
+        <div id="admin-roadmaps-list" style="display:flex; flex-direction:column; gap:16px;">
+          <!-- Dynamic roadmap editor -->
+        </div>
+      </div>
+
+      <div class="grid" style="grid-template-columns: 1fr 1.5fr; gap:30px;">
+        <div class="card" style="padding:24px;">
+          <h3 style="font-size:16px; font-weight:700; margin-bottom:16px;">Weeks & Topics</h3>
+          <div id="admin-weeks-list" style="display:flex; flex-direction:column; gap:12px; max-height:600px; overflow-y:auto;">
+            <!-- Dynamic weeks list -->
+          </div>
+          <button class="btn-sm" style="width:100%; margin-top:16px;" onclick="addWeekItem()">+ Add New Week</button>
+        </div>
+
+        <div class="card" style="padding:24px;">
+          <h3 style="font-size:16px; font-weight:700; margin-bottom:16px;">Active Projects</h3>
+          <div id="admin-projects-list" style="display:flex; flex-direction:column; gap:12px;">
+            <!-- Dynamic projects list -->
+          </div>
+          <button class="btn-sm" style="width:100%; margin-top:16px;" onclick="addProjectItem()">+ Add New Project</button>
+        </div>
+      </div>
+    </div>
   </div> <!-- end main-content -->
 
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
