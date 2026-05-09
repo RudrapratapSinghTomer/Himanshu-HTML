@@ -4,8 +4,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bestpeers Learning Dashboard â€” Analytics Transition Platform</title>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <title>Bestpeers Learning Dashboard — Analytics Transition Platform</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&display=swap"
+    rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
 </head>
 
@@ -16,7 +18,7 @@
     <div class="login-card">
       <div class="login-logo">Bestpeers Learning Dashboard</div>
       <div class="login-sub">Analytics Transition Platform</div>
-      
+
       <div id="signup-fields" style="display:none; margin-bottom: 16px;">
         <div class="login-form">
           <input type="text" id="auth-fname" class="login-input" placeholder="First Name">
@@ -37,7 +39,7 @@
 
   <div id="main-content">
 
-    <h1 class="sr-only">Bestpeers Learning Dashboard â€” Analytics Transition Learning Platform</h1>
+    <h1 class="sr-only">Bestpeers Learning Dashboard — Analytics Transition Learning Platform</h1>
 
     <!-- SIDEBAR -->
     <nav class="sidebar">
@@ -102,7 +104,8 @@
         </button>
         <button class="nav-item host-only" onclick="showPage('admin-users',this)" style="display:none;">
           <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+              d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
           </svg>
           User Management
         </button>
@@ -130,16 +133,25 @@
       <div class="topbar">
         <div class="page-title" id="page-title">Dashboard</div>
         <div class="global-search-wrap">
-          <svg style="position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--text3);" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-          <input type="text" class="global-search-input" placeholder="Search roadmap, projects, resources..." oninput="handleGlobalSearch(this.value)">
+          <svg style="position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--text3);" width="16"
+            height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <input type="text" class="global-search-input" placeholder="Search roadmap, projects, resources..."
+            oninput="handleGlobalSearch(this.value)">
         </div>
         <div class="topbar-right">
           <button class="btn" onclick="toggleFocusMode()" id="focus-mode-btn">
-            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="vertical-align:middle; margin-right:4px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
+            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+              style="vertical-align:middle; margin-right:4px;">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+            </svg>
             Focus Mode
           </button>
           <div class="streak-badge">
-            <span>ðŸ”¥</span> <span id="streak-count-topbar">0</span>
+            <span>🔥</span> <span id="streak-count-topbar">0</span>
           </div>
           <button class="btn btn-primary" onclick="toggleLogForm()">+ Log Session</button>
         </div>
@@ -149,8 +161,9 @@
       <div class="page active" id="page-dashboard">
         <div class="welcome-banner">
           <div>
-            <h1 class="welcome-title">Welcome back, Arjun ðŸ‘‹</h1>
-            <p class="welcome-sub">Today is <span id="today-date" style="color:var(--blue2); font-weight:600;"></span> Â· You've completed 75% of your daily goal. Keep the momentum!</p>
+            <h1 class="welcome-title">Welcome back, Arjun 👋</h1>
+            <p class="welcome-sub">Today is <span id="today-date" style="color:var(--blue2); font-weight:600;"></span> ·
+              You've completed 75% of your daily goal. Keep the momentum!</p>
           </div>
           <div class="progress-ring-wrap">
             <div class="progress-text">
@@ -169,7 +182,8 @@
         <div class="kpi-grid">
           <div class="kpi-card" style="--accent-color: var(--blue);">
             <div class="kpi-label">Total Learning</div>
-            <div class="kpi-value"><span id="kpi-hours">0</span><small style="font-size:12px;margin-left:4px;color:var(--text3)">h</small></div>
+            <div class="kpi-value"><span id="kpi-hours">0</span><small
+                style="font-size:12px;margin-left:4px;color:var(--text3)">h</small></div>
             <div class="kpi-trend trend-up">+2.4h from last week</div>
           </div>
           <div class="kpi-card" style="--accent-color: var(--orange);">
@@ -248,7 +262,12 @@
         <div id="host-admin-section" style="display:none; margin-bottom:32px;">
           <div class="admin-card">
             <div class="admin-title">
-              <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+              <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
               Assign & Manage Roadmaps
             </div>
             <div class="assign-grid">
@@ -265,7 +284,8 @@
                   <option value="Data Engineering">Data Engineering</option>
                 </select>
               </div>
-              <button class="btn btn-primary" onclick="handleAdminAssign()" style="height:44px; padding:0 24px;">Assign Roadmap</button>
+              <button class="btn btn-primary" onclick="handleAdminAssign()" style="height:44px; padding:0 24px;">Assign
+                Roadmap</button>
             </div>
           </div>
 
@@ -304,30 +324,65 @@
         <div class="card" style="margin-bottom:24px; padding:20px;">
           <div style="display:flex; gap:16px; align-items:center; flex-wrap:wrap;">
             <div style="flex:1; min-width:250px; position:relative;">
-              <input type="text" id="log-search" placeholder="Search topics..." class="form-input" oninput="renderLogEntries()" style="padding-left:40px; height:44px;">
-              <svg style="position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--text3);" width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+              <input type="text" id="log-search" placeholder="Search topics..." class="form-input"
+                oninput="renderLogEntries()" style="padding-left:40px; height:44px;">
+              <svg style="position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--text3);"
+                width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
             </div>
-            <select id="log-filter-tool" class="form-select" onchange="renderLogEntries()" style="width:160px; height:44px;">
+            <select id="log-filter-tool" class="form-select" onchange="renderLogEntries()"
+              style="width:160px; height:44px;">
               <option value="">All Tools</option>
-              <option>SQL</option><option>Python</option><option>Power BI</option><option>Excel</option><option>Tableau</option>
+              <option>SQL</option>
+              <option>Python</option>
+              <option>Power BI</option>
+              <option>Excel</option>
+              <option>Tableau</option>
             </select>
             <button class="btn btn-primary" onclick="toggleLogForm()">+ New Session</button>
           </div>
         </div>
-        <div id="log-form-container" class="card" style="display:none; margin-bottom:24px; padding:24px; border:1px solid var(--blue);">
+        <div id="log-form-container" class="card"
+          style="display:none; margin-bottom:24px; padding:24px; border:1px solid var(--blue);">
           <div class="card-title" style="margin-bottom:20px;">Log Today's Session</div>
           <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:20px;">
-            <div class="form-group"><label class="form-label">Date</label><input type="date" class="form-input" id="log-date"></div>
-            <div class="form-group"><label class="form-label">Week #</label><select class="form-select" id="log-week"></select></div>
-            <div class="form-group"><label class="form-label">Topic</label><input type="text" class="form-input" id="log-topic"></div>
-            <div class="form-group"><label class="form-label">Tool</label><select class="form-select" id="log-tool"><option>SQL</option><option>Python</option><option>Power BI</option><option>Excel</option><option>Tableau</option></select></div>
-            <div class="form-group"><label class="form-label">Hours</label><input type="number" class="form-input" id="log-hours" step="0.5"></div>
-            <div class="form-group"><label class="form-label">Mood</label><div style="display:flex;gap:8px;"><span class="mood-btn" onclick="setMood(1,this)">ðŸ˜´</span><span class="mood-btn active" onclick="setMood(3,this)">ðŸ™‚</span><span class="mood-btn" onclick="setMood(5,this)">ðŸ”¥</span></div></div>
-            <div class="form-group" style="grid-column:1/-1;"><label class="form-label">Topics & Key Concepts</label><textarea class="form-textarea" id="log-learned" placeholder="What core concepts did you study today?"></textarea></div>
-            <div class="form-group" style="grid-column:1/-1;"><label class="form-label">Wins & A-ha Moments</label><textarea class="form-textarea" id="log-wins" placeholder="Any breakthroughs or successful implementations?"></textarea></div>
-            <div class="form-group" style="grid-column:1/-1;"><label class="form-label">Hands-on Work</label><textarea class="form-textarea" id="log-handson" placeholder="Describe the specific labs, scripts, or projects you worked on."></textarea></div>
-            <div class="form-group" style="grid-column:1/-1;"><label class="form-label">Blockers & Challenges</label><textarea class="form-textarea" id="log-blockers" placeholder="What slowed you down?"></textarea></div>
-            <div class="form-group" style="grid-column:1/-1;"><label class="form-label">Focus for Tomorrow</label><input type="text" class="form-input" id="log-tomorrow" placeholder="What's the #1 priority for your next session?"></div>
+            <div class="form-group"><label class="form-label">Date</label><input type="date" class="form-input"
+                id="log-date"></div>
+            <div class="form-group"><label class="form-label">Week #</label><select class="form-select"
+                id="log-week"></select></div>
+            <div class="form-group"><label class="form-label">Topic</label><input type="text" class="form-input"
+                id="log-topic"></div>
+            <div class="form-group"><label class="form-label">Tool</label><select class="form-select" id="log-tool">
+                <option>SQL</option>
+                <option>Python</option>
+                <option>Power BI</option>
+                <option>Excel</option>
+                <option>Tableau</option>
+              </select></div>
+            <div class="form-group"><label class="form-label">Hours</label><input type="number" class="form-input"
+                id="log-hours" step="0.5"></div>
+            <div class="form-group"><label class="form-label">Mood</label>
+              <div style="display:flex;gap:8px;"><span class="mood-btn" onclick="setMood(1,this)">😴</span><span
+                  class="mood-btn active" onclick="setMood(3,this)">🙂</span><span class="mood-btn"
+                  onclick="setMood(5,this)">🔥</span></div>
+            </div>
+            <div class="form-group" style="grid-column:1/-1;"><label class="form-label">Topics & Key
+                Concepts</label><textarea class="form-textarea" id="log-learned"
+                placeholder="What core concepts did you study today?"></textarea></div>
+            <div class="form-group" style="grid-column:1/-1;"><label class="form-label">Wins & A-ha
+                Moments</label><textarea class="form-textarea" id="log-wins"
+                placeholder="Any breakthroughs or successful implementations?"></textarea></div>
+            <div class="form-group" style="grid-column:1/-1;"><label class="form-label">Hands-on Work</label><textarea
+                class="form-textarea" id="log-handson"
+                placeholder="Describe the specific labs, scripts, or projects you worked on."></textarea></div>
+            <div class="form-group" style="grid-column:1/-1;"><label class="form-label">Blockers &
+                Challenges</label><textarea class="form-textarea" id="log-blockers"
+                placeholder="What slowed you down?"></textarea></div>
+            <div class="form-group" style="grid-column:1/-1;"><label class="form-label">Focus for Tomorrow</label><input
+                type="text" class="form-input" id="log-tomorrow"
+                placeholder="What's the #1 priority for your next session?"></div>
             <div style="grid-column:1/-1; display:flex; gap:12px;">
               <button class="btn btn-primary" style="flex:1;" onclick="addLogEntry()">Save Session</button>
               <button class="btn" style="background:var(--card2);" onclick="toggleLogForm()">Cancel</button>
@@ -370,7 +425,8 @@
           </div>
           <div style="display:flex; gap:12px;">
             <div id="host-edit-toggle-wrap" style="display:none;">
-              <button class="btn btn-secondary" id="host-edit-mode-btn" onclick="toggleHostEditMode()">Edit Mode: OFF</button>
+              <button class="btn btn-secondary" id="host-edit-mode-btn" onclick="toggleHostEditMode()">Edit Mode:
+                OFF</button>
             </div>
           </div>
         </div>
@@ -378,17 +434,24 @@
         <div class="review-week-grid" id="review-week-grid" style="margin-bottom:24px;"></div>
 
         <div class="card" id="weekly-review-container" style="padding:32px; min-height:400px;">
-          <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:32px; border-bottom:1px solid var(--border); padding-bottom:20px;">
+          <div
+            style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:32px; border-bottom:1px solid var(--border); padding-bottom:20px;">
             <div>
-              <div style="font-size:12px; color:var(--text3); text-transform:uppercase; font-weight:800; letter-spacing:1px; margin-bottom:4px;">Review Period</div>
-              <div style="font-size:24px; font-weight:800; color:var(--text); display:flex; align-items:center; gap:12px;">
+              <div
+                style="font-size:12px; color:var(--text3); text-transform:uppercase; font-weight:800; letter-spacing:1px; margin-bottom:4px;">
+                Review Period</div>
+              <div
+                style="font-size:24px; font-weight:800; color:var(--text); display:flex; align-items:center; gap:12px;">
                 Week <span id="review-week-label">1</span>
-                <span id="auto-gen-badge" style="font-size:10px; padding:2px 8px; border-radius:4px; background:var(--blue)22; color:var(--blue2); border:1px solid var(--blue)44;">Auto-Generated</span>
+                <span id="auto-gen-badge"
+                  style="font-size:10px; padding:2px 8px; border-radius:4px; background:var(--blue)22; color:var(--blue2); border:1px solid var(--blue)44;">Auto-Generated</span>
               </div>
             </div>
             <div style="text-align:right;">
-              <div style="font-size:12px; color:var(--text3); text-transform:uppercase; font-weight:800; letter-spacing:1px; margin-bottom:4px;">Weekly Rating</div>
-              <div id="review-rating-display" style="font-size:24px;">â­â­â­â­â­</div>
+              <div
+                style="font-size:12px; color:var(--text3); text-transform:uppercase; font-weight:800; letter-spacing:1px; margin-bottom:4px;">
+                Weekly Rating</div>
+              <div id="review-rating-display" style="font-size:24px;">⭐⭐⭐⭐⭐</div>
             </div>
           </div>
 
@@ -396,49 +459,67 @@
             <div>
               <div class="review-section">
                 <label class="form-label" style="color:var(--blue2);">Topics & Concepts Covered</label>
-                <div id="display-topics" style="padding:16px; background:var(--card2); border-radius:8px; font-size:13px; line-height:1.6; min-height:80px;"></div>
+                <div id="display-topics"
+                  style="padding:16px; background:var(--card2); border-radius:8px; font-size:13px; line-height:1.6; min-height:80px;">
+                </div>
                 <textarea id="edit-topics" class="form-textarea" style="display:none;"></textarea>
               </div>
               <div class="review-section" style="margin-top:24px;">
                 <label class="form-label" style="color:var(--green2);">Hands-on Projects & Exercises</label>
-                <div id="display-handson" style="padding:16px; background:var(--card2); border-radius:8px; font-size:13px; line-height:1.6; min-height:80px;"></div>
+                <div id="display-handson"
+                  style="padding:16px; background:var(--card2); border-radius:8px; font-size:13px; line-height:1.6; min-height:80px;">
+                </div>
                 <textarea id="edit-handson" class="form-textarea" style="display:none;"></textarea>
               </div>
             </div>
             <div>
               <div class="review-section">
                 <label class="form-label" style="color:var(--gold);">Key Wins & A-ha Moments</label>
-                <div id="display-win" style="padding:16px; background:var(--card2); border-radius:8px; font-size:13px; line-height:1.6; min-height:80px;"></div>
+                <div id="display-win"
+                  style="padding:16px; background:var(--card2); border-radius:8px; font-size:13px; line-height:1.6; min-height:80px;">
+                </div>
                 <textarea id="edit-win" class="form-textarea" style="display:none;"></textarea>
               </div>
               <div class="review-section" style="margin-top:24px;">
                 <label class="form-label" style="color:var(--red);">Blockers & Challenges</label>
-                <div id="display-blocker" style="padding:16px; background:var(--card2); border-radius:8px; font-size:13px; line-height:1.6; min-height:80px;"></div>
+                <div id="display-blocker"
+                  style="padding:16px; background:var(--card2); border-radius:8px; font-size:13px; line-height:1.6; min-height:80px;">
+                </div>
                 <textarea id="edit-blocker" class="form-textarea" style="display:none;"></textarea>
               </div>
               <div class="review-section" style="margin-top:24px;">
                 <label class="form-label" style="color:var(--blue);">Focus for Next Week</label>
-                <div id="display-focus" style="padding:16px; background:var(--card2); border-radius:8px; font-size:13px; line-height:1.6; min-height:80px;"></div>
+                <div id="display-focus"
+                  style="padding:16px; background:var(--card2); border-radius:8px; font-size:13px; line-height:1.6; min-height:80px;">
+                </div>
                 <textarea id="edit-focus" class="form-textarea" style="display:none;"></textarea>
               </div>
             </div>
           </div>
 
-          <div style="margin-top:40px; padding-top:24px; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+          <div
+            style="margin-top:40px; padding-top:24px; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
             <div style="display:flex; gap:32px;">
               <div>
-                <div style="font-size:11px; color:var(--text3); text-transform:uppercase; font-weight:800; margin-bottom:4px;">Total Effort</div>
-                <div style="font-size:20px; font-weight:700; color:var(--blue2);"><span id="review-hours-display">0</span> hrs</div>
+                <div
+                  style="font-size:11px; color:var(--text3); text-transform:uppercase; font-weight:800; margin-bottom:4px;">
+                  Total Effort</div>
+                <div style="font-size:20px; font-weight:700; color:var(--blue2);"><span
+                    id="review-hours-display">0</span> hrs</div>
                 <input type="number" id="edit-hours" class="form-input" style="display:none; width:80px;">
               </div>
               <div>
-                <div style="font-size:11px; color:var(--text3); text-transform:uppercase; font-weight:800; margin-bottom:4px;">Status</div>
+                <div
+                  style="font-size:11px; color:var(--text3); text-transform:uppercase; font-weight:800; margin-bottom:4px;">
+                  Status</div>
                 <div id="review-status-badge" class="badge">Draft</div>
               </div>
             </div>
             <div>
-              <button class="btn btn-primary" id="review-action-btn" onclick="submitWeeklyReview()">Submit Review âœ“</button>
-              <button class="btn btn-primary" id="review-save-btn" style="display:none;" onclick="saveWeekReview()">Save Changes</button>
+              <button class="btn btn-primary" id="review-action-btn" onclick="submitWeeklyReview()">Submit Review
+                ✓</button>
+              <button class="btn btn-primary" id="review-save-btn" style="display:none;" onclick="saveWeekReview()">Save
+                Changes</button>
             </div>
           </div>
         </div>
@@ -469,4 +550,6 @@
   <script src="js/data.js"></script>
   <script src="js/app.js"></script>
 
-</body></html>
+</body>
+
+</html>

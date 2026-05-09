@@ -90,10 +90,19 @@ function updateUserUI() {
   const fName = u.firstName || 'User';
   const lName = u.lastName || '';
   const welcomeTitle = document.querySelector('.welcome-title');
+  const welcomeSub = document.querySelector('.welcome-sub');
   const sidebarName = document.querySelector('.user-name');
   const avatar = document.querySelector('.avatar');
   const roleBadge = document.querySelector('.user-role');
+
   if (welcomeTitle) welcomeTitle.textContent = `Welcome back, ${fName} 👋`;
+  if (welcomeSub) {
+    const activePhases = getActivePhases();
+    const allWeeks = [].concat(...activePhases.map(p => p.weeks));
+    const doneWeeks = allWeeks.filter(w => state.weekStatus[w] === 'done').length;
+    const pct = allWeeks.length > 0 ? Math.round((doneWeeks / allWeeks.length) * 100) : 0;
+    welcomeSub.innerHTML = `Today is <span id="today-date" style="color:var(--blue2); font-weight:600;">${new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</span> · You've completed ${pct}% of your roadmap. Keep the momentum!`;
+  }
   if (sidebarName) sidebarName.textContent = `${fName} ${lName}`;
   if (avatar) avatar.textContent = (fName[0] || '') + (lName[0] || '');
   if (roleBadge) roleBadge.textContent = (u.role || myRole || 'user').toUpperCase();
@@ -155,14 +164,45 @@ function renderDashboard() {
 }
 
 function updateKPIs() {
+  updateStreak();
   const activePhases = getActivePhases();
   const allWeeks = [].concat(...activePhases.map(p => p.weeks));
   const doneWeeks = allWeeks.filter(w => state.weekStatus[w] === 'done').length;
   const pct = allWeeks.length > 0 ? Math.round((doneWeeks / allWeeks.length) * 100) : 0;
-  const kpis = { 'kpi-hours': (state.logEntries || []).reduce((s, e) => s + (e.hours || 0), 0).toFixed(1), 'kpi-projects': PROJECTS.filter(p => state.projectStatus[p.id] === 'Completed').length, 'kpi-skills': SKILLS.filter(s => (state.skillNow[s.key] || 0) >= 3).length, 'overall-pct': pct + '%' };
+  const kpis = { 
+    'kpi-hours': (state.logEntries || []).reduce((s, e) => s + (e.hours || 0), 0).toFixed(1), 
+    'kpi-projects': PROJECTS.filter(p => state.projectStatus[p.id] === 'Completed').length, 
+    'kpi-skills': SKILLS.filter(s => (state.skillNow[s.key] || 0) >= 3).length, 
+    'overall-pct': pct + '%' 
+  };
   Object.entries(kpis).forEach(([id, val]) => { const el = document.getElementById(id); if (el) el.textContent = val; });
   const circle = document.getElementById('milestone-progress-bar');
   if (circle) circle.style.strokeDashoffset = 226 - (226 * pct) / 100;
+}
+
+function updateStreak() {
+  if (!state.logEntries || state.logEntries.length === 0) {
+    state.streak = 0;
+  } else {
+    const dates = [...new Set(state.logEntries.map(e => e.date))].sort().reverse();
+    let streak = 0;
+    const today = new Date().toISOString().split('T')[0];
+    const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+
+    if (dates[0] === today || dates[0] === yesterday) {
+      streak = 1;
+      for (let i = 0; i < dates.length - 1; i++) {
+        const d1 = new Date(dates[i]);
+        const d2 = new Date(dates[i+1]);
+        const diff = Math.round((d1 - d2) / (1000 * 60 * 60 * 24));
+        if (diff === 1) streak++;
+        else break;
+      }
+    }
+    state.streak = streak;
+  }
+  const el = document.getElementById('streak-count-topbar');
+  if (el) el.textContent = state.streak;
 }
 
 function renderPhaseProgressBars() {
