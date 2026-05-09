@@ -394,22 +394,253 @@ async function saveLogEntry() {
   const topic = document.getElementById('log-topic')?.value;
   const learned = document.getElementById('log-learned')?.value;
   const hours = parseFloat(document.getElementById('log-hours')?.value || 0);
-  if (!topic || !learned) return alert("Fill all fields");
-  const entry = { topic, learned, hours, date: new Date().toISOString().split('T')[0], createdAt: firebase.firestore.FieldValue.serverTimestamp() };
-  await db.collection('users').doc(auth.currentUser.uid).collection('logs').add(entry);
-  await db.collection('users').doc(auth.currentUser.uid).update({ totalHours: firebase.firestore.FieldValue.increment(hours) });
-  toggleLogForm(); showToast("Logged!");
+  const date = document.getElementById('log-date')?.value || new Date().toISOString().split('T')[0];
+  const week = document.getElementById('log-week')?.value;
+  const tool = document.getElementById('log-tool')?.value;
+  const mood = state.selectedMood || 3;
+  const wins = document.getElementById('log-wins')?.value;
+  const handson = document.getElementById('log-handson')?.value;
+  const blockers = document.getElementById('log-blockers')?.value;
+  const tomorrow = document.getElementById('log-tomorrow')?.value;
+
+  if (!topic || !learned) return alert("Fill topic and learned fields");
+
+  const entry = { 
+    topic, learned, hours, date, week, tool, mood, wins, handson, blockers, tomorrow,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp() 
+  };
+
+  try {
+    const userRef = db.collection('users').doc(auth.currentUser.uid);
+    await userRef.collection('logs').add(entry);
+    await userRef.update({ 
+      totalHours: firebase.firestore.FieldValue.increment(hours),
+      streak: firebase.firestore.FieldValue.increment(1) // Simple streak increment for now
+    });
+    toggleLogForm(); 
+    showToast("Session Logged!");
+    renderDashboard();
+  } catch (e) { showToast("Failed to save log", true); }
 }
-function renderAdminUsers() { fetchEmployees(); }
 async function fetchEmployees() {
   const snap = await db.collection('users').get();
   allUsers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  renderAdminUsers();
 }
-async function switchViewUser(uid) { viewingUserId = uid; const u = allUsers.find(x => x.id === uid); if (u) { state = { ...defaultState, ...u }; updateUserUI(); renderDashboard(); } }
+
+function renderAdminUsers() {
+  const userList = document.getElementById('admin-users-list');
+  const pendingList = document.getElementById('pending-requests-list');
+  const userSelect = document.getElementById('admin-user-select');
+  const userCount = document.getElementById('admin-user-count');
+  
+  if (!userList || !allUsers.length) return;
+
+  if (userCount) userCount.textContent = `${allUsers.length} Users`;
+
+  // Directory
+  userList.innerHTML = allUsers.map(u => `
+    <div class="user-item" onclick="switchViewUser('${u.id}')" style="display:flex; justify-content:space-between; align-items:center; padding:12px; background:var(--navy3); border-radius:8px; cursor:pointer; margin-bottom:8px;">
+      <div style="display:flex; gap:12px; align-items:center;">
+        <div class="avatar" style="width:32px; height:32px; font-size:12px;">${(u.firstName?.[0]||'')+ (u.lastName?.[0]||'')}</div>
+        <div>
+          <div style="font-weight:600; font-size:13px;">${u.firstName} ${u.lastName || ''}</div>
+          <div style="font-size:10px; color:var(--text3);">${u.role?.toUpperCase() || 'USER'}</div>
+        </div>
+      </div>
+      <div class="badge" style="background:var(--blue)22; color:var(--blue2);">${u.assignedRoadmap || 'None'}</div>
+    </div>
+  `).join('');
+
+  // Select for assignment
+  if (userSelect) {
+    userSelect.innerHTML = '<option value="">Select an employee...</option>' + 
+      allUsers.map(u => `<option value="${u.id}">${u.firstName} ${u.lastName || ''}</option>`).join('');
+  }
+}
+
+async function handleAdminAssign() {
+  const uid = document.getElementById('admin-user-select')?.value;
+  const roadmap = document.getElementById('admin-roadmap-select')?.value;
+  if (!uid || !roadmap) return alert("Select user and roadmap");
+  
+  try {
+    await db.collection('users').doc(uid).update({ assignedRoadmap: roadmap });
+    showToast("Roadmap Assigned!");
+    fetchEmployees();
+  } catch (e) { showToast("Failed to assign", true); }
+}
+
+async function switchViewUser(uid) { 
+  viewingUserId = uid; 
+  const u = allUsers.find(x => x.id === uid); 
+  if (u) { 
+    state = { ...defaultState, ...u }; 
+    updateUserUI(); 
+    renderDashboard(); 
+    showPage('dashboard', document.querySelector('.nav-item[onclick*="dashboard"]'));
+  } 
+}
+
 function toggleLogForm() { const el = document.getElementById('log-form-container'); el.style.display = el.style.display === 'none' ? 'block' : 'none'; }
-function showToast(msg, isErr) { alert(msg); }
+function showToast(msg, isErr) {
+  const toast = document.getElementById('save-toast');
+  const text = document.getElementById('save-toast-text');
+  if (!toast || !text) return;
+  text.textContent = msg;
+  toast.style.background = isErr ? 'var(--red)' : 'var(--blue)';
+  toast.classList.add('active');
+  setTimeout(() => toast.classList.remove('active'), 3000);
+}
+
+function toggleFocusMode() {
+  document.body.classList.toggle('focus-active');
+  const btn = document.getElementById('focus-mode-btn');
+  if (btn) {
+    const isActive = document.body.classList.contains('focus-active');
+    btn.innerHTML = isActive ? 'Exit Focus' : '<svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="vertical-align:middle; margin-right:4px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" /></svg> Focus Mode';
+  }
+}
+
+function setMood(val, btn) {
+  state.selectedMood = val;
+  document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+}
+
+window.showTab = function(type, filter, btn) {
+  if (type !== 'skills') return;
+  
+  // 1. Update active button state
+  const buttons = document.querySelectorAll('.tab-btn');
+  buttons.forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  
+  // 2. Filter skill domains
+  const skillDomains = document.querySelectorAll('.skills-domain');
+  skillDomains.forEach(domain => {
+    const header = domain.querySelector('.domain-header').textContent.toLowerCase().trim();
+    
+    // Mapping filter values to actual header text
+    let shouldShow = false;
+    if (filter === 'all') {
+      shouldShow = true;
+    } else if (filter === 'sql' && header === 'sql') {
+      shouldShow = true;
+    } else if (filter === 'python' && header === 'python') {
+      shouldShow = true;
+    } else if (filter === 'powerbi' && header === 'power bi') {
+      shouldShow = true;
+    } else if (filter === 'excel' && header === 'excel') {
+      shouldShow = true;
+    } else if (filter === 'core' && header === 'analytics core') {
+      shouldShow = true;
+    }
+    
+    domain.style.display = shouldShow ? 'block' : 'none';
+  });
+};
 function fixLinks() {}
-function renderWeekly() {}
+let isHostEditMode = false;
+function toggleHostEditMode() {
+  isHostEditMode = !isHostEditMode;
+  const btn = document.getElementById('host-edit-mode-btn');
+  if (btn) btn.textContent = `Edit Mode: ${isHostEditMode ? 'ON' : 'OFF'}`;
+  renderWeekly();
+}
+
+function renderReviewWeeks() {
+  const grid = document.getElementById('review-week-grid'); if (!grid) return;
+  const activePhases = getActivePhases();
+  const allWeeks = [].concat(...activePhases.map(p => p.weeks));
+  
+  grid.innerHTML = allWeeks.map(w => {
+    const isSelected = (state.selectedReviewWeek || 1) == w;
+    const status = state.weekReviews?.[w]?.status || 'Empty';
+    return `<button class="week-sel-btn ${isSelected?'active':''}" onclick="setReviewWeek(${w})">W${w}<br><small style="font-size:8px;">${status}</small></button>`;
+  }).join('');
+}
+
+function setReviewWeek(w) {
+  state.selectedReviewWeek = w;
+  renderReviewWeeks();
+  renderWeekly();
+}
+
+// Add call to renderReviewWeeks in renderWeekly
+async function renderWeekly() {
+  renderReviewWeeks();
+  const weekNum = state.selectedReviewWeek || 1;
+// ... rest of the function exists ...
+  const review = state.weekReviews?.[weekNum] || {};
+  
+  // Update UI Elements
+  const elements = {
+    'review-week-label': weekNum,
+    'display-topics': review.topics || 'No logs for this week yet.',
+    'display-handson': review.handson || 'No practical work logged.',
+    'display-win': review.wins || 'No breakthroughs recorded.',
+    'display-blocker': review.blockers || 'No blockers reported.',
+    'display-focus': review.focus || 'Next week focus not set.',
+    'review-hours-display': review.hours || 0,
+    'review-status-badge': review.status || 'Draft'
+  };
+
+  Object.entries(elements).forEach(([id, val]) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = val;
+  });
+
+  // Toggle Edit Visibility
+  const editFields = ['topics', 'handson', 'win', 'blocker', 'focus', 'hours'];
+  editFields.forEach(f => {
+    const display = document.getElementById('display-' + f);
+    const edit = document.getElementById('edit-' + f);
+    if (display && edit) {
+      display.style.display = isHostEditMode ? 'none' : 'block';
+      edit.style.display = isHostEditMode ? 'block' : 'none';
+      if (isHostEditMode) edit.value = review[f] || display.textContent;
+    }
+  });
+
+  const saveBtn = document.getElementById('review-save-btn');
+  const submitBtn = document.getElementById('review-action-btn');
+  if (saveBtn && submitBtn) {
+    saveBtn.style.display = isHostEditMode ? 'block' : 'none';
+    submitBtn.style.display = isHostEditMode ? 'none' : 'block';
+  }
+}
+
+async function submitWeeklyReview() {
+  const weekNum = state.selectedReviewWeek || 1;
+  if (!state.weekReviews) state.weekReviews = {};
+  
+  if (isHostEditMode) {
+    state.weekReviews[weekNum] = {
+      ...state.weekReviews[weekNum],
+      topics: document.getElementById('edit-topics')?.value,
+      handson: document.getElementById('edit-handson')?.value,
+      wins: document.getElementById('edit-win')?.value,
+      blockers: document.getElementById('edit-blocker')?.value,
+      focus: document.getElementById('edit-focus')?.value,
+      hours: parseFloat(document.getElementById('edit-hours')?.value || 0),
+      status: 'Reviewed',
+      reviewedAt: new Date().toISOString()
+    };
+    isHostEditMode = false;
+    const btn = document.getElementById('host-edit-mode-btn');
+    if (btn) btn.textContent = `Edit Mode: OFF`;
+  } else {
+    state.weekReviews[weekNum] = {
+      ...state.weekReviews[weekNum],
+      status: 'Submitted',
+      submittedAt: new Date().toISOString()
+    };
+  }
+  
+  await saveState();
+  renderWeekly();
+}
 function handleGlobalSearch(query) {
   const container = document.getElementById('global-search-results');
   if (!container) return;
@@ -484,5 +715,77 @@ document.addEventListener('click', (e) => {
     container.classList.remove('active');
   }
 });
-function toggleHostEditMode() {}
-function renderAdminContent() {}
+function renderAdminContent() {
+  const roadmapList = document.getElementById('admin-roadmaps-list');
+  const weeksList = document.getElementById('admin-weeks-list');
+  const projectsList = document.getElementById('admin-projects-list');
+  
+  if (roadmapList) {
+    roadmapList.innerHTML = Object.entries(ROADMAPS_DB).map(([name, phases]) => `
+      <div class="card" style="padding:16px; background:var(--navy3);">
+        <div style="font-weight:700; margin-bottom:12px;">${name}</div>
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          ${phases.map((p, idx) => `
+            <div style="display:flex; gap:8px;">
+              <input type="text" class="form-input" value="${p.name}" onchange="updateRoadmapPhase('${name}', ${idx}, 'name', this.value)">
+              <input type="color" value="${p.color}" onchange="updateRoadmapPhase('${name}', ${idx}, 'color', this.value)" style="width:40px; padding:0;">
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `).join('');
+  }
+
+  if (weeksList) {
+    weeksList.innerHTML = WEEKS_DB.map((w, idx) => `
+      <div class="card" style="padding:12px; background:var(--navy3); margin-bottom:8px;">
+        <div style="display:flex; gap:8px; margin-bottom:8px;">
+          <input type="number" class="form-input" value="${w.w}" style="width:60px;" onchange="updateWeekItem(${idx}, 'w', this.value)">
+          <input type="text" class="form-input" value="${w.title}" onchange="updateWeekItem(${idx}, 'title', this.value)">
+        </div>
+        <textarea class="form-textarea" style="font-size:11px; height:60px;" onchange="updateWeekItem(${idx}, 'goals', this.value)">${w.goals}</textarea>
+      </div>
+    `).join('');
+  }
+
+  if (projectsList) {
+    projectsList.innerHTML = PROJECTS_DB.map((p, idx) => `
+      <div class="card" style="padding:12px; background:var(--navy3); margin-bottom:8px;">
+        <div style="display:flex; gap:8px; margin-bottom:8px;">
+          <input type="text" class="form-input" value="${p.title}" onchange="updateProjectItem(${idx}, 'title', this.value)">
+          <input type="color" value="${p.color}" style="width:40px;" onchange="updateProjectItem(${idx}, 'color', this.value)">
+        </div>
+        <input type="text" class="form-input" value="${p.tools.join(', ')}" style="font-size:11px;" onchange="updateProjectItem(${idx}, 'tools', this.value.split(','))">
+      </div>
+    `).join('');
+  }
+}
+
+function updateRoadmapPhase(roadmap, idx, key, val) { ROADMAPS_DB[roadmap][idx][key] = val; }
+function updateWeekItem(idx, key, val) { WEEKS_DB[idx][key] = (key === 'w') ? parseInt(val) : val; }
+function updateProjectItem(idx, key, val) { PROJECTS_DB[idx][key] = val; }
+
+function addWeekItem() {
+  const nextW = (WEEKS_DB[WEEKS_DB.length-1]?.w || 0) + 1;
+  WEEKS_DB.push({ w: nextW, title: 'New Week', goals: 'Enter goals here', phase: 'p1' });
+  renderAdminContent();
+}
+
+function addProjectItem() {
+  const nextNum = PROJECTS_DB.length + 1;
+  PROJECTS_DB.push({ id: 'proj' + nextNum, num: nextNum.toString().padStart(2, '0'), title: 'New Project', color: '#3B82F6', tools: ['SQL'], tasks: ['Task 1'], status: 'Not Started' });
+  renderAdminContent();
+}
+
+async function saveRoadmapConfig() {
+  try {
+    await db.collection('config').doc('roadmaps').set(ROADMAPS_DB);
+    // For weeks/projects, we might need to batch update or set whole collection if small
+    // Simpler: just loop and set for now if counts are low
+    const batch = db.batch();
+    WEEKS_DB.forEach(w => batch.set(db.collection('weeks').doc('w'+w.w), w));
+    PROJECTS_DB.forEach(p => batch.set(db.collection('projects').doc(p.id), p));
+    await batch.commit();
+    showToast("Content Saved Globally");
+  } catch (e) { showToast("Global Save Failed", true); }
+}
