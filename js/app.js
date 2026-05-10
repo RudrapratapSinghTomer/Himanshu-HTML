@@ -429,17 +429,20 @@ async function saveLogEntry() {
   };
 
   try {
-    const userRef = db.collection('users').doc(auth.currentUser.uid);
+    const userRef = db.collection('users').doc(user.uid);
     await userRef.collection('logs').add(entry);
     await userRef.update({ 
       totalHours: firebase.firestore.FieldValue.increment(hours),
-      streak: firebase.firestore.FieldValue.increment(1) // Simple streak increment for now
+      streak: firebase.firestore.FieldValue.increment(1) 
     });
     toggleLogForm(); 
     showToast("Session Logged!");
     renderDashboard();
     renderLogEntries();
-  } catch (e) { showToast("Failed to save log", true); }
+  } catch (e) { 
+    console.error("Firestore Save Error:", e);
+    showToast(`Failed to save log: ${e.message}`, true); 
+  }
 }
 async function fetchEmployees() {
   const snap = await db.collection('users').get();
