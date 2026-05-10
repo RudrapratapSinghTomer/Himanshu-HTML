@@ -330,11 +330,18 @@ function updateKPIs() {
   const allWeeks = [].concat(...activePhases.map(p => p.weeks));
   const doneWeeks = allWeeks.filter(w => state.weekStatus[w] === 'done').length;
   const pct = allWeeks.length > 0 ? Math.round((doneWeeks / allWeeks.length) * 100) : 0;
+  
+  const completedProjects = PROJECTS_DB.filter(p => state.projectStatus[p.id] === 'Completed').length;
+  const projLabel = `${completedProjects} / ${PROJECTS_DB.length} complete`;
+
   const kpis = { 
     'kpi-hours': (state.totalHours || 0).toFixed(1), 
-    'kpi-projects': PROJECTS_DB.filter(p => state.projectStatus[p.id] === 'Completed').length, 
+    'kpi-projects': completedProjects, 
     'kpi-skills': SKILLS_DB.filter(s => (state.skillNow[s.key] || 0) >= 3).length, 
-    'overall-pct': pct + '%' 
+    'overall-pct': pct + '%',
+    'kpi-streak': state.streak || 0,
+    'proj-count-label': projLabel,
+    'proj-count-label-projects': projLabel
   };
   Object.entries(kpis).forEach(([id, val]) => { const el = document.getElementById(id); if (el) el.textContent = val; });
 }
