@@ -789,3 +789,20 @@ async function saveRoadmapConfig() {
     showToast("Content Saved Globally");
   } catch (e) { showToast("Global Save Failed", true); }
 }
+
+// ── INITIALIZATION & LISTENERS ───────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  // Force date picker to open on click for profile join date
+  const dateInput = document.getElementById('profile-join');
+  if (dateInput) {
+    dateInput.addEventListener('click', (e) => {
+      try {
+        if (typeof dateInput.showPicker === 'function') {
+          dateInput.showPicker();
+        }
+      } catch (err) {
+        console.warn("Manual picker opening failed", err);
+      }
+    });
+  }
+});
