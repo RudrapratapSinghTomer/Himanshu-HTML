@@ -1625,3 +1625,15 @@ body.auth #login-overlay {
   color: var(--text3);
   font-size: 13px;
 }
+
+/* -- PROFILE PAGE CENTERING -- */
+#page-profile .card {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#page-profile .page-header {
+    max-width: 600px; /* Matching the card width */
+    margin-left: auto;
+    margin-right: auto;
+}
