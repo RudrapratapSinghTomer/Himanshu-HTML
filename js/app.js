@@ -45,6 +45,7 @@ function logout() { auth.signOut().then(() => window.location.reload()); }
 let userUnsub = null;
 let allUsersUnsub = null;
 let configUnsub = null;
+let logsUnsub = null;
 
 auth.onAuthStateChanged(async (user) => {
   if (userUnsub) userUnsub();
