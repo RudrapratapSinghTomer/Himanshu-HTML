@@ -210,7 +210,7 @@ function showPage(id, btn) {
   const renderers = {
     dashboard: renderDashboard, roadmap: renderRoadmap, skills: renderSkills,
     projects: renderProjects, weekly: renderWeekly, resources: renderResources,
-    daily: renderLogEntries, 'admin-users': renderAdminUsers, 
+    daily: renderRecentLogs, 'admin-users': renderAdminUsers, 
     'admin-content': renderAdminContent, profile: renderProfile
   };
   if (renderers[id]) renderers[id]();
@@ -311,7 +311,7 @@ function renderResources() {
   container.innerHTML = filtered.map(r => `<div class="resource-item"><div>${r.name}</div><a href="${r.url}" target="_blank">Link</a></div>`).join('');
 }
 
-function renderLogEntries() {
+function renderRecentLogs() {
   const container = document.getElementById('log-entries-list'); if (!container) return;
   const user = auth.currentUser; if (!user) return;
   const targetUid = (myRole === 'host' && viewingUserId) ? viewingUserId : user.uid;
@@ -438,7 +438,7 @@ async function saveLogEntry() {
     toggleLogForm(); 
     showToast("Session Logged!");
     renderDashboard();
-    renderLogEntries();
+    renderRecentLogs();
   } catch (e) { 
     console.error("Firestore Save Error:", e);
     showToast(`Failed to save log: ${e.message}`, true); 
