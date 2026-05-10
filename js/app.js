@@ -608,25 +608,58 @@ function setReviewWeek(w) {
 async function renderWeekly() {
   renderReviewWeeks();
   const weekNum = state.selectedReviewWeek || 1;
-// ... rest of the function exists ...
+  const targetUid = (myRole === 'host' && viewingUserId) ? viewingUserId : auth.currentUser?.uid;
+  if (!targetUid) return;
+
+  // 1. Fetch logs for this week to aggregate data
+  const logsSnap = await db.collection('users').doc(targetUid).collection('logs').where('week', '==', weekNum.toString()).get();
+  const weeklyLogs = logsSnap.docs.map(d => d.data());
+
+  // 2. Aggregate data from logs
+  const aggregated = {
+    topics: weeklyLogs.map(l => l.topic).filter(Boolean).join(', '),
+    handson: weeklyLogs.map(l => l.handson).filter(Boolean).join('. '),
+    wins: weeklyLogs.map(l => l.wins).filter(Boolean).join('. '),
+    blockers: weeklyLogs.map(l => l.blockers).filter(Boolean).join('. '),
+    focus: weeklyLogs.map(l => l.tomorrow).filter(Boolean).slice(-1)[0] || '', 
+    hours: weeklyLogs.reduce((sum, l) => sum + (parseFloat(l.hours) || 0), 0)
+  };
+
   const review = state.weekReviews?.[weekNum] || {};
   
-  // Update UI Elements
+  // Use aggregated data if review fields are empty
+  const displayData = {
+    topics: review.topics || aggregated.topics || 'No logs for this week yet.',
+    handson: review.handson || aggregated.handson || 'No practical work logged.',
+    wins: review.wins || aggregated.wins || 'No breakthroughs recorded.',
+    blockers: review.blockers || aggregated.blockers || 'No blockers reported.',
+    focus: review.focus || aggregated.focus || 'Next week focus not set.',
+    hours: (review.hours !== undefined) ? review.hours : aggregated.hours,
+    status: review.status || (weeklyLogs.length > 0 ? 'Draft' : 'Empty')
+  };
+
+  // 3. Update UI Elements
   const elements = {
     'review-week-label': weekNum,
-    'display-topics': review.topics || 'No logs for this week yet.',
-    'display-handson': review.handson || 'No practical work logged.',
-    'display-win': review.wins || 'No breakthroughs recorded.',
-    'display-blocker': review.blockers || 'No blockers reported.',
-    'display-focus': review.focus || 'Next week focus not set.',
-    'review-hours-display': review.hours || 0,
-    'review-status-badge': review.status || 'Draft'
+    'display-topics': displayData.topics,
+    'display-handson': displayData.handson,
+    'display-win': displayData.wins,
+    'display-blocker': displayData.blockers,
+    'display-focus': displayData.focus,
+    'review-hours-display': displayData.hours,
+    'review-status-badge': displayData.status
   };
 
   Object.entries(elements).forEach(([id, val]) => {
     const el = document.getElementById(id);
     if (el) el.textContent = val;
   });
+
+  // 4. Update the mini log summary tags
+  const logSummaryContainer = document.getElementById('weekly-logs-summary');
+  if (logSummaryContainer) {
+    logSummaryContainer.innerHTML = weeklyLogs.map(l => `<span class="badge" style="background:var(--blue)22; color:var(--blue2); font-size:10px; margin-bottom:4px;">${l.date}: ${l.topic} (${l.hours}h)</span>`).join('');
+  }
 
   // Toggle Edit Visibility
   const editFields = ['topics', 'handson', 'win', 'blocker', 'focus', 'hours'];
@@ -636,7 +669,10 @@ async function renderWeekly() {
     if (display && edit) {
       display.style.display = isHostEditMode ? 'none' : 'block';
       edit.style.display = isHostEditMode ? 'block' : 'none';
-      if (isHostEditMode) edit.value = review[f] || display.textContent;
+      if (isHostEditMode) {
+        const fieldKey = f === 'win' ? 'wins' : (f === 'blocker' ? 'blockers' : f);
+        edit.value = review[fieldKey] || display.textContent;
+      }
     }
   });
 
