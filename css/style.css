@@ -1627,6 +1627,10 @@ body.auth #login-overlay {
 }
 
 /* -- PROFILE PAGE CENTERING -- */
+#page-profile {
+    padding-top: 0px;
+}
+
 #page-profile .card {
     margin-left: auto;
     margin-right: auto;
