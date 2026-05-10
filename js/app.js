@@ -337,7 +337,7 @@ function updateKPIs() {
   const kpis = { 
     'kpi-hours': (state.totalHours || 0).toFixed(1), 
     'kpi-projects': completedProjects, 
-    'kpi-skills': SKILLS_DB.filter(s => (state.skillNow[s.key] || 0) >= 3).length, 
+    'kpi-skills': SKILLS_DB.filter(s => (state.skillNow[s.key] || 0) >= 1).length, 
     'overall-pct': pct + '%',
     'kpi-streak': state.streak || 0,
     'proj-count-label': projLabel,
