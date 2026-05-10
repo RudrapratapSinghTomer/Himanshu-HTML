@@ -394,7 +394,21 @@ async function saveProfile() {
   state.joiningDate = document.getElementById('profile-join')?.value;
   await saveState();
 }
+
+function showToast(msg, isErr) {
+  const toast = document.getElementById('save-toast');
+  const text = document.getElementById('save-toast-text');
+  if (!toast || !text) return;
+  text.textContent = msg;
+  toast.style.background = isErr ? 'var(--red)' : 'var(--blue)';
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
 async function saveLogEntry() {
+  const user = auth.currentUser;
+  if (!user) return showToast("You must be logged in", true);
+
   const topic = document.getElementById('log-topic')?.value;
   const learned = document.getElementById('log-learned')?.value;
   const hours = parseFloat(document.getElementById('log-hours')?.value || 0);
@@ -407,7 +421,7 @@ async function saveLogEntry() {
   const blockers = document.getElementById('log-blockers')?.value;
   const tomorrow = document.getElementById('log-tomorrow')?.value;
 
-  if (!topic || !learned) return alert("Fill topic and learned fields");
+  if (!topic || !learned) return showToast("Fill topic and learned fields", true);
 
   const entry = { 
     topic, learned, hours, date, week, tool, mood, wins, handson, blockers, tomorrow,
@@ -424,6 +438,7 @@ async function saveLogEntry() {
     toggleLogForm(); 
     showToast("Session Logged!");
     renderDashboard();
+    renderLogEntries();
   } catch (e) { showToast("Failed to save log", true); }
 }
 async function fetchEmployees() {
@@ -507,15 +522,6 @@ function toggleLogForm() {
     const dateInput = document.getElementById('log-date');
     if (dateInput) dateInput.value = new Date().toISOString().split('T')[0];
   }
-}
-function showToast(msg, isErr) {
-  const toast = document.getElementById('save-toast');
-  const text = document.getElementById('save-toast-text');
-  if (!toast || !text) return;
-  text.textContent = msg;
-  toast.style.background = isErr ? 'var(--red)' : 'var(--blue)';
-  toast.classList.add('active');
-  setTimeout(() => toast.classList.remove('active'), 3000);
 }
 
 function toggleFocusMode() {
