@@ -65,6 +65,7 @@ auth.onAuthStateChanged(async (user) => {
         if (!viewingUserId) {
           updateUserUI();
           renderDashboard();
+          renderWeekly();
         }
       } else {
         // New user: Create initial profile doc
@@ -219,7 +220,7 @@ function showPage(id, btn) {
 
 // ── PAGE RENDERERS ───────────────────────────────────────────────────────────
 function renderDashboard() {
-  updateKPIs(); renderPhaseProgressBars(); renderHeatmap(); renderRecentLogs(); renderSchedule(); renderLeaderboard();
+  updateKPIs(); renderPhaseProgressBars(); renderHeatmap(); renderRecentLogs(); renderSchedule(); renderLeaderboard(); renderWeekly();
 }
 
 function renderRoadmap() {
@@ -440,6 +441,7 @@ async function saveLogEntry() {
     showToast("Session Logged!");
     renderDashboard();
     renderRecentLogs();
+    renderWeekly();
   } catch (e) { 
     console.error("Firestore Save Error:", e);
     showToast(`Failed to save log: ${e.message}`, true); 
