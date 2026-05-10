@@ -380,11 +380,15 @@ function renderLeaderboard() {
 
 // ── MISC ─────────────────────────────────────────────────────────────────────
 function renderProfile() {
+  document.getElementById('profile-first-name').value = state.firstName || '';
+  document.getElementById('profile-last-name').value = state.lastName || '';
   document.getElementById('profile-bio').value = state.bio || '';
   document.getElementById('profile-dept').value = state.department || '';
   document.getElementById('profile-join').value = state.joiningDate || '';
 }
 async function saveProfile() {
+  state.firstName = document.getElementById('profile-first-name')?.value;
+  state.lastName = document.getElementById('profile-last-name')?.value;
   state.bio = document.getElementById('profile-bio')?.value;
   state.department = document.getElementById('profile-dept')?.value;
   state.joiningDate = document.getElementById('profile-join')?.value;
