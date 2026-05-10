@@ -486,7 +486,28 @@ async function switchViewUser(uid) {
   } 
 }
 
-function toggleLogForm() { const el = document.getElementById('log-form-container'); el.style.display = el.style.display === 'none' ? 'block' : 'none'; }
+function toggleLogForm() {
+  const el = document.getElementById('log-form-container');
+  if (!el) return;
+  const isOpening = el.style.display === 'none';
+  el.style.display = isOpening ? 'block' : 'none';
+  
+  if (isOpening) {
+    const weekSelect = document.getElementById('log-week');
+    if (weekSelect) {
+      const activePhases = getActivePhases();
+      const allWeeks = [].concat(...activePhases.map(p => p.weeks));
+      weekSelect.innerHTML = allWeeks.map(w => `<option value="${w}">Week ${w}</option>`).join('');
+      
+      // Auto-select the currently active week if available
+      const currentWeek = Object.keys(state.weekStatus).find(w => state.weekStatus[w] === 'active');
+      if (currentWeek) weekSelect.value = currentWeek;
+    }
+    // Set default date to today
+    const dateInput = document.getElementById('log-date');
+    if (dateInput) dateInput.value = new Date().toISOString().split('T')[0];
+  }
+}
 function showToast(msg, isErr) {
   const toast = document.getElementById('save-toast');
   const text = document.getElementById('save-toast-text');
