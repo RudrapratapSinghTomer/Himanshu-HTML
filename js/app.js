@@ -1287,15 +1287,101 @@ async function fetchQuizQuestion() {
 function renderQuestion(q) {
   const questionEl = document.getElementById('quiz-question-text');
   const optionsEl = document.getElementById('quiz-options-list');
-  
+  const codeWrap = document.getElementById('quiz-code-input-wrap');
+  const submitCodeBtn = document.getElementById('quiz-submit-code-btn');
+  const nextBtn = document.getElementById('quiz-next-btn');
+  const feedbackEl = document.getElementById('quiz-ai-feedback');
+
   questionEl.textContent = q.question;
-  optionsEl.innerHTML = q.options.map((opt, i) => `
-    <button class="quiz-option" onclick="selectQuizOption(${i})">
-      <div class="option-letter">${String.fromCharCode(65 + i)}</div>
-      <span>${opt}</span>
-    </button>
-  `).join('');
+  feedbackEl.style.display = 'none';
+  nextBtn.style.display = 'none';
+
+  if (q.type === 'code') {
+    optionsEl.style.display = 'none';
+    codeWrap.style.display = 'flex';
+    submitCodeBtn.style.display = 'block';
+    document.getElementById('quiz-code-input').value = q.initialCode || '';
+    document.getElementById('quiz-code-input').disabled = false;
+  } else {
+    optionsEl.style.display = 'flex';
+    codeWrap.style.display = 'none';
+    submitCodeBtn.style.display = 'none';
+    optionsEl.innerHTML = q.options.map((opt, i) => `
+      <button class="quiz-option" onclick="selectQuizOption(${i})">
+        <div class="option-letter">${String.fromCharCode(65 + i)}</div>
+        <span>${opt}</span>
+      </button>
+    `).join('');
+  }
 }
+
+async function submitCodeAnswer() {
+  const code = document.getElementById('quiz-code-input').value;
+  const feedbackEl = document.getElementById('quiz-ai-feedback');
+  const feedbackContent = document.getElementById('quiz-feedback-content');
+  const submitBtn = document.getElementById('quiz-submit-code-btn');
+  const nextBtn = document.getElementById('quiz-next-btn');
+  
+  submitBtn.disabled = true;
+  submitBtn.textContent = "AI Reviewing...";
+  
+  try {
+    const functionUrl = 'https://us-central1-bestpeers-learning-dashboard.cloudfunctions.net/evaluateCodeAnswer';
+    
+    let result;
+    try {
+      const response = await fetch(functionUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          code: code,
+          question: quizState.currentQuestion.question,
+          topic: quizState.currentQuestion.topic
+        })
+      });
+      if (response.ok) {
+        result = await response.json();
+      } else {
+        throw new Error("Evaluation failed");
+      }
+    } catch (e) {
+      // Offline/Fallback Feedback
+      console.warn("Using local pattern-based review");
+      const keywords = quizState.currentQuestion.expectedKeywords || [];
+      const missing = keywords.filter(k => !code.toLowerCase().includes(k.toLowerCase()));
+      
+      if (missing.length === 0) {
+        result = {
+          correct: true,
+          feedback: "Great work! Your code uses all the expected concepts. (Local Review)"
+        };
+      } else {
+        result = {
+          correct: false,
+          feedback: `Your code is a good start, but it seems to be missing some key concepts like: ${missing.join(', ')}. Keep refining! (Local Review)`
+        };
+      }
+    }
+
+    feedbackEl.style.display = 'block';
+    feedbackContent.innerHTML = `<p style="color: ${result.correct ? 'var(--green2)' : 'var(--orange)'}; font-weight: 600;">${result.correct ? 'Correct Logic' : 'Needs Improvement'}</p><p>${result.feedback}</p>`;
+    
+    if (result.correct) quizState.score++;
+    document.getElementById('quiz-score-tag').textContent = `Score: ${quizState.score}`;
+    
+    document.getElementById('quiz-code-input').disabled = true;
+    submitBtn.style.display = 'none';
+    nextBtn.style.display = 'block';
+    
+  } catch (e) {
+    console.error(e);
+    alert("Error reviewing code.");
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.textContent = "Submit for AI Review";
+  }
+}
+
 
 function selectQuizOption(idx) {
   if (!quizState.currentQuestion) return;
@@ -1367,14 +1453,17 @@ function getMockQuestion(idx, difficulty) {
   const doneWeekNums = Object.keys(state.weekStatus).filter(w => state.weekStatus[w] === 'done').map(Number);
   const completedTopicTitles = WEEKS_DB.filter(w => doneWeekNums.includes(w.w)).map(w => w.title);
 
+  // Mix MCQs and Coding Challenges
+  const combinedPool = [...ALL_QUESTIONS, ...CODING_CHALLENGES];
+
   let personalizedPool = [];
 
   if (quizState.selectedTopic !== 'all') {
     // Focus on a specific topic
-    personalizedPool = ALL_QUESTIONS.filter(q => q.topic === quizState.selectedTopic);
+    personalizedPool = combinedPool.filter(q => q.topic === quizState.selectedTopic);
   } else {
     // "Anywhere" - Filter by roadmap and only completed topics
-    personalizedPool = ALL_QUESTIONS.filter(q => 
+    personalizedPool = combinedPool.filter(q => 
       (q.tags.includes(roadmap) || q.tags.some(tag => userSkills.includes(tag))) &&
       (completedTopicTitles.includes(q.topic) || q.topic === "General")
     );
@@ -1382,7 +1471,7 @@ function getMockQuestion(idx, difficulty) {
 
   // Fallback to all questions if pool is empty (e.g. nothing completed yet)
   if (personalizedPool.length === 0) {
-    personalizedPool = ALL_QUESTIONS.filter(q => q.tags.includes(roadmap));
+    personalizedPool = combinedPool.filter(q => q.tags.includes(roadmap));
   }
   
   // If still empty, use the original static mocks as ultimate fallback
@@ -1397,9 +1486,10 @@ function getMockQuestion(idx, difficulty) {
   return personalizedPool[idx % personalizedPool.length];
 }
 
-
 // Explicitly expose to global scope
 window.startQuiz = startQuiz;
 window.selectQuizOption = selectQuizOption;
 window.nextQuizQuestion = nextQuizQuestion;
 window.renderQuiz = renderQuiz;
+window.submitCodeAnswer = submitCodeAnswer;
+

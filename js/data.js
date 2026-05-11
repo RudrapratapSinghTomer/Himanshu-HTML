@@ -196,3 +196,31 @@ const ALL_QUESTIONS = [
     correctIndex: 1 
   }
 ];
+
+const CODING_CHALLENGES = [
+  {
+    topic: "SQL (Basic to Advanced)",
+    type: "code",
+    question: "Write a SQL query to find the total hours logged by each user. Output the user_id and the sum of hours, ordered by total hours descending.",
+    initialCode: "-- Write your SQL here\nSELECT ...",
+    expectedKeywords: ["GROUP BY", "SUM", "ORDER BY", "DESC"],
+    tags: ["SQL", "Data Engineering"]
+  },
+  {
+    topic: "Python & PySpark (The Processing Engine)",
+    type: "code",
+    question: "Create a Python function 'clean_data' that takes a list of strings and returns only those that are not empty and have more than 3 characters.",
+    initialCode: "def clean_data(items):\n    # Your code here\n    return []",
+    expectedKeywords: ["def", "filter", "len", "return"] ,
+    tags: ["Python", "Data Engineering"]
+  },
+  {
+    topic: "Python & PySpark (Scalable ML)",
+    type: "code",
+    question: "In PySpark, how would you read a Parquet file located at 's3://my-bucket/data.parquet' into a DataFrame named 'df'?",
+    initialCode: "df = ...",
+    expectedKeywords: ["spark.read.parquet", "s3://"],
+    tags: ["PySpark", "Data Science"]
+  }
+];
+
