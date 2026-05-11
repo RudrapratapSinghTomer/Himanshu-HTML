@@ -758,30 +758,9 @@ body {
   gap: 8px;
 }
 
-.mood-btn {
-  flex: 1;
-  padding: 10px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--navy3);
-  cursor: pointer;
-  text-align: center;
-  font-size: 18px;
-  transition: all 0.15s;
-}
 
-.mood-btn:hover,
-.mood-btn.selected {
-  border-color: var(--blue);
-  background: rgba(59, 130, 246, 0.12);
-}
 
-.mood-btn .mood-label {
-  font-size: 10px;
-  color: var(--text3);
-  display: block;
-  margin-top: 4px;
-}
+
 
 .log-entries {
   margin-top: 24px;

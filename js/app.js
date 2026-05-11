@@ -602,14 +602,13 @@ async function saveLogEntry() {
   const date = document.getElementById('log-date')?.value || new Date().toISOString().split('T')[0];
   const week = document.getElementById('log-week')?.value;
   const tool = document.getElementById('log-tool')?.value;
-  const mood = state.selectedMood || 3;
   const handson = document.getElementById('log-handson')?.value;
   const tomorrow = document.getElementById('log-tomorrow')?.value;
 
   if (!topic || !learned) return showToast("Fill topic and learned fields", true);
 
   const entry = { 
-    topic, learned, hours, date, week, tool, mood, handson, tomorrow,
+    topic, learned, hours, date, week, tool, handson, tomorrow,
     createdAt: firebase.firestore.FieldValue.serverTimestamp() 
   };
 
@@ -829,11 +828,7 @@ function calculateWeekFromDate(date) {
   return Math.ceil((diffInDays + 1) / 7);
 }
 
-function setMood(val, btn) {
-  state.selectedMood = val;
-  document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('active'));
-  if (btn) btn.classList.add('active');
-}
+
 
 window.showTab = function(type, filter, btn) {
   if (type !== 'skills') return;
