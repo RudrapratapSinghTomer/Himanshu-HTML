@@ -77,15 +77,40 @@ const WEEKS = [
 ];
 
 const SKILLS = [
-  { domain: 'SQL', color: '#6366F1', key: 'sql1', name: 'Advanced Window Functions', before: 0, now: 0, target: 5 },
-  { domain: 'SQL', color: '#6366F1', key: 'sql2', name: 'Performance Tuning & Indexing', before: 0, now: 0, target: 5 },
-  { domain: 'Python', color: '#3776AB', key: 'py1', name: 'PySpark Distributed Compute', before: 0, now: 0, target: 5 },
-  { domain: 'Python', color: '#3776AB', key: 'py2', name: 'Memory Management & Logging', before: 0, now: 0, target: 5 },
-  { domain: 'Power BI', color: '#F2C811', key: 'pbi1', name: 'DAX Measures & Time Intelligence', before: 0, now: 0, target: 5 },
-  { domain: 'Power BI', color: '#F2C811', key: 'pbi2', name: 'Relational Data Modeling', before: 0, now: 0, target: 5 },
-  { domain: 'Machine Learning', color: '#8B5CF6', key: 'ml1', name: 'Deep Learning & LLM APIs', before: 0, now: 0, target: 5 },
-  { domain: 'Machine Learning', color: '#8B5CF6', key: 'ml2', name: 'MLOps & Model Tracking', before: 0, now: 0, target: 5 },
+  // SQL
+  { domain: 'SQL', color: '#3B82F6', key: 'sql1', name: 'SQL Joins & Subqueries', before: 4, now: 4, target: 5 },
+  { domain: 'SQL', color: '#3B82F6', key: 'sql2', name: 'Window Functions', before: 3, now: 3, target: 5 },
+  { domain: 'SQL', color: '#3B82F6', key: 'sql3', name: 'CTEs & Recursive Queries', before: 2, now: 2, target: 5 },
+  { domain: 'SQL', color: '#3B82F6', key: 'sql4', name: 'Query Optimization & EXPLAIN', before: 2, now: 2, target: 4 },
+  { domain: 'SQL', color: '#3B82F6', key: 'sql5', name: 'Analytics Patterns (cohort/funnel)', before: 0, now: 0, target: 4 },
+  { domain: 'SQL', color: '#3B82F6', key: 'sql6', name: 'dbt (Data Build Tool)', before: 0, now: 0, target: 3 },
+  { domain: 'SQL', color: '#3B82F6', key: 'sql7', name: 'BigQuery / Snowflake', before: 0, now: 0, target: 3 },
+
+  // PYTHON
+  { domain: 'Python', color: '#8B5CF6', key: 'py1', name: 'Pandas – Data Wrangling', before: 2, now: 2, target: 5 },
+  { domain: 'Python', color: '#8B5CF6', key: 'py2', name: 'Matplotlib / Seaborn', before: 1, now: 1, target: 4 },
+  { domain: 'Python', color: '#8B5CF6', key: 'py3', name: 'Plotly / Interactive Charts', before: 0, now: 0, target: 4 },
+  { domain: 'Python', color: '#8B5CF6', key: 'py4', name: 'Statistics (scipy, numpy)', before: 1, now: 1, target: 4 },
+  { domain: 'Python', color: '#8B5CF6', key: 'py5', name: 'Jupyter Notebooks', before: 2, now: 2, target: 5 },
+  { domain: 'Python', color: '#8B5CF6', key: 'py6', name: 'EDA Best Practices', before: 1, now: 1, target: 5 },
+
+  // POWER BI
+  { domain: 'Power BI', color: '#F97316', key: 'pbi1', name: 'Power Query (M Language)', before: 0, now: 0, target: 4 },
+  { domain: 'Power BI', color: '#F97316', key: 'pbi2', name: 'Data Modeling & Relationships', before: 0, now: 0, target: 5 },
+  { domain: 'Power BI', color: '#F97316', key: 'pbi3', name: 'DAX – Basic Measures', before: 0, now: 0, target: 5 },
+  { domain: 'Power BI', color: '#F97316', key: 'pbi4', name: 'DAX – Time Intelligence', before: 0, now: 0, target: 4 },
+  { domain: 'Power BI', color: '#F97316', key: 'pbi5', name: 'Dashboard Design & UX', before: 0, now: 0, target: 4 },
+  { domain: 'Power BI', color: '#F97316', key: 'pbi6', name: 'Power BI Service & Sharing', before: 0, now: 0, target: 3 },
+
+  // MACHINE LEARNING
+  { domain: 'Machine Learning', color: '#10B981', key: 'ml1', name: 'Feature Engineering', before: 0, now: 0, target: 5 },
+  { domain: 'Machine Learning', color: '#10B981', key: 'ml2', name: 'Model Selection & Tuning', before: 0, now: 0, target: 4 },
+  { domain: 'Machine Learning', color: '#10B981', key: 'ml3', name: 'Model Evaluation Metrics', before: 0, now: 0, target: 5 },
+  { domain: 'Machine Learning', color: '#10B981', key: 'ml4', name: 'Deep Learning Basics', before: 0, now: 0, target: 3 },
+  { domain: 'Machine Learning', color: '#10B981', key: 'ml5', name: 'LLM & Prompt Engineering', before: 0, now: 0, target: 4 },
+  { domain: 'Machine Learning', color: '#10B981', key: 'ml6', name: 'MLOps (Tracking & Deploy)', before: 0, now: 0, target: 3 },
 ];
+
 
 
 const PROJECTS = [

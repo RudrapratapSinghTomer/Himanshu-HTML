@@ -800,8 +800,6 @@ function calculateWeekFromDate(date) {
   return Math.ceil((diffInDays + 1) / 7);
 }
 
-
-
 function setMood(val, btn) {
   state.selectedMood = val;
   document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('active'));
@@ -810,35 +808,17 @@ function setMood(val, btn) {
 
 window.showTab = function(type, filter, btn) {
   if (type !== 'skills') return;
-  
-  // 1. Update active button state
-  const buttons = document.querySelectorAll('.tab-btn');
-  buttons.forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  
-  // 2. Filter skill domains
-  const skillDomains = document.querySelectorAll('.skills-domain');
-  skillDomains.forEach(domain => {
-    const header = domain.querySelector('.domain-header').textContent.toLowerCase().trim();
-    
-    // Mapping filter values to actual header text
-    let shouldShow = false;
-    if (filter === 'all') {
-      shouldShow = true;
-    } else if (filter === 'python' && header.includes('python')) {
-      shouldShow = true;
-    } else if (filter === 'powerbi' && header.includes('power bi')) {
-      shouldShow = true;
-    } else if (filter === 'sql' && header === 'sql') {
-      shouldShow = true;
-    } else if (filter === 'ml' && header.includes('machine learning')) {
-      shouldShow = true;
-    }
 
-    
-    domain.style.display = shouldShow ? 'block' : 'none';
-  });
+  state.activeSkillTab = filter;
+  saveState();
+  const parent = btn.parentElement;
+  if (parent) {
+    parent.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+  renderSkills();
 };
+
 function fixLinks() {}
 let isHostEditMode = false;
 function toggleHostEditMode() {
