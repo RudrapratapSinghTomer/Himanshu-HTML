@@ -281,6 +281,25 @@ function renderRoadmap() {
       const w = WEEKS_DB.find(x => x.w === wNum && x.phase === phase.id) || { title: 'TBD', goals: '' };
       const status = state.weekStatus[wNum] || 'todo';
       
+      const goalsArray = w.goals.split('Day-').filter(Boolean).map(g => 'Day-' + g.trim());
+      const goalsHtml = goalsArray.length > 0 ? goalsArray.map((goalStr) => {
+        const match = goalStr.match(/Day-(\d+):\s*(.*)/);
+        if (!match) return `<div style="font-size:11px; margin-bottom:8px;">${goalStr}</div>`;
+        const dNum = match[1];
+        const dText = match[2];
+        const dStatus = (state.dayStatus?.[wNum] || {})[dNum] || 'todo';
+        return `
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 11px; margin-bottom: 8px;">
+            <span style="flex:1;"><strong>Day-${dNum}:</strong> ${dText}</span>
+            <select onchange="setDayStatus(${wNum}, ${dNum}, this.value)" class="form-select" style="width:auto; height:24px; font-size:10px; padding:0 4px; border-radius:4px; flex-shrink:0;">
+              <option value="todo" ${dStatus==='todo'?'selected':''}>Todo</option>
+              <option value="doing" ${dStatus==='doing'?'selected':''}>Doing</option>
+              <option value="done" ${dStatus==='done'?'selected':''}>Done</option>
+            </select>
+          </div>
+        `;
+      }).join('') : '<div style="font-size:11px; color:var(--text3);">No daily goals set for this week.</div>';
+
       return `
         <div class="week-card ${status==='done'?'done':''}" style="border-top:4px solid ${phase.color}">
           <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
@@ -292,9 +311,9 @@ function renderRoadmap() {
             </select>
           </div>
           <div class="week-title" style="margin-bottom:8px;">${w.title}</div>
-          <details class="week-details" style="cursor:pointer; font-size:12px; color:var(--text2);">
+          <details class="week-details" style="cursor:pointer; font-size:12px; color:var(--text2);" ${status === 'doing' ? 'open' : ''}>
             <summary style="outline:none; list-style:none; color:var(--blue2); font-weight:500;">View Daily Goals</summary>
-            <div class="week-goals" style="margin-top:8px; padding-top:8px; border-top:1px solid var(--border);">${w.goals}</div>
+            <div class="week-goals" style="margin-top:12px; padding-top:12px; border-top:1px solid var(--border);">${goalsHtml}</div>
           </details>
         </div>
       `;
@@ -322,6 +341,21 @@ function switchRoadmap(name, btn) {
   renderRoadmap();
 }
 function setWeekStatus(w, s) { state.weekStatus[w] = s; saveState(); renderRoadmap(); updateKPIs(); }
+
+function setDayStatus(w, d, s) {
+  if (!state.dayStatus) state.dayStatus = {};
+  if (!state.dayStatus[w]) state.dayStatus[w] = {};
+  state.dayStatus[w][d] = s;
+  
+  // Auto-set week to "doing" if a day is started
+  if (s === 'doing' || s === 'done') {
+    if (state.weekStatus[w] === 'todo') state.weekStatus[w] = 'doing';
+  }
+  
+  saveState();
+  renderRoadmap();
+  updateKPIs();
+}
 
 function renderSkills() {
   const container = document.getElementById('skills-content'); if (!container) return;
@@ -1078,13 +1112,22 @@ function addProjectItem() {
 async function saveRoadmapConfig() {
   try {
     await db.collection('config').doc('roadmaps').set(ROADMAPS);
+    
+    // Clear old weeks to prevent overlap
+    const oldWeeks = await db.collection('weeks').get();
+    const deleteBatch = db.batch();
+    oldWeeks.forEach(doc => deleteBatch.delete(doc.ref));
+    await deleteBatch.commit();
+
     const batch = db.batch();
     WEEKS.forEach(w => {
-      const docId = w.phase + '_w' + w.w; // Use unique doc ID for different roadmaps
+      const docId = w.phase + '_w' + w.w; 
       batch.set(db.collection('weeks').doc(docId), w);
     });
     PROJECTS.forEach(p => batch.set(db.collection('projects').doc(p.id), p));
     SKILLS.forEach(s => batch.set(db.collection('skills').doc(s.key), s));
+    RESOURCES.forEach((r, idx) => batch.set(db.collection('resources').doc('res_' + idx), r));
+    
     await batch.commit();
     showToast("Global Content Synchronized!");
   } catch (e) { 

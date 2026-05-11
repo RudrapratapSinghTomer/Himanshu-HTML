@@ -17,7 +17,8 @@ const defaultState = {
   activeSkillTab: 'all',
   activeResourceFilter: 'All',
   streak: 0,
-  rating: 0
+  rating: 0,
+  dayStatus: {}
 };
 
 const ROADMAPS = {
