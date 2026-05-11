@@ -378,14 +378,32 @@ function renderHeatmap() {
   const container = document.getElementById('heatmap'); if (!container) return;
   const targetUid = (myRole === 'host' && viewingUserId) ? viewingUserId : auth.currentUser?.uid;
   if (!targetUid) return;
+
   db.collection('users').doc(targetUid).collection('logs').get().then(snap => {
-    const logMap = {}; snap.docs.forEach(doc => { const e = doc.data(); if (e.date) logMap[e.date] = (logMap[e.date] || 0) + 1; });
-    let html = ''; const now = new Date();
+    const logMap = {}; 
+    snap.docs.forEach(doc => { 
+      const e = doc.data(); 
+      if (e.date) {
+        const hrs = parseFloat(e.hours || 0);
+        logMap[e.date] = (logMap[e.date] || 0) + hrs; 
+      }
+    });
+
+    let html = ''; 
+    const now = new Date();
     for (let i = 83; i >= 0; i--) {
-      const d = new Date(); d.setDate(now.getDate() - i);
+      const d = new Date(); 
+      d.setDate(now.getDate() - i);
       const ds = d.toISOString().split('T')[0];
-      const count = logMap[ds] || 0;
-      html += `<div class="heatmap-cell" style="opacity: ${0.1 + count * 0.22}; background: var(--teal);" title="${ds}"></div>`;
+      const hours = logMap[ds] || 0;
+      
+      // Calculate intensity based on hours (0-8 range for max intensity)
+      const intensity = Math.min(hours / 8, 1);
+      const opacity = 0.1 + (intensity * 0.9);
+      const isToday = ds === now.toISOString().split('T')[0];
+      const borderStyle = isToday ? 'outline: 1px solid white;' : '';
+
+      html += `<div class="heatmap-cell" style="opacity: ${opacity}; background: var(--teal); ${borderStyle}" title="${ds}: ${hours.toFixed(1)} hours logged"></div>`;
     }
     container.innerHTML = html;
   });
