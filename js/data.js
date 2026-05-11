@@ -25,22 +25,28 @@ const ROADMAPS = {
     { id: 'de1', name: 'Month 1: The Core Engineering Sprint', color: '#6366F1', weeks: [1, 2, 3, 4] },
   ],
   'Data Science': [
-    { id: 'ds1', name: 'Month 1: The Machine Learning Sprint', color: '#8B5CF6', weeks: [1, 2, 3, 4] },
+    { id: 'ds1', name: 'Month 1: Foundations & ML Basics', color: '#8B5CF6', weeks: [1, 2, 3, 4] },
+    { id: 'ds2', name: 'Month 2: Advanced ML & Deployment', color: '#8B5CF6', weeks: [5, 6, 7, 8, 9] },
   ]
 };
 
 const WEEKS = [
-  // --- DATA ENGINEERING ---
-  { w: 1, phase: 'de1', title: 'SQL (Basic to Advanced)', tools: ['SQL'], goals: 'Day-1: Foundational Queries (SELECT/WHERE), Day-2: Join Logic (INNER/LEFT/CROSS), Day-3: Aggregations & Grouping, Day-4: Advanced Window Functions, Day-5: DDL/DML & Performance, Day-6: Complex Logic (CTEs)' },
-  { w: 2, phase: 'de1', title: 'Python & PySpark (Processing)', tools: ['Python', 'PySpark'], goals: 'Day-1: Python for Data I/O, Day-2: Distributed Computing Concepts, Day-3: PySpark DataFrames, Day-4: Spark SQL & Functions, Day-5: Data Cleaning at Scale, Day-6: Data Writing & Formats (Parquet)' },
-  { w: 3, phase: 'de1', title: 'Power BI (The Pipeline)', tools: ['Power BI'], goals: 'Day-1: Connecting to Sources (SQL/Cloud), Day-2: Power Query (M Language), Day-3: Data Modeling Basics (Star Schema), Day-4: Basic DAX (CALCULATE), Day-5: Visual Design & Slicers, Day-6: Service & Sharing' },
-  { w: 4, phase: 'de1', title: 'Cloud & Orchestration', tools: ['ADF', 'Databricks', 'Fabric'], goals: 'Day-1: Cloud Ingestion (ADF), Day-2: Databricks Workspace & Notebooks, Day-3: Medallion Architecture, Day-4: Microsoft Fabric (OneLake), Day-5: Delta Lake Logic (ACID), Day-6: Capstone Pipeline Project' },
+  // --- DATA ENGINEERING (Limit: 4 Weeks) ---
+  { w: 1, phase: 'de1', title: 'SQL (Basic to Advanced)', tools: ['SQL'], goals: 'Day-1: Foundational Queries, Day-2: Join Logic, Day-3: Aggregations, Day-4: Window Functions, Day-5: DDL/DML, Day-6: Complex Logic' },
+  { w: 2, phase: 'de1', title: 'Python & PySpark (Processing)', tools: ['Python', 'PySpark'], goals: 'Day-1: Python for Data I/O, Day-2: Distributed Compute, Day-3: DataFrames, Day-4: Spark SQL, Day-5: Data Cleaning, Day-6: Parquet Formats' },
+  { w: 3, phase: 'de1', title: 'Power BI (The Pipeline)', tools: ['Power BI'], goals: 'Day-1: Source Connection, Day-2: Power Query, Day-3: Star Schema, Day-4: Basic DAX, Day-5: Visual Design, Day-6: Service/Sharing' },
+  { w: 4, phase: 'de1', title: 'Cloud & Orchestration', tools: ['ADF', 'Databricks', 'Fabric'], goals: 'Day-1: Cloud Ingestion, Day-2: Databricks Notebooks, Day-3: Medallion Arch, Day-4: Microsoft Fabric, Day-5: Delta Lake, Day-6: Pipeline Project' },
 
-  // --- DATA SCIENCE ---
-  { w: 1, phase: 'ds1', title: 'SQL (Data Extraction)', tools: ['SQL'], goals: 'Day-1: Retrieval (Efficient SELECT), Day-2: Filtering & Case Logic, Day-3: Feature Aggregation (GROUP BY), Day-4: Window Functions for Trends, Day-5: Data Sampling, Day-6: SQL Clean-up & Formatting' },
-  { w: 2, phase: 'ds1', title: 'Python & PySpark (Scalable ML)', tools: ['Python', 'PySpark'], goals: 'Day-1: Scikit-Learn Foundations, Day-2: Stats with Python, Day-3: PySpark MLlib, Day-4: Distributed Feature Engineering, Day-5: Linear & Logistic Regression, Day-6: Spark ML Pipelines' },
-  { w: 3, phase: 'ds1', title: 'Power BI (Model Evaluation)', tools: ['Power BI'], goals: 'Day-1: Visualizing Results (Confusion Matrix), Day-2: Power BI + Python Scripts, Day-3: Dynamic Dashboards (What-If), Day-4: DAX for Data Science (RMSE), Day-5: Storytelling (Key Influencers), Day-6: Stakeholder Reporting' },
-  { w: 4, phase: 'ds1', title: 'Cloud DS & AutoML', tools: ['Databricks', 'Fabric'], goals: 'Day-1: MLflow on Databricks, Day-2: AutoML (Fabric/Databricks), Day-3: Distributed Training, Day-4: Model Deployment (API), Day-5: Monitoring Drift, Day-6: Final DS Project' },
+  // --- DATA SCIENCE (Limit: 9 Weeks) ---
+  { w: 1, phase: 'ds1', title: 'SQL (Data Extraction)', tools: ['SQL'], goals: 'Day-1: Retrieval, Day-2: Filtering, Day-3: Aggregation, Day-4: Window Functions, Day-5: Data Sampling, Day-6: Formatting' },
+  { w: 2, phase: 'ds1', title: 'Python & PySpark (Scalable ML)', tools: ['Python', 'PySpark'], goals: 'Day-1: Scikit-Learn, Day-2: Stats Foundations, Day-3: MLlib Basics, Day-4: Feature Engineering, Day-5: Regressions, Day-6: Spark ML Pipelines' },
+  { w: 3, phase: 'ds1', title: 'Power BI (Model Evaluation)', tools: ['Power BI'], goals: 'Day-1: Confusion Matrix, Day-2: Python Scripts, Day-3: What-If Analysis, Day-4: RMSE DAX, Day-5: Storytelling, Day-6: Stakeholder Reporting' },
+  { w: 4, phase: 'ds1', title: 'Cloud DS & AutoML', tools: ['Databricks', 'Fabric'], goals: 'Day-1: MLflow, Day-2: AutoML, Day-3: Distributed Training, Day-4: Deployment, Day-5: Drift Monitoring, Day-6: ML Project' },
+  { w: 5, phase: 'ds2', title: 'Deep Learning Foundations', tools: ['PyTorch', 'Keras'], goals: 'Day-1: Neural Nets 101, Day-2: Activation Functions, Day-3: Backpropagation, Day-4: CNN Basics, Day-5: Training Loops, Day-6: Simple Image Classifier' },
+  { w: 6, phase: 'ds2', title: 'Natural Language Processing', tools: ['HuggingFace', 'OpenAI'], goals: 'Day-1: Tokenization, Day-2: Embeddings, Day-3: Transformers, Day-4: Prompt Engineering, Day-5: Vector DBs, Day-6: Chatbot MVP' },
+  { w: 7, phase: 'ds2', title: 'MLOps & CI/CD for ML', tools: ['MLflow', 'GitHub Actions'], goals: 'Day-1: Experiment Tracking, Day-2: Model Registry, Day-3: Automated Testing, Day-4: CI/CD Pipelines, Day-5: Production Serving, Day-6: MLOps Audit' },
+  { w: 8, phase: 'ds2', title: 'Advanced Scalability', tools: ['Dask', 'Ray'], goals: 'Day-1: Parallelizing Python, Day-2: Ray Core, Day-3: Dask DataFrames, Day-4: Distributed Hyperopt, Day-5: Memory Management, Day-6: Scale Test' },
+  { w: 9, phase: 'ds2', title: 'DS Capstone Project', tools: ['Full Stack DS'], goals: 'Day-1: Scoping, Day-2: Ingestion, Day-3: Model Selection, Day-4: Optimization, Day-5: Final Dashboard, Day-6: Presentation' },
 ];
 
 
