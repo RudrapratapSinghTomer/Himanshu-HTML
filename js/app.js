@@ -1247,16 +1247,10 @@ async function startQuiz() {
   if (selectedTopic !== 'all' && selectedTopic !== 'none') {
     filteredPool = combinedPool.filter(q => q.topic === selectedTopic);
   } else {
-    // Only include questions from completed topics or general ones
-    filteredPool = combinedPool.filter(q => 
-      (q.tags.includes(roadmap) || q.tags.some(tag => userSkills.includes(tag))) &&
-      (completedTopicTitles.includes(q.topic) || q.topic === "General")
-    );
+    // Broadened filter to ensure larger variety (All questions for your roadmap)
+    filteredPool = combinedPool.filter(q => q.tags.includes(roadmap));
   }
 
-  // Fallback if empty
-  if (filteredPool.length === 0) filteredPool = combinedPool.filter(q => q.tags.includes(roadmap));
-  
   // Shuffle logic (Fisher-Yates)
   for (let i = filteredPool.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -1267,7 +1261,7 @@ async function startQuiz() {
     active: true,
     currentQuestion: null,
     index: 0,
-    total: Math.min(10, filteredPool.length),
+    total: Math.min(20, filteredPool.length),
     score: 0,
     history: [],
     selectedTopic: selectedTopic,
