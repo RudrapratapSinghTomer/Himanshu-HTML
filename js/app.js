@@ -585,14 +585,7 @@ function updateLogWeek(dateVal) {
   }
 }
 
-function toggleFocusMode() {
-  document.body.classList.toggle('focus-active');
-  const btn = document.getElementById('focus-mode-btn');
-  if (btn) {
-    const isActive = document.body.classList.contains('focus-active');
-    btn.innerHTML = isActive ? 'Exit Focus' : '<svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="vertical-align:middle; margin-right:4px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" /></svg> Focus Mode';
-  }
-}
+
 
 function setMood(val, btn) {
   state.selectedMood = val;
