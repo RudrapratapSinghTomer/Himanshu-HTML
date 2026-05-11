@@ -311,10 +311,14 @@ function renderRoadmap() {
             </select>
           </div>
           <div class="week-title" style="margin-bottom:8px;">${w.title}</div>
-          ${w.url ? `<a href="${w.url}" target="_blank" class="btn-sm" style="text-decoration:none; display:inline-flex; align-items:center; gap:8px; margin-bottom:16px; background:var(--blue); color:#FFFFFF; border:none; width:fit-content; font-size:12px; font-weight:600; padding:8px 12px; border-radius:6px; box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);">
-            <svg style="width:14px; height:14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
-            Open Course Material
-          </a>` : ''}
+          ${w.url ? `
+            <a href="${w.url}" target="_blank" class="btn-sm" style="text-decoration:none; display:inline-flex; align-items:center; gap:8px; margin-bottom:16px; background:${w.url.includes('youtube.com') || w.url.includes('youtu.be') ? '#FF0000' : 'var(--blue)'}; color:#FFFFFF; border:none; width:fit-content; font-size:12px; font-weight:600; padding:8px 12px; border-radius:6px; box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);">
+              ${w.url.includes('youtube.com') || w.url.includes('youtu.be') ? 
+                `<svg style="width:14px; height:14px;" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.377.505 9.377.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>` : 
+                `<svg style="width:14px; height:14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>`
+              }
+              ${w.url.includes('youtube.com') || w.url.includes('youtu.be') ? 'Watch Tutorial' : 'Open Course Material'}
+            </a>` : ''}
           <details class="week-details" style="cursor:pointer; font-size:12px; color:var(--text2);" ${status === 'doing' ? 'open' : ''}>
             <summary style="outline:none; list-style:none; color:var(--blue2); font-weight:500;">View Daily Goals</summary>
             <div class="week-goals" style="margin-top:12px; padding-top:12px; border-top:1px solid var(--border);">${goalsHtml}</div>
@@ -1173,8 +1177,10 @@ let quizState = {
   total: 10,
   score: 0,
   history: [],
-  selectedTopic: 'all'
+  selectedTopic: 'all',
+  pool: []
 };
+
 
 function renderQuiz() {
   if (!quizState.active) {
@@ -1204,14 +1210,47 @@ async function startQuiz() {
   const topicSelect = document.getElementById('quiz-topic-select');
   const selectedTopic = topicSelect ? topicSelect.value : 'all';
 
+  // Pre-calculate and Shuffle Pool
+  const roadmap = state.assignedRoadmap || 'Data Engineering';
+  const userSkills = Object.keys(state.skillNow).filter(s => state.skillNow[s] > 0);
+  const doneWeekNums = Object.keys(state.weekStatus).filter(w => state.weekStatus[w] === 'done').map(Number);
+  const completedTopicTitles = WEEKS_DB.filter(w => doneWeekNums.includes(w.w)).map(w => w.title);
+
+  const combinedPool = [
+    ...ALL_QUESTIONS,
+    ...CODING_CHALLENGES,
+    ...(typeof EXTRACTED_MCQS !== 'undefined' ? EXTRACTED_MCQS : []),
+    ...(typeof EXTRACTED_CODE !== 'undefined' ? EXTRACTED_CODE : [])
+  ];
+
+  let filteredPool = [];
+  if (selectedTopic !== 'all') {
+    filteredPool = combinedPool.filter(q => q.topic === selectedTopic);
+  } else {
+    filteredPool = combinedPool.filter(q => 
+      (q.tags.includes(roadmap) || q.tags.some(tag => userSkills.includes(tag))) &&
+      (completedTopicTitles.includes(q.topic) || q.topic === "General")
+    );
+  }
+
+  // Fallback if empty
+  if (filteredPool.length === 0) filteredPool = combinedPool.filter(q => q.tags.includes(roadmap));
+  
+  // Shuffle logic (Fisher-Yates)
+  for (let i = filteredPool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [filteredPool[i], filteredPool[j]] = [filteredPool[j], filteredPool[i]];
+  }
+
   quizState = {
     active: true,
     currentQuestion: null,
     index: 0,
-    total: 10,
+    total: Math.min(10, filteredPool.length),
     score: 0,
     history: [],
-    selectedTopic: selectedTopic
+    selectedTopic: selectedTopic,
+    pool: filteredPool
   };
   
   document.getElementById('quiz-start-view').style.display = 'none';
@@ -1221,6 +1260,7 @@ async function startQuiz() {
   
   await fetchQuizQuestion();
 }
+
 
 
 async function fetchQuizQuestion() {
@@ -1271,9 +1311,10 @@ async function fetchQuizQuestion() {
         throw new Error("Function not available");
       }
     } catch (e) {
-      console.warn("Using personalized mock quiz data (Cloud Function not detected)");
-      data = getMockQuestion(quizState.index, difficulty);
+      console.warn("Using shuffled local quiz pool (AI Function Offline)");
+      data = quizState.pool[quizState.index % quizState.pool.length];
     }
+
 
     quizState.currentQuestion = data;
     renderQuestion(data);
@@ -1444,51 +1485,6 @@ async function finishQuiz() {
   });
   
   await saveState();
-}
-
-function getMockQuestion(idx, difficulty) {
-  // Use the global 'state' object and 'ALL_QUESTIONS' pool
-  const roadmap = state.assignedRoadmap || 'Data Engineering'; 
-  const userSkills = Object.keys(state.skillNow).filter(s => state.skillNow[s] > 0);
-  const doneWeekNums = Object.keys(state.weekStatus).filter(w => state.weekStatus[w] === 'done').map(Number);
-  const completedTopicTitles = WEEKS_DB.filter(w => doneWeekNums.includes(w.w)).map(w => w.title);
-
-  // Mix MCQs and Coding Challenges (including the 170+ extracted ones)
-  const combinedPool = [
-    ...ALL_QUESTIONS, 
-    ...CODING_CHALLENGES,
-    ...(typeof EXTRACTED_MCQS !== 'undefined' ? EXTRACTED_MCQS : []),
-    ...(typeof EXTRACTED_CODE !== 'undefined' ? EXTRACTED_CODE : [])
-  ];
-
-  let personalizedPool = [];
-
-  if (quizState.selectedTopic !== 'all') {
-    // Focus on a specific topic
-    personalizedPool = combinedPool.filter(q => q.topic === quizState.selectedTopic);
-  } else {
-    // "Anywhere" - Filter by roadmap and only completed topics
-    personalizedPool = combinedPool.filter(q => 
-      (q.tags.includes(roadmap) || q.tags.some(tag => userSkills.includes(tag))) &&
-      (completedTopicTitles.includes(q.topic) || q.topic === "General")
-    );
-  }
-
-  // Fallback to all questions if pool is empty (e.g. nothing completed yet)
-  if (personalizedPool.length === 0) {
-    personalizedPool = combinedPool.filter(q => q.tags.includes(roadmap));
-  }
-  
-  // If still empty, use the original static mocks as ultimate fallback
-  if (personalizedPool.length === 0) {
-    return { 
-      question: "Which SQL clause is used to filter records after an aggregation has been performed?", 
-      options: ["WHERE", "FILTER", "HAVING", "GROUP BY"], 
-      correctIndex: 2 
-    };
-  }
-
-  return personalizedPool[idx % personalizedPool.length];
 }
 
 // Explicitly expose to global scope

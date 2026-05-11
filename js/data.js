@@ -38,6 +38,7 @@ const WEEKS = [
     phase: 'de1',
     title: 'SQL (Basic to Advanced)',
     tools: ['SQL'],
+    url: 'https://www.youtube.com/watch?v=OT1RErkfLNQ',
     goals: 'Day-1: Foundational Queries – Mastering SELECT, WHERE, and logical operators. Day-2: The Join Logic – Using INNER, LEFT, and CROSS JOINS. Day-3: Aggregations & Grouping – Using GROUP BY and HAVING to summarize data. Day-4: Advanced Window Functions – Applying RANK(), LEAD/LAG, and PARTITION BY. Day-5: DDL/DML & Performance – Creating/Altering tables and using INDEXING. Day-6: Complex Logic (CTEs) – Writing Common Table Expressions for nested queries.'
   },
   {
