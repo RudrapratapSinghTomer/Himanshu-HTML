@@ -79,7 +79,8 @@ auth.onAuthStateChanged(async (user) => {
           id: user.uid,
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
         };
-        db.collection('users').doc(user.uid).set(initialDoc);
+        db.collection('users').doc(user.uid).set(initialDoc)
+          .catch(e => console.error("Error creating initial profile:", e));
       }
     });
 
@@ -157,7 +158,10 @@ async function saveState() {
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     }, { merge: true });
     showToast("Saved to Cloud");
-  } catch (e) { showToast("Sync failed", true); }
+  } catch (e) { 
+    console.error("Firestore Sync Error:", e);
+    showToast("Sync failed", true); 
+  }
 }
 
 // ── DATA FETCHING ────────────────────────────────────────────────────────────
@@ -500,7 +504,10 @@ async function handleAdminAssign() {
     await db.collection('users').doc(uid).update({ assignedRoadmap: roadmap });
     showToast("Roadmap Assigned!");
     fetchEmployees();
-  } catch (e) { showToast("Failed to assign", true); }
+  } catch (e) { 
+    console.error("Admin Assign Error:", e);
+    showToast("Failed to assign", true); 
+  }
 }
 
 async function switchViewUser(uid) { 
@@ -867,7 +874,10 @@ async function saveRoadmapConfig() {
     PROJECTS_DB.forEach(p => batch.set(db.collection('projects').doc(p.id), p));
     await batch.commit();
     showToast("Content Saved Globally");
-  } catch (e) { showToast("Global Save Failed", true); }
+  } catch (e) { 
+    console.error("Global Save Error:", e);
+    showToast("Global Save Failed", true); 
+  }
 }
 
 // ── INITIALIZATION & LISTENERS ───────────────────────────────────────────────
