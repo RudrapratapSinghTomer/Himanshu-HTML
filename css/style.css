@@ -1066,6 +1066,12 @@ body.focus-mode .page {
 }
 
 /* ── WEEKLY REVIEW ── */
+#review-rating-display {
+  color: var(--gold);
+  text-shadow: 0 0 10px rgba(245, 158, 11, 0.2);
+  transition: all 0.3s ease;
+}
+
 .review-week-grid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);

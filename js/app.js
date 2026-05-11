@@ -653,6 +653,15 @@ async function renderWeekly() {
     rating: review.rating || 0
   };
 
+  // 3. Auto-Calculate Rating if not manually set
+  if (!displayData.rating && displayData.hours > 0) {
+    if (displayData.hours >= 7) displayData.rating = 5;
+    else if (displayData.hours >= 6) displayData.rating = 4;
+    else if (displayData.hours >= 4) displayData.rating = 3;
+    else if (displayData.hours >= 2) displayData.rating = 2;
+    else displayData.rating = 1;
+  }
+
   // Calculate Star String
   const maxStars = 5;
   const rating = displayData.rating || 0;
