@@ -5,7 +5,7 @@ const defaultState = {
   firstName: '',
   lastName: '',
   role: 'user',
-  assignedRoadmap: 'Data Analytics',
+  assignedRoadmap: 'Data Analyst',
   weekStatus: {},
   projectTasks: {},
   projectStatus: {},
@@ -21,42 +21,52 @@ const defaultState = {
 };
 
 const ROADMAPS = {
-  'Data Analytics': [
-    { id: 'p1', name: 'Analytics Mindset', color: '#14B8A6', weeks: [1, 2] },
-    { id: 'p2', name: 'SQL Deep Dive', color: '#3B82F6', weeks: [3, 4, 5, 6] },
-    { id: 'p3', name: 'Python Analytics', color: '#8B5CF6', weeks: [7, 8, 9, 10] },
-    { id: 'p4', name: 'Power BI', color: '#F97316', weeks: [11, 12, 13, 14] },
-    { id: 'p5', name: 'Advanced Excel', color: '#F59E0B', weeks: [15, 16] },
-    { id: 'p6', name: 'Portfolio & Career', color: '#10B981', weeks: [17, 18, 19, 20] },
+  'Data Analyst': [
+    { id: 'da1', name: 'Month 1: The Core Analyst', color: '#3B82F6', weeks: [1, 2, 3, 4] },
+    { id: 'da2', name: 'Month 2: Advanced Analyst', color: '#14B8A6', weeks: [5, 6, 7, 8] },
   ],
   'Data Engineering': [
-    { id: 'e1', name: 'Cloud Infra', color: '#6366F1', weeks: [1, 2] },
-    { id: 'e2', name: 'Data Modeling', color: '#3B82F6', weeks: [3, 4] },
+    { id: 'de1', name: 'Month 1: The Foundation Engineer', color: '#6366F1', weeks: [1, 2, 3, 4] },
+    { id: 'de2', name: 'Month 2: Advanced Data Engineer', color: '#4361ee', weeks: [5, 6, 7, 8] },
+  ],
+  'Data Science': [
+    { id: 'ds1', name: 'Month 1: The Machine Learning Starter', color: '#8B5CF6', weeks: [1, 2, 3, 4] },
+    { id: 'ds2', name: 'Month 2: Advanced Data Scientist', color: '#9d4edd', weeks: [5, 6, 7, 8] },
   ]
 };
 
 const WEEKS = [
-  { w: 1, phase: 'p1', title: 'What is Data Analytics?', tools: ['Notes', 'YouTube'], goals: 'Analyst vs Engineer vs Scientist roles; Analytics lifecycle; Tool landscape', handson: 'Write 1-page role comparison; Map 5 JDs to skills' },
-  { w: 2, phase: 'p1', title: 'Business Thinking & KPIs', tools: ['Excel'], goals: 'KPI design (SMART); Funnel metrics; Cohort basics; Pivot tables', handson: 'Build KPI dashboard in Excel from sample sales data' },
-  { w: 3, phase: 'p2', title: 'SQL — Advanced Querying', tools: ['PostgreSQL'], goals: 'CTEs, Window functions (ROW_NUMBER, RANK, LAG/LEAD), Subqueries vs joins', handson: '10 LeetCode SQL mediums; Window function queries on sample DB' },
-  { w: 4, phase: 'p2', title: 'SQL — Analytics Patterns', tools: ['BigQuery', 'dbt'], goals: 'Cohort analysis, Retention & churn SQL, Funnel queries, Date math', handson: 'Cohort retention table on e-commerce dataset; Funnel analysis query' },
-  { w: 5, phase: 'p2', title: 'SQL — Performance & Modeling', tools: ['PostgreSQL', 'dbt'], goals: 'EXPLAIN & indexes; Star vs snowflake schema; Intro dbt', handson: 'Optimize 3 slow queries; Build a star schema on sample data' },
-  { w: 6, phase: 'p2', title: 'SQL — Project Week', tools: ['SQL', 'Power BI'], goals: 'End-to-end SQL analytics project; Data cleaning; Storytelling', handson: 'Full project: raw CSV → SQL clean → 5 key metrics → present findings' },
-  { w: 7, phase: 'p3', title: 'Pandas & Data Wrangling', tools: ['Python', 'Pandas'], goals: 'merge, groupby, pivot_table; Nulls, duplicates, dtypes; Date operations', handson: 'Clean a messy Kaggle CSV; Groupby analysis with 5 insights' },
-  { w: 8, phase: 'p3', title: 'Data Visualization — Python', tools: ['Seaborn', 'Plotly'], goals: 'Chart types & when to use; Seaborn statistical plots; Interactive Plotly', handson: '5 chart types on same dataset; EDA notebook with 10 visuals' },
-  { w: 9, phase: 'p3', title: 'Statistics for Analytics', tools: ['scipy', 'numpy'], goals: 'Descriptive stats; Correlation vs causation; t-test, chi-square', handson: 'Statistical EDA on HR dataset; 3 statistically significant insights' },
-  { w: 10, phase: 'p3', title: 'Python Analytics Project', tools: ['Python', 'Jupyter'], goals: 'End-to-end analysis project; Storytelling with data; Notebook best practices', handson: 'Full Jupyter: load → clean → explore → visualize → insights → conclusions' },
-  { w: 11, phase: 'p4', title: 'Power BI — Fundamentals', tools: ['Power BI'], goals: 'Data model concepts; Power Query (M) basics; Relationships & cardinality', handson: 'Connect to Excel → 3-table model → 5 basic visuals' },
-  { w: 12, phase: 'p4', title: 'DAX Fundamentals', tools: ['Power BI', 'DAX'], goals: 'Measures vs columns; CALCULATE, FILTER, ALL; Time intelligence basics', handson: '10 DAX measures (YTD, MoM%, running total); Sales summary report' },
-  { w: 13, phase: 'p4', title: 'Power BI — Advanced Visuals', tools: ['Power BI'], goals: 'Custom visuals; Drill-through & bookmarks; Mobile layout; RLS basics', handson: 'Interactive multi-page dashboard; Drill-through on product report' },
-  { w: 14, phase: 'p4', title: 'Power BI — Publish & Project', tools: ['Power BI Service'], goals: 'Publish to Service; Scheduled refresh; Share & collaborate; Row-level security', handson: 'Publish dashboard to PBI Service; Set auto-refresh; Present to peer' },
-  { w: 15, phase: 'p5', title: 'Excel — Advanced Analytics', tools: ['Excel'], goals: 'INDEX-MATCH, XLOOKUP, array formulas; Power Query in Excel; Data validation', handson: 'Rebuild SQL metrics in Excel; Power Query to merge 3 tables' },
-  { w: 16, phase: 'p5', title: 'Excel — Dashboard & VBA Intro', tools: ['Excel', 'VBA'], goals: 'Dynamic charts & named ranges; Slicers & dropdowns; Basic VBA macros', handson: 'Executive Excel dashboard with slicers; Record 1 macro' },
-  { w: 17, phase: 'p6', title: 'Capstone — Data Collection', tools: ['SQL', 'Python'], goals: 'Choose real-world dataset; Full cleaning pipeline SQL + Python; Data dictionary', handson: 'Source Kaggle dataset; Clean & document every column' },
-  { w: 18, phase: 'p6', title: 'Capstone — Analysis & Insights', tools: ['Python', 'Power BI'], goals: 'Full EDA + statistical analysis; Define 5 key business questions; Answer with data', handson: 'Full EDA notebook; Power BI dashboard for same capstone data' },
-  { w: 19, phase: 'p6', title: 'Portfolio & GitHub', tools: ['GitHub', 'Markdown'], goals: 'Clean notebooks; Write READMEs; Publish 3+ projects', handson: 'Polish 3 projects; Write case-study READMEs; Post on LinkedIn' },
-  { w: 20, phase: 'p6', title: 'Interview Prep & Mock Analytics', tools: ['All'], goals: 'SQL interview patterns; Case study practice; Present capstone', handson: '20 SQL interview Qs; Present capstone; Update resume' },
+  // --- DATA ANALYST ---
+  { w: 1, phase: 'da1', title: 'SQL Foundations', tools: ['SQL'], goals: 'Day-1: SELECT & Filtering, Day-2: Joins & Unions, Day-3: Aggregations (Sums/Avg), Day-4: Subqueries & CTEs, Day-5: Window Functions, Day-6: Data Cleaning, Day-7: SQL Case Study' },
+  { w: 2, phase: 'da1', title: 'Power BI & Data Modeling', tools: ['Power BI'], goals: 'Day-1: Ingestion & Power Query, Day-2: Star Schema Modeling, Day-3: DAX Basics, Day-4: Time Intelligence, Day-5: Visual Selection & UX, Day-6: Interactivity, Day-7: Dashboard Project' },
+  { w: 3, phase: 'da1', title: 'Python for Analysis', tools: ['Python', 'Pandas'], goals: 'Day-1: Data Structures, Day-2: Pandas DataFrames, Day-3: Data Cleaning, Day-4: Merging & Pivoting, Day-5: Seaborn Plots, Day-6: EDA Patterns, Day-7: Python Analysis Project' },
+  { w: 4, phase: 'da1', title: 'Business Intelligence & Logic', tools: ['Stats', 'BI'], goals: 'Day-1: KPI Definition, Day-2: Statistical Distributions, Day-3: Correlation & Outliers, Day-4: Storytelling with Data, Day-5: Portfolio, Day-6: Resume, Day-7: Final Capstone' },
+  { w: 5, phase: 'da2', title: 'Fabric & Advanced Power BI', tools: ['MS Fabric', 'Power BI'], goals: 'Day-1: Intro to Fabric OneLake, Day-2: Direct Lake Mode, Day-3: DAX Optimization, Day-4: Power BI Service Admin, Day-5: Row Level Security, Day-6: Fabric Data Factory' },
+  { w: 6, phase: 'da2', title: 'Big Data Analytics (PySpark)', tools: ['PySpark', 'Databricks'], goals: 'Day-1: Spark for Analysts, Day-2: Handling Huge Datasets (Parquet), Day-3: Databricks Dashboards' },
+  { w: 7, phase: 'da2', title: 'Stats & Enterprise Portfolio I', tools: ['Stats'], goals: 'A/B Testing logic, Time Series Forecasting' },
+  { w: 8, phase: 'da2', title: 'Stats & Enterprise Portfolio II', tools: ['MS Fabric'], goals: 'Final Capstone built entirely on Microsoft Fabric' },
+
+  // --- DATA ENGINEERING ---
+  { w: 1, phase: 'de1', title: 'SQL for Engineering', tools: ['SQL'], goals: 'Day-1: DDL/DML Operations, Day-2: Views & Stored Procedures, Day-3: Indexing & Partitioning, Day-4: Query Optimization, Day-5: ACID Properties, Day-6: NoSQL vs SQL, Day-7: Database Design Project' },
+  { w: 2, phase: 'de1', title: 'Python & Automation', tools: ['Python'], goals: 'Day-1: Scripting & Modules, Day-2: Error Handling & Logging, Day-3: API Extraction, Day-4: JSON & Parquet, Day-5: SQLAlchemy, Day-6: Cron Jobs, Day-7: Automation Project' },
+  { w: 3, phase: 'de1', title: 'Cloud Ingestion (ADF/GCP)', tools: ['ADF', 'GCP'], goals: 'Day-1: Cloud Storage Basics, Day-2: ADF Linked Services, Day-3: Copy Activity, Day-4: Control Flow, Day-5: GCP Dataflow, Day-6: Ingestion Patterns, Day-7: Pipeline Project' },
+  { w: 4, phase: 'de1', title: 'PySpark Basics', tools: ['PySpark'], goals: 'Day-1: Distributed Computing, Day-2: SparkSession & DataFrames, Day-3: Transformations vs Actions, Day-4: PySpark Data Cleaning, Day-5: Working with Schemas, Day-6: Writing to DBs, Day-7: ETL Project' },
+  { w: 5, phase: 'de2', title: 'Databricks & Delta Lake', tools: ['Databricks'], goals: 'Day-1: Delta Lake ACID, Day-2: Time Travel, Day-3: Medallion Architecture (Bronze/Silver/Gold)' },
+  { w: 6, phase: 'de2', title: 'Fabric & Unified Data', tools: ['MS Fabric'], goals: 'Day-1: Lakehouse vs Warehouse, Day-2: Shortcuts' },
+  { w: 7, phase: 'de2', title: 'Governance & DevOps I', tools: ['Unity Catalog'], goals: 'Unity Catalog for security and governance' },
+  { w: 8, phase: 'de2', title: 'Governance & DevOps II', tools: ['CI/CD'], goals: 'Git Integration for pipelines, CI/CD to automate deployments' },
+
+  // --- DATA SCIENCE ---
+  { w: 1, phase: 'ds1', title: 'Stats & Python Foundations', tools: ['Python', 'NumPy'], goals: 'Day-1: DS Libraries, Day-2: Descriptive Stats, Day-3: Probability Theory, Day-4: NumPy Math, Day-5: Data Distribution, Day-6: Handling Outliers, Day-7: Stats Project' },
+  { w: 2, phase: 'ds1', title: 'Machine Learning - Supervised', tools: ['Scikit-Learn'], goals: 'Day-1: Linear Regression, Day-2: Logistic Regression, Day-3: Decision Trees, Day-4: Random Forest, Day-5: Model Evaluation (RMSE), Day-6: Bias-Variance, Day-7: Prediction Project' },
+  { w: 3, phase: 'ds1', title: 'Advanced ML & SQL', tools: ['SQL', 'ML'], goals: 'Day-1: SVM & KNN, Day-2: K-Means Clustering, Day-3: Feature Extraction with SQL, Day-4: Scaling & Normalization, Day-5: Feature Encoding, Day-6: Hyperparameter Tuning, Day-7: Classification Project' },
+  { w: 4, phase: 'ds1', title: 'Visualization & Deployment', tools: ['Plotly', 'Streamlit'], goals: 'Day-1: Matplotlib/Plotly, Day-2: PBI for Model Monitoring, Day-3: Streamlit, Day-4: Model Pickling, Day-5: SHAP Values (Explainability), Day-6: Portfolio Setup, Day-7: End-to-end ML Project' },
+  { w: 5, phase: 'ds2', title: 'Big Data ML (PySpark)', tools: ['PySpark'], goals: 'Day-1: Spark MLlib, Day-2: Distributed Training' },
+  { w: 6, phase: 'ds2', title: 'Cloud ML (Databricks/Fabric)', tools: ['Databricks'], goals: 'Day-1: MLflow Tracking, Day-2: Databricks AutoML' },
+  { w: 7, phase: 'ds2', title: 'Deep Learning & MLOps I', tools: ['PyTorch', 'TensorFlow'], goals: 'Neural Networks, GenAI/LLM APIs' },
+  { w: 8, phase: 'ds2', title: 'Deep Learning & MLOps II', tools: ['MLOps'], goals: 'Model Drift detection and retraining patterns' },
 ];
+
 
 const SKILLS = [
   { domain: 'SQL', color: '#3B82F6', key: 'sql1', name: 'SQL Joins & Subqueries', before: 4, now: 4, target: 5 },

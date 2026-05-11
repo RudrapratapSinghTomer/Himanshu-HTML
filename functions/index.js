@@ -51,7 +51,7 @@ exports.getQuizQuestion = functions.https.onRequest(async (req, res) => {
       messages: [
         { 
           role: "system", 
-          content: "You are QuizGPT. Generate a multiple-choice question for a Data Analytics student. Return ONLY JSON in this format: { \"question\": \"...\", \"options\": [\"A\", \"B\", \"C\", \"D\"], \"correctIndex\": 0 }. Context: Roadmap is " + roadmap + ", Student Skills: " + skills.join(", ") 
+          content: "You are QuizGPT. Generate a multiple-choice question for a tech professional. Return ONLY JSON in this format: { \"question\": \"...\", \"options\": [\"A\", \"B\", \"C\", \"D\"], \"correctIndex\": 0 }. Context: Roadmap is " + roadmap + ", Student Skills: " + skills.join(", ") 
         },
         { 
           role: "user", 

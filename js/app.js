@@ -112,8 +112,8 @@ auth.onAuthStateChanged(async (user) => {
 
 // ── UTILS ────────────────────────────────────────────────────────────────────
 function getActivePhases() {
-  const roadmapName = state.assignedRoadmap || 'Data Analytics';
-  return ROADMAPS_DB[roadmapName] || ROADMAPS_DB['Data Analytics'] || [];
+  const roadmapName = state.assignedRoadmap || 'Data Analyst';
+  return ROADMAPS_DB[roadmapName] || ROADMAPS_DB['Data Analyst'] || [];
 }
 
 function updateUserUI() {
@@ -233,7 +233,7 @@ function renderRoadmap() {
   const grid = document.getElementById('week-grid'); if (!grid) return;
   try {
     const activePhases = getActivePhases();
-    const roadmapId = state.assignedRoadmap || 'Data Analytics';
+    const roadmapId = state.assignedRoadmap || 'Data Analyst';
     const titleEl = document.getElementById('roadmap-user-title');
     if (titleEl) titleEl.textContent = roadmapId + ' Path';
 
@@ -253,9 +253,9 @@ function renderRoadmap() {
     }
     
     grid.innerHTML = displayWeeks.map(wNum => {
-      const w = WEEKS_DB.find(x => x.w === wNum) || { title: 'TBD', goals: '' };
-      const status = state.weekStatus[wNum] || 'todo';
       const phase = activePhases.find(p => p.weeks.includes(wNum)) || { color: '#ccc' };
+      const w = WEEKS_DB.find(x => x.w === wNum && x.phase === phase.id) || { title: 'TBD', goals: '' };
+      const status = state.weekStatus[wNum] || 'todo';
       
       return `
         <div class="week-card ${status==='done'?'done':''}" style="border-top:4px solid ${phase.color}">
