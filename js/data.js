@@ -23,11 +23,9 @@ const defaultState = {
 const ROADMAPS = {
   'Data Engineering': [
     { id: 'de1', name: 'Month 1: The Core Engineering Sprint', color: '#6366F1', weeks: [1, 2, 3, 4] },
-    { id: 'de2', name: 'Month 2: Advanced Specialization', color: '#4361ee', weeks: [5, 6, 7, 8] },
   ],
   'Data Science': [
     { id: 'ds1', name: 'Month 1: The Machine Learning Sprint', color: '#8B5CF6', weeks: [1, 2, 3, 4] },
-    { id: 'ds2', name: 'Month 2: Advanced Specialization', color: '#9d4edd', weeks: [5, 6, 7, 8] },
   ]
 };
 
@@ -37,20 +35,12 @@ const WEEKS = [
   { w: 2, phase: 'de1', title: 'Python & PySpark (Processing)', tools: ['Python', 'PySpark'], goals: 'Day-1: Python for Data I/O, Day-2: Distributed Computing Concepts, Day-3: PySpark DataFrames, Day-4: Spark SQL & Functions, Day-5: Data Cleaning at Scale, Day-6: Data Writing & Formats (Parquet)' },
   { w: 3, phase: 'de1', title: 'Power BI (The Pipeline)', tools: ['Power BI'], goals: 'Day-1: Connecting to Sources (SQL/Cloud), Day-2: Power Query (M Language), Day-3: Data Modeling Basics (Star Schema), Day-4: Basic DAX (CALCULATE), Day-5: Visual Design & Slicers, Day-6: Service & Sharing' },
   { w: 4, phase: 'de1', title: 'Cloud & Orchestration', tools: ['ADF', 'Databricks', 'Fabric'], goals: 'Day-1: Cloud Ingestion (ADF), Day-2: Databricks Workspace & Notebooks, Day-3: Medallion Architecture, Day-4: Microsoft Fabric (OneLake), Day-5: Delta Lake Logic (ACID), Day-6: Capstone Pipeline Project' },
-  { w: 5, phase: 'de2', title: 'Enterprise Scale & Git', tools: ['Git', 'Azure DevOps'], goals: 'Implementation of CI/CD for data pipelines, Git branching strategies, and automated deployment patterns.' },
-  { w: 6, phase: 'de2', title: 'Orchestration with Airflow', tools: ['Airflow'], goals: 'Complex workflow orchestration, DAG design, scheduling, and monitoring production pipelines.' },
-  { w: 7, phase: 'de2', title: 'Governance & Security', tools: ['Unity Catalog'], goals: 'Implementing Unity Catalog for cloud data security, lineage tracking, and enterprise-grade access control.' },
-  { w: 8, phase: 'de2', title: 'Advanced DE Capstone', tools: ['Fabric', 'Databricks'], goals: 'Building a fully automated, governed, and production-ready data platform in the cloud.' },
 
   // --- DATA SCIENCE ---
   { w: 1, phase: 'ds1', title: 'SQL (Data Extraction)', tools: ['SQL'], goals: 'Day-1: Retrieval (Efficient SELECT), Day-2: Filtering & Case Logic, Day-3: Feature Aggregation (GROUP BY), Day-4: Window Functions for Trends, Day-5: Data Sampling, Day-6: SQL Clean-up & Formatting' },
   { w: 2, phase: 'ds1', title: 'Python & PySpark (Scalable ML)', tools: ['Python', 'PySpark'], goals: 'Day-1: Scikit-Learn Foundations, Day-2: Stats with Python, Day-3: PySpark MLlib, Day-4: Distributed Feature Engineering, Day-5: Linear & Logistic Regression, Day-6: Spark ML Pipelines' },
   { w: 3, phase: 'ds1', title: 'Power BI (Model Evaluation)', tools: ['Power BI'], goals: 'Day-1: Visualizing Results (Confusion Matrix), Day-2: Power BI + Python Scripts, Day-3: Dynamic Dashboards (What-If), Day-4: DAX for Data Science (RMSE), Day-5: Storytelling (Key Influencers), Day-6: Stakeholder Reporting' },
   { w: 4, phase: 'ds1', title: 'Cloud DS & AutoML', tools: ['Databricks', 'Fabric'], goals: 'Day-1: MLflow on Databricks, Day-2: AutoML (Fabric/Databricks), Day-3: Distributed Training, Day-4: Model Deployment (API), Day-5: Monitoring Drift, Day-6: Final DS Project' },
-  { w: 5, phase: 'ds2', title: 'Deep Learning Foundations', tools: ['PyTorch', 'TensorFlow'], goals: 'Understanding Neural Networks, building simple architectures, and training on large datasets.' },
-  { w: 6, phase: 'ds2', title: 'GenAI & LLM Integration', tools: ['OpenAI', 'LangChain'], goals: 'Integrating OpenAI APIs within Databricks, fine-tuning, and building RAG systems for enterprise data.' },
-  { w: 7, phase: 'ds2', title: 'MLOps & Automation', tools: ['MLflow', 'DevOps'], goals: 'Automated model retraining patterns, deployment pipelines, and production monitoring for ML models.' },
-  { w: 8, phase: 'ds2', title: 'Advanced DS Capstone', tools: ['Databricks', 'MLflow'], goals: 'Deploying a production-grade ML model with full tracking, monitoring, and automated retraining.' },
 ];
 
 

@@ -285,13 +285,17 @@ function renderRoadmap() {
         <div class="week-card ${status==='done'?'done':''}" style="border-top:4px solid ${phase.color}">
           <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
             <span class="badge" style="background:${phase.color}22; color:${phase.color};">WK ${wNum}</span>
-            <select onchange="setWeekStatus(${wNum}, this.value)" class="form-select" style="width:auto; height:24px; font-size:10px; padding:0 4px;">
-              <option value="todo" ${status==='todo'?'selected':''}>To Do</option>
+            <select onchange="setWeekStatus(${wNum}, this.value)" class="form-select" style="width:auto; height:24px; font-size:10px; padding:0 4px; border-radius:4px;">
+              <option value="todo" ${status==='todo'?'selected':''}>Not Started</option>
               <option value="doing" ${status==='doing'?'selected':''}>In Progress</option>
               <option value="done" ${status==='done'?'selected':''}>Completed</option>
             </select>
-          <div class="week-title">${w.title}</div>
-          <div class="week-goals">${w.goals}</div>
+          </div>
+          <div class="week-title" style="margin-bottom:8px;">${w.title}</div>
+          <details class="week-details" style="cursor:pointer; font-size:12px; color:var(--text2);">
+            <summary style="outline:none; list-style:none; color:var(--blue2); font-weight:500;">View Daily Goals</summary>
+            <div class="week-goals" style="margin-top:8px; padding-top:8px; border-top:1px solid var(--border);">${w.goals}</div>
+          </details>
         </div>
       `;
     }).join('');

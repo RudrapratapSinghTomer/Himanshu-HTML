@@ -619,6 +619,27 @@ body {
   transition: width 0.4s;
 }
 
+/* ── EXPANDABLE WEEKS ── */
+.week-details summary::-webkit-details-marker {
+  display: none;
+}
+
+.week-details summary::after {
+  content: '▼';
+  font-size: 8px;
+  margin-left: 6px;
+  transition: transform 0.2s;
+  display: inline-block;
+}
+
+.week-details[open] summary::after {
+  transform: rotate(180deg);
+}
+
+.week-details summary:hover {
+  opacity: 0.8;
+}
+
 /* ── DAILY LOG ── */
 .log-form {
   display: flex;
