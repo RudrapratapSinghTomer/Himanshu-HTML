@@ -458,10 +458,19 @@ async function saveLogEntry() {
     const targetUid = (myRole === 'host' && viewingUserId) ? viewingUserId : user.uid;
     const userRef = db.collection('users').doc(targetUid);
     await userRef.collection('logs').add(entry);
-    await userRef.update({ 
+    const updateObj = { 
       totalHours: firebase.firestore.FieldValue.increment(hours),
       streak: firebase.firestore.FieldValue.increment(1) 
-    });
+    };
+
+    // Ensure the week is tracked in both local state and DB to trigger dynamic scaling
+    if (week && (!state.weekStatus || !state.weekStatus[week])) {
+      if (!state.weekStatus) state.weekStatus = {};
+      state.weekStatus[week] = 'todo';
+      updateObj[`weekStatus.${week}`] = 'todo';
+    }
+
+    await userRef.update(updateObj);
     toggleLogForm(); 
     showToast("Session Logged!");
     renderDashboard();
