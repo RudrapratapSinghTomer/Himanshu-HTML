@@ -239,7 +239,8 @@ function renderRoadmap() {
 
     const roadmapWeeks = [].concat(...activePhases.map(p => p.weeks));
     const currentWeekNum = getCurrentWeek();
-    const maxW = Math.max(...roadmapWeeks, currentWeekNum, 20);
+    const dataWeeks = [...Object.keys(state.weekStatus || {}), ...Object.keys(state.weekReviews || {})].map(Number);
+    const maxW = Math.max(...roadmapWeeks, currentWeekNum, 20, ...dataWeeks);
 
     let displayWeeks;
     if (activePhaseFilter === 'all') {
@@ -609,7 +610,8 @@ function toggleLogForm() {
       const activePhases = getActivePhases();
       const roadmapWeeks = [].concat(...activePhases.map(p => p.weeks));
       const currentWeekNum = getCurrentWeek();
-      const maxW = Math.max(...roadmapWeeks, currentWeekNum, 20);
+      const dataWeeks = [...Object.keys(state.weekStatus || {}), ...Object.keys(state.weekReviews || {})].map(Number);
+      const maxW = Math.max(...roadmapWeeks, currentWeekNum, 20, ...dataWeeks);
       
       const allWeeks = Array.from({length: maxW}, (_, i) => i + 1);
       weekSelect.innerHTML = allWeeks.map(w => `<option value="${w}">Week ${w}</option>`).join('');
@@ -715,9 +717,10 @@ function renderReviewWeeks() {
   const activePhases = getActivePhases();
   const roadmapWeeks = [].concat(...activePhases.map(p => p.weeks));
   const currentWeekNum = getCurrentWeek();
+  const dataWeeks = [...Object.keys(state.weekStatus || {}), ...Object.keys(state.weekReviews || {})].map(Number);
   
-  // Show all weeks in roadmap + any weeks elapsed since start date (up to current)
-  const maxW = Math.max(...roadmapWeeks, currentWeekNum, 20);
+  // Show all weeks in roadmap + any weeks elapsed + any weeks with data
+  const maxW = Math.max(...roadmapWeeks, currentWeekNum, 20, ...dataWeeks);
   const allWeeks = Array.from({length: maxW}, (_, i) => i + 1);
   
   grid.innerHTML = allWeeks.map(w => {
