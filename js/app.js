@@ -649,8 +649,14 @@ async function renderWeekly() {
     blockers: review.blockers || aggregated.blockers || 'No blockers reported.',
     focus: review.focus || aggregated.focus || 'Next week focus not set.',
     hours: (review.hours !== undefined) ? review.hours : aggregated.hours,
-    status: review.status || (weeklyLogs.length > 0 ? 'Draft' : 'Empty')
+    status: review.status || (weeklyLogs.length > 0 ? 'Draft' : 'Empty'),
+    rating: review.rating || 0
   };
+
+  // Calculate Star String
+  const maxStars = 5;
+  const rating = displayData.rating || 0;
+  const starString = "⭐".repeat(rating) + "☆".repeat(maxStars - rating);
 
   // 3. Update UI Elements
   const elements = {
@@ -661,7 +667,8 @@ async function renderWeekly() {
     'display-blocker': displayData.blockers,
     'display-focus': displayData.focus,
     'review-hours-display': displayData.hours,
-    'review-status-badge': displayData.status
+    'review-status-badge': displayData.status,
+    'review-rating-display': (rating > 0) ? starString : 'No Rating'
   };
 
   Object.entries(elements).forEach(([id, val]) => {
@@ -676,7 +683,7 @@ async function renderWeekly() {
   }
 
   // Toggle Edit Visibility
-  const editFields = ['topics', 'handson', 'win', 'blocker', 'focus', 'hours'];
+  const editFields = ['topics', 'handson', 'win', 'blocker', 'focus', 'hours', 'rating'];
   editFields.forEach(f => {
     const display = document.getElementById('display-' + f);
     const edit = document.getElementById('edit-' + f);
@@ -685,7 +692,7 @@ async function renderWeekly() {
       edit.style.display = isHostEditMode ? 'block' : 'none';
       if (isHostEditMode) {
         const fieldKey = f === 'win' ? 'wins' : (f === 'blocker' ? 'blockers' : f);
-        edit.value = review[fieldKey] || display.textContent;
+        edit.value = (f === 'rating') ? (review.rating || 0) : (review[fieldKey] || display.textContent);
       }
     }
   });
@@ -711,6 +718,7 @@ async function submitWeeklyReview() {
       blockers: document.getElementById('edit-blocker')?.value,
       focus: document.getElementById('edit-focus')?.value,
       hours: parseFloat(document.getElementById('edit-hours')?.value || 0),
+      rating: parseInt(document.getElementById('edit-rating')?.value || 0),
       status: 'Reviewed',
       reviewedAt: new Date().toISOString()
     };

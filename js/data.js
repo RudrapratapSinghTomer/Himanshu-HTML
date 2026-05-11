@@ -16,7 +16,8 @@ const defaultState = {
   selectedReviewWeek: 1,
   activeSkillTab: 'all',
   activeResourceFilter: 'All',
-  streak: 0
+  streak: 0,
+  rating: 0
 };
 
 const ROADMAPS = {
