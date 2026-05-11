@@ -112,8 +112,8 @@ auth.onAuthStateChanged(async (user) => {
 
 // ── UTILS ────────────────────────────────────────────────────────────────────
 function getActivePhases() {
-  const roadmapName = state.assignedRoadmap || 'Data Analyst';
-  return ROADMAPS_DB[roadmapName] || ROADMAPS_DB['Data Analyst'] || [];
+  const roadmapName = state.assignedRoadmap || 'Data Engineering';
+  return ROADMAPS_DB[roadmapName] || ROADMAPS_DB['Data Engineering'] || [];
 }
 
 function updateUserUI() {
@@ -170,7 +170,7 @@ function loadDynamicData() {
     if (doc.exists) { 
       const data = doc.data();
       // Auto-upgrade stale database if new tracks are missing
-      if (!data['Data Engineering'] || data['Data Analytics']) {
+      if (!data['Data Engineering'] || data['Data Analyst']) {
         console.warn("Stale global roadmap detected. Prioritizing local logic-first curriculum.");
         ROADMAPS_DB = ROADMAPS;
         if (myRole === 'host') {
@@ -257,7 +257,7 @@ function renderRoadmap() {
   const grid = document.getElementById('week-grid'); if (!grid) return;
   try {
     const activePhases = getActivePhases();
-    const roadmapId = state.assignedRoadmap || 'Data Analyst';
+    const roadmapId = state.assignedRoadmap || 'Data Engineering';
     const titleEl = document.getElementById('roadmap-user-title');
     if (titleEl) titleEl.textContent = roadmapId + ' Path';
 
@@ -321,7 +321,7 @@ function setWeekStatus(w, s) { state.weekStatus[w] = s; saveState(); renderRoadm
 
 function renderSkills() {
   const container = document.getElementById('skills-content'); if (!container) return;
-  const domainFilter = { all:null, da:'Data Analyst', de:'Data Engineering', ds:'Data Science' }[state.activeSkillTab] || null;
+  const domainFilter = { all:null, de:'Data Engineering', ds:'Data Science' }[state.activeSkillTab] || null;
   container.innerHTML = [...new Set(SKILLS_DB.map(s => s.domain))].map(domain => {
     if (domainFilter && domain !== domainFilter) return '';
     return `<div class="skills-domain"><div class="domain-header">${domain}</div>${SKILLS_DB.filter(s => s.domain === domain).map(s => `<div class="skill-row"><span>${s.name}</span><div class="skill-bar-wrap"><div class="skill-bar-fill" style="width:${(state.skillNow[s.key]||0)*33}%;background:${s.color};"></div></div><select onchange="updateSkill('${s.key}',this.value)" class="form-select"><option value="0" ${state.skillNow[s.key]==0?'selected':''}>None</option><option value="1" ${state.skillNow[s.key]==1?'selected':''}>Beginner</option><option value="2" ${state.skillNow[s.key]==2?'selected':''}>Inter</option><option value="3" ${state.skillNow[s.key]==3?'selected':''}>Expert</option></select></div>`).join('')}</div>`;
@@ -769,8 +769,6 @@ window.showTab = function(type, filter, btn) {
     let shouldShow = false;
     if (filter === 'all') {
       shouldShow = true;
-    } else if (filter === 'da' && header === 'data analyst') {
-      shouldShow = true;
     } else if (filter === 'de' && header === 'data engineering') {
       shouldShow = true;
     } else if (filter === 'ds' && header === 'data science') {
@@ -1168,7 +1166,7 @@ async function fetchQuizQuestion() {
 
   try {
     // Determine context for AI
-    const roadmap = state.assignedRoadmap || 'Data Analyst';
+    const roadmap = state.assignedRoadmap || 'Data Engineering';
     const skills = Object.keys(state.skillNow).filter(k => state.skillNow[k] > 0);
     
     // Call Firebase Cloud Function (Proxy)

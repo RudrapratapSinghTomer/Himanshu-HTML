@@ -343,7 +343,6 @@
               <div class="form-group">
                 <label class="form-label">Select Roadmap</label>
                 <select class="form-select" id="admin-roadmap-select" style="height:44px;">
-                  <option value="Data Analyst">Data Analyst</option>
                   <option value="Data Engineering">Data Engineering</option>
                   <option value="Data Science">Data Science</option>
                 </select>
@@ -371,8 +370,7 @@
               <p class="section-sub" id="roadmap-user-sub">Logic-first curriculum focusing on engineering principles and tool syntax.</p>
             </div>
             <div class="tab-row" id="roadmap-track-filters" style="margin-bottom:20px; border-bottom:1px solid var(--border); padding-bottom:12px;">
-              <button class="tab-btn active" onclick="switchRoadmap('Data Analyst', this)">Data Analyst</button>
-              <button class="tab-btn" onclick="switchRoadmap('Data Engineering', this)">Data Engineering</button>
+              <button class="tab-btn active" onclick="switchRoadmap('Data Engineering', this)">Data Engineering</button>
               <button class="tab-btn" onclick="switchRoadmap('Data Science', this)">Data Science</button>
             </div>
             <div class="phase-bar" id="phase-filter-bar" style="margin-bottom:0; min-width:400px;"></div>
@@ -459,7 +457,6 @@
       <div class="page" id="page-skills">
         <div class="tab-row">
           <button class="tab-btn active" onclick="showTab('skills','all',this)">All Skills</button>
-          <button class="tab-btn" onclick="showTab('skills','da',this)">Data Analyst</button>
           <button class="tab-btn" onclick="showTab('skills','de',this)">Data Engineering</button>
           <button class="tab-btn" onclick="showTab('skills','ds',this)">Data Science</button>
         </div>
