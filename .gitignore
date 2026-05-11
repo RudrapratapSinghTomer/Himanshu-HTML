@@ -1,8 +1,14 @@
 node_modules/
-.env
-.DS_Store
 dist/
 build/
+.env
+.DS_Store
 *.log
+firebase-debug.log*
+firestore-debug.log*
+.firebase/
+.gemini/
+brain/
+scratch/
 implementation_plan - Bestpeers learning dashboard
 logo.png

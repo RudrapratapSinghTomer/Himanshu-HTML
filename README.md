@@ -4,10 +4,12 @@ A premium data analytics learning and tracking portal designed for aspiring data
 
 ## Features
 - **Dashboard**: Track your overall progress, hours logged, and daily streaks.
-- **Roadmap**: A comprehensive 20-week learning path from basics to portfolio ready.
-- **Daily Log**: Log your sessions, topics covered, and mood.
+- **Dynamic Roadmap**: Flexible learning paths that scale automatically beyond the initial 20-week curriculum.
+- **Daily Log**: Streamlined session logging with auto-calculated week tracking.
+- **Weekly Review**: Auto-generated performance summaries with rating systems and rating calculations.
+- **Host Controls**: Full administrative access for 'host' users to manage student logs, reviews, and content.
 - **Skills Tracker**: Visualize your growth across SQL, Python, Power BI, and more.
-- **Project Portfolio**: Manage and track 8 core analytics projects.
+- **Project Portfolio**: Manage and track core analytics projects with real-time status updates.
 - **Firebase Integration**: Real-time database sync and secure authentication.
 
 ## Tech Stack
@@ -18,8 +20,14 @@ A premium data analytics learning and tracking portal designed for aspiring data
 
 ## Setup
 1. Clone the repository.
-2. Open `index.html` (renamed from `data_analytics_portal.html`).
-3. Add your Firebase configuration in the `<script>` section.
+2. Update the Firebase configuration in `js/app.js` with your project credentials.
+3. Open `index.html` in a local server environment.
+
+## Administrative Access
+Users with the `host` role can:
+- View all registered users.
+- Edit or Delete user sessions and logs.
+- Manage global roadmap phases and project lists.
 
 ## License
 MIT
