@@ -1453,8 +1453,13 @@ function getMockQuestion(idx, difficulty) {
   const doneWeekNums = Object.keys(state.weekStatus).filter(w => state.weekStatus[w] === 'done').map(Number);
   const completedTopicTitles = WEEKS_DB.filter(w => doneWeekNums.includes(w.w)).map(w => w.title);
 
-  // Mix MCQs and Coding Challenges
-  const combinedPool = [...ALL_QUESTIONS, ...CODING_CHALLENGES];
+  // Mix MCQs and Coding Challenges (including the 170+ extracted ones)
+  const combinedPool = [
+    ...ALL_QUESTIONS, 
+    ...CODING_CHALLENGES,
+    ...(typeof EXTRACTED_MCQS !== 'undefined' ? EXTRACTED_MCQS : []),
+    ...(typeof EXTRACTED_CODE !== 'undefined' ? EXTRACTED_CODE : [])
+  ];
 
   let personalizedPool = [];
 
