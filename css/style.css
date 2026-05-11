@@ -679,6 +679,13 @@ body.focus-mode .page {
   letter-spacing: 0.8px;
 }
 
+#log-week {
+  pointer-events: none;
+  background-color: var(--navy2);
+  opacity: 0.8;
+  cursor: not-allowed;
+}
+
 .form-input,
 .form-select,
 .form-textarea {

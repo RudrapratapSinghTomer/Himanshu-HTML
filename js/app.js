@@ -540,7 +540,26 @@ function toggleLogForm() {
     }
     // Set default date to today
     const dateInput = document.getElementById('log-date');
-    if (dateInput) dateInput.value = new Date().toISOString().split('T')[0];
+    if (dateInput) {
+      dateInput.value = new Date().toISOString().split('T')[0];
+      updateLogWeek(dateInput.value); // Initial calculation
+    }
+  }
+}
+
+function updateLogWeek(dateVal) {
+  const selectedDate = new Date(dateVal);
+  if (isNaN(selectedDate)) return;
+  
+  // Logic: Week 1 starts on Dec 29, 2025
+  const startOfFirstWeek = new Date('2025-12-29');
+  const diffInMs = selectedDate - startOfFirstWeek;
+  const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
+  let weekNumber = Math.ceil((diffInDays + 1) / 7);
+  
+  const weekSelect = document.getElementById('log-week');
+  if (weekSelect && weekNumber >= 1 && weekNumber <= 52) {
+    weekSelect.value = weekNumber;
   }
 }
 
@@ -917,6 +936,9 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btn-log-session')?.addEventListener('click', toggleLogForm);
   document.getElementById('btn-new-session')?.addEventListener('click', toggleLogForm);
   document.getElementById('btn-cancel-log')?.addEventListener('click', toggleLogForm);
+
+  // Date to Week Auto-calculation
+  document.getElementById('log-date')?.addEventListener('change', (e) => updateLogWeek(e.target.value));
 });
 
 // Explicitly expose to global scope for any remaining inline onclicks or external calls
