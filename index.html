@@ -17,18 +17,20 @@
   <div id="login-overlay">
     <div class="login-card">
       <div class="sidebar-logo">
-      <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" style="border-radius:8px;">
-        <rect width="32" height="32" rx="8" fill="url(#logo-grad)"/>
-        <path d="M10 22V10L16 14L22 10V22" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-        <defs>
-          <linearGradient id="logo-grad" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
-            <stop stop-color="#4361ee"/>
-            <stop offset="1" stop-color="#4cc9f0"/>
-          </linearGradient>
-        </defs>
-      </svg>
-      <span>Learning Portal</span>
-    </div>
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"
+          style="border-radius:8px;">
+          <rect width="32" height="32" rx="8" fill="url(#logo-grad)" />
+          <path d="M10 22V10L16 14L22 10V22" stroke="white" stroke-width="2.5" stroke-linecap="round"
+            stroke-linejoin="round" />
+          <defs>
+            <linearGradient id="logo-grad" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#4361ee" />
+              <stop offset="1" stop-color="#4cc9f0" />
+            </linearGradient>
+          </defs>
+        </svg>
+        <span>Learning Portal</span>
+      </div>
       <div class="login-sub">Analytics Transition Platform</div>
 
 
@@ -47,19 +49,22 @@
     <!-- SIDEBAR -->
     <nav class="sidebar">
       <div class="sidebar-logo" style="display:flex; align-items:center; gap:10px; margin-bottom:40px;">
-        <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" style="border-radius:8px;">
-          <rect width="32" height="32" rx="8" fill="url(#logo-grad)"/>
-          <path d="M10 22V10L16 14L22 10V22" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"
+          style="border-radius:8px;">
+          <rect width="32" height="32" rx="8" fill="url(#logo-grad)" />
+          <path d="M10 22V10L16 14L22 10V22" stroke="white" stroke-width="2.5" stroke-linecap="round"
+            stroke-linejoin="round" />
           <defs>
             <linearGradient id="logo-grad" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
-              <stop stop-color="#4361ee"/>
-              <stop offset="1" stop-color="#4cc9f0"/>
+              <stop stop-color="#4361ee" />
+              <stop offset="1" stop-color="#4cc9f0" />
             </linearGradient>
           </defs>
         </svg>
         <div style="display:flex; flex-direction:column;">
           <span style="font-size:16px; font-weight:800; line-height:1.2;">Learning Portal</span>
-          <span style="font-size:9px; color:var(--text3); letter-spacing:1px; text-transform:uppercase;">Accelerator</span>
+          <span
+            style="font-size:9px; color:var(--text3); letter-spacing:1px; text-transform:uppercase;">Accelerator</span>
         </div>
       </div>
       <div class="nav">
@@ -104,7 +109,8 @@
         </button>
         <button class="nav-item" onclick="showPage('quiz',this)" style="border-left: 3px solid var(--purple2);">
           <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+              d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           QuizGPT
           <span class="badge" style="background:var(--purple)22; color:var(--purple2);">AI</span>
@@ -169,7 +175,9 @@
       <div class="topbar">
         <div style="display:flex; flex-direction:column;">
           <div class="page-title" id="page-title">Dashboard</div>
-          <div id="currently-viewing-msg" style="display:none; font-size:10px; color:var(--blue2); font-weight:700; text-transform:uppercase; letter-spacing:0.5px; margin-top:2px;"></div>
+          <div id="currently-viewing-msg"
+            style="display:none; font-size:10px; color:var(--blue2); font-weight:700; text-transform:uppercase; letter-spacing:0.5px; margin-top:2px;">
+          </div>
         </div>
         <div class="global-search-wrap">
           <svg style="position:absolute; left:16px; top:50%; transform:translateY(-50%); color:var(--text3);" width="18"
@@ -214,18 +222,24 @@
 
         <!-- HOST ONLY STATS -->
         <div id="host-stats-banner" class="host-only" style="display:none; gap:20px; margin-bottom:24px;">
-           <div class="card" style="flex:1; padding:20px; border-left:4px solid var(--purple);">
-              <div style="font-size:11px; color:var(--text3); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px;">Avg. Roadmap Progress</div>
-              <div style="font-size:24px; font-weight:800; color:var(--purple2);" id="host-avg-progress">0%</div>
-           </div>
-           <div class="card" style="flex:1; padding:20px; border-left:4px solid var(--teal);">
-              <div style="font-size:11px; color:var(--text3); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px;">Active Learners</div>
-              <div style="font-size:24px; font-weight:800; color:var(--teal2);" id="host-active-count">0</div>
-           </div>
-           <div class="card" style="flex:1; padding:20px; border-left:4px solid var(--orange);">
-              <div style="font-size:11px; color:var(--text3); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px;">Pending Reviews</div>
-              <div style="font-size:24px; font-weight:800; color:var(--orange2);" id="host-pending-reviews">0</div>
-           </div>
+          <div class="card" style="flex:1; padding:20px; border-left:4px solid var(--purple);">
+            <div
+              style="font-size:11px; color:var(--text3); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px;">
+              Avg. Roadmap Progress</div>
+            <div style="font-size:24px; font-weight:800; color:var(--purple2);" id="host-avg-progress">0%</div>
+          </div>
+          <div class="card" style="flex:1; padding:20px; border-left:4px solid var(--teal);">
+            <div
+              style="font-size:11px; color:var(--text3); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px;">
+              Active Learners</div>
+            <div style="font-size:24px; font-weight:800; color:var(--teal2);" id="host-active-count">0</div>
+          </div>
+          <div class="card" style="flex:1; padding:20px; border-left:4px solid var(--orange);">
+            <div
+              style="font-size:11px; color:var(--text3); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px;">
+              Pending Reviews</div>
+            <div style="font-size:24px; font-weight:800; color:var(--orange2);" id="host-pending-reviews">0</div>
+          </div>
         </div>
 
         <div class="kpi-grid">
@@ -453,7 +467,8 @@
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
           <div style="font-size:13px;color:var(--text2);">Complete all 8 projects to build a production-grade analytics
             portfolio</div>
-          <div style="font-size:13px;font-family:'JetBrains Mono',monospace;color:var(--text3);" id="proj-count-label-projects">0
+          <div style="font-size:13px;font-family:'JetBrains Mono',monospace;color:var(--text3);"
+            id="proj-count-label-projects">0
             / 8 complete</div>
         </div>
         <div class="project-grid" id="project-grid"></div>
@@ -495,7 +510,8 @@
                 style="font-size:12px; color:var(--text3); text-transform:uppercase; font-weight:800; letter-spacing:1px; margin-bottom:4px;">
                 Weekly Rating</div>
               <div id="review-rating-display" style="font-size:24px;">⭐⭐⭐⭐⭐</div>
-              <input type="number" id="edit-rating" min="0" max="5" class="form-input" style="display:none; width:60px; float:right;" placeholder="0-5">
+              <input type="number" id="edit-rating" min="0" max="5" class="form-input"
+                style="display:none; width:60px; float:right;" placeholder="0-5">
             </div>
           </div>
 
@@ -542,7 +558,8 @@
           </div>
 
           <div style="margin-top:30px; border-top:1px solid var(--border); padding-top:20px;">
-            <h4 style="font-size:12px; color:var(--text3); text-transform:uppercase; margin-bottom:12px;">Activity from Daily Logs</h4>
+            <h4 style="font-size:12px; color:var(--text3); text-transform:uppercase; margin-bottom:12px;">Activity from
+              Daily Logs</h4>
             <div id="weekly-logs-summary" style="display:flex; flex-wrap:wrap; gap:8px;">
               <!-- Dynamic log summary -->
             </div>
@@ -567,8 +584,10 @@
               </div>
             </div>
             <div>
-              <button class="btn btn-primary" id="review-action-btn" onclick="submitWeeklyReview()">Submit Review</button>
-              <button class="btn btn-primary" id="review-save-btn" style="display:none;" onclick="submitWeeklyReview()">Save Review</button>
+              <button class="btn btn-primary" id="review-action-btn" onclick="submitWeeklyReview()">Submit
+                Review</button>
+              <button class="btn btn-primary" id="review-save-btn" style="display:none;"
+                onclick="submitWeeklyReview()">Save Review</button>
             </div>
           </div>
         </div>
@@ -594,23 +613,29 @@
           <div style="font-size:48px; margin-bottom:20px;">🤖</div>
           <h3 style="font-size:24px; font-weight:800; margin-bottom:12px;">Ready to test your knowledge?</h3>
           <p style="color:var(--text2); margin-bottom:30px; max-width:500px; margin-left:auto; margin-right:auto;">
-            QuizGPT will generate questions tailored to your current learning phase. Each correct answer boosts your profile score!
+            QuizGPT will generate questions tailored to your current learning phase. Each correct answer boosts your
+            profile score!
           </p>
-          <button class="btn btn-primary" style="padding:12px 32px; font-size:16px; font-weight:700;" onclick="startQuiz()">Start AI Quiz</button>
+          <button class="btn btn-primary" style="padding:12px 32px; font-size:16px; font-weight:700;"
+            onclick="startQuiz()">Start AI Quiz</button>
         </div>
 
         <div id="quiz-question-view" class="quiz-container" style="display:none;">
           <div class="quiz-progress-wrap" style="margin-bottom:30px;">
-             <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:8px; color:var(--text3);">
-               <span>Progress</span>
-               <span id="quiz-progress-text">Question 1 of 5</span>
-             </div>
-             <div class="progress-track" style="height:6px; background:var(--navy3); border-radius:3px; overflow:hidden;">
-               <div id="quiz-progress-bar" class="progress-fill" style="width:20%; background:var(--purple); height:100%;"></div>
-             </div>
+            <div
+              style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:8px; color:var(--text3);">
+              <span>Progress</span>
+              <span id="quiz-progress-text">Question 1 of 5</span>
+            </div>
+            <div class="progress-track"
+              style="height:6px; background:var(--navy3); border-radius:3px; overflow:hidden;">
+              <div id="quiz-progress-bar" class="progress-fill"
+                style="width:20%; background:var(--purple); height:100%;"></div>
+            </div>
           </div>
 
-          <div class="card question-card" style="padding:40px; margin-bottom:24px; border-left:4px solid var(--purple);">
+          <div class="card question-card"
+            style="padding:40px; margin-bottom:24px; border-left:4px solid var(--purple);">
             <div id="quiz-question-text" style="font-size:18px; font-weight:600; line-height:1.6; margin-bottom:24px;">
               Generating your question...
             </div>
@@ -618,118 +643,128 @@
               <!-- Options populated by JS -->
             </div>
           </div>
-          
+
           <div style="display:flex; justify-content:flex-end; gap:12px;">
-            <button id="quiz-next-btn" class="btn btn-primary" style="display:none;" onclick="nextQuizQuestion()">Next Question</button>
+            <button id="quiz-next-btn" class="btn btn-primary" style="display:none;" onclick="nextQuizQuestion()">Next
+              Question</button>
           </div>
         </div>
 
         <div id="quiz-result-view" class="card" style="display:none; text-align:center; padding:60px 40px;">
           <div style="font-size:48px; margin-bottom:20px;">🎉</div>
           <h3 style="font-size:24px; font-weight:800; margin-bottom:12px;">Quiz Completed!</h3>
-          <div style="font-size:36px; font-weight:800; color:var(--purple2); margin-bottom:20px;" id="quiz-final-score">0/5</div>
+          <div style="font-size:36px; font-weight:800; color:var(--purple2); margin-bottom:20px;" id="quiz-final-score">
+            0/5</div>
           <p id="quiz-feedback" style="color:var(--text2); margin-bottom:30px;"></p>
-          <button class="btn btn-primary" onclick="showPage('dashboard', document.querySelector('.nav-item[onclick*=\\'dashboard\\']'))">Return to Dashboard</button>
+          <button class="btn btn-primary"
+            onclick="showPage('dashboard', document.querySelector('.nav-item[onclick*=\\'dashboard\\']'))">Return to
+            Dashboard</button>
           <button class="btn" style="margin-left:12px;" onclick="startQuiz()">Try Again</button>
         </div>
       </div>
 
-    <div class="save-toast" id="save-toast">
-      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-      </svg>
-      <span id="save-toast-text">Progress saved!</span>
-    </div>
-
-
-
-    <!-- ADMIN CONTENT MANAGER PAGE -->
-    <div id="page-admin-content" class="page">
-      <div class="page-header">
-        <div>
-          <h2 class="page-title">Content Manager</h2>
-          <p class="page-sub">Manage roadmaps, weeks, and projects across the platform.</p>
-        </div>
+      <div class="save-toast" id="save-toast">
+        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+        </svg>
+        <span id="save-toast-text">Progress saved!</span>
       </div>
 
-      <div class="card" style="padding:24px; margin-bottom:30px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-          <h3 style="font-size:18px; font-weight:700;">Global Roadmaps</h3>
-          <button class="btn-sm" onclick="saveRoadmapConfig()">Save All Changes</button>
-        </div>
-        <div id="admin-roadmaps-list" style="display:flex; flex-direction:column; gap:16px;">
-          <!-- Dynamic roadmap editor -->
-        </div>
-      </div>
 
-      <div class="grid" style="grid-template-columns: 1fr 1.5fr; gap:30px;">
-        <div class="card" style="padding:24px;">
-          <h3 style="font-size:16px; font-weight:700; margin-bottom:16px;">Weeks & Topics</h3>
-          <div id="admin-weeks-list" style="display:flex; flex-direction:column; gap:12px; max-height:600px; overflow-y:auto;">
-            <!-- Dynamic weeks list -->
-          </div>
-          <button class="btn-sm" style="width:100%; margin-top:16px;" onclick="addWeekItem()">+ Add New Week</button>
-        </div>
 
-        <div class="card" style="padding:24px;">
-          <h3 style="font-size:16px; font-weight:700; margin-bottom:16px;">Active Projects</h3>
-          <div id="admin-projects-list" style="display:flex; flex-direction:column; gap:12px;">
-            <!-- Dynamic projects list -->
-          </div>
-          <button class="btn-sm" style="width:100%; margin-top:16px;" onclick="addProjectItem()">+ Add New Project</button>
-        </div>
-      </div>
-    </div>
-    <!-- PROFILE PAGE -->
-    <div id="page-profile" class="page">
-      <div class="page-header">
-        <div>
-          <h2 class="page-title">Personal Profile</h2>
-          <p class="page-sub">Manage your professional identity and team details.</p>
-        </div>
-      </div>
-
-      <div class="card" style="max-width:600px; padding:30px;">
-        <div style="display:flex; gap:20px; align-items:center; margin-bottom:30px;">
-          <div class="avatar" style="width:80px; height:80px; font-size:32px; border-radius:20px;"></div>
+      <!-- ADMIN CONTENT MANAGER PAGE -->
+      <div id="page-admin-content" class="page">
+        <div class="page-header">
           <div>
-            <h3 class="user-name" style="font-size:24px; font-weight:800;"></h3>
-            <p class="user-role" style="font-size:12px; color:var(--text3); text-transform:uppercase; letter-spacing:1px;"></p>
+            <h2 class="page-title">Content Manager</h2>
+            <p class="page-sub">Manage roadmaps, weeks, and projects across the platform.</p>
           </div>
         </div>
 
-        <div style="display:flex; flex-direction:column; gap:20px;">
-          <div class="grid" style="grid-template-columns: 1fr 1fr; gap:20px;">
-            <div class="input-group">
-              <label style="font-size:12px; color:var(--text3); margin-bottom:8px; display:block;">First Name</label>
-              <input type="text" id="profile-first-name" class="login-input" placeholder="First Name">
+        <div class="card" style="padding:24px; margin-bottom:30px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <h3 style="font-size:18px; font-weight:700;">Global Roadmaps</h3>
+            <button class="btn-sm" onclick="saveRoadmapConfig()">Save All Changes</button>
+          </div>
+          <div id="admin-roadmaps-list" style="display:flex; flex-direction:column; gap:16px;">
+            <!-- Dynamic roadmap editor -->
+          </div>
+        </div>
+
+        <div class="grid" style="grid-template-columns: 1fr 1.5fr; gap:30px;">
+          <div class="card" style="padding:24px;">
+            <h3 style="font-size:16px; font-weight:700; margin-bottom:16px;">Weeks & Topics</h3>
+            <div id="admin-weeks-list"
+              style="display:flex; flex-direction:column; gap:12px; max-height:600px; overflow-y:auto;">
+              <!-- Dynamic weeks list -->
             </div>
-            <div class="input-group">
-              <label style="font-size:12px; color:var(--text3); margin-bottom:8px; display:block;">Last Name</label>
-              <input type="text" id="profile-last-name" class="login-input" placeholder="Last Name">
-            </div>
+            <button class="btn-sm" style="width:100%; margin-top:16px;" onclick="addWeekItem()">+ Add New Week</button>
           </div>
 
-          <div class="input-group">
-            <label style="font-size:12px; color:var(--text3); margin-bottom:8px; display:block;">Professional Bio</label>
-            <textarea id="profile-bio" class="login-input" style="height:100px; padding:15px; resize:none;" placeholder="Tell us about your tech stack and interests..."></textarea>
-          </div>
-
-          <div class="grid" style="grid-template-columns: 1fr 1fr; gap:20px;">
-            <div class="input-group">
-              <label style="font-size:12px; color:var(--text3); margin-bottom:8px; display:block;">Department</label>
-              <input type="text" id="profile-dept" class="login-input" placeholder="e.g. Data Engineering">
+          <div class="card" style="padding:24px;">
+            <h3 style="font-size:16px; font-weight:700; margin-bottom:16px;">Active Projects</h3>
+            <div id="admin-projects-list" style="display:flex; flex-direction:column; gap:12px;">
+              <!-- Dynamic projects list -->
             </div>
-            <div class="input-group">
-              <label style="font-size:12px; color:var(--text3); margin-bottom:8px; display:block;">Joining Date</label>
-              <input type="date" id="profile-join" class="login-input">
-            </div>
+            <button class="btn-sm" style="width:100%; margin-top:16px;" onclick="addProjectItem()">+ Add New
+              Project</button>
           </div>
-
-          <button class="login-btn" onclick="saveProfile()" style="margin-top:10px;">Update Profile</button>
         </div>
       </div>
-    </div>
+      <!-- PROFILE PAGE -->
+      <div id="page-profile" class="page">
+        <div class="page-header">
+          <div>
+            <h2 class="page-title">Personal Profile</h2>
+            <p class="page-sub">Manage your professional identity and team details.</p>
+          </div>
+        </div>
+
+        <div class="card" style="max-width:600px; padding:30px;">
+          <div style="display:flex; gap:20px; align-items:center; margin-bottom:30px;">
+            <div class="avatar" style="width:80px; height:80px; font-size:32px; border-radius:20px;"></div>
+            <div>
+              <h3 class="user-name" style="font-size:24px; font-weight:800;"></h3>
+              <p class="user-role"
+                style="font-size:12px; color:var(--text3); text-transform:uppercase; letter-spacing:1px;"></p>
+            </div>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:20px;">
+            <div class="grid" style="grid-template-columns: 1fr 1fr; gap:20px;">
+              <div class="input-group">
+                <label style="font-size:12px; color:var(--text3); margin-bottom:8px; display:block;">First Name</label>
+                <input type="text" id="profile-first-name" class="login-input" placeholder="First Name">
+              </div>
+              <div class="input-group">
+                <label style="font-size:12px; color:var(--text3); margin-bottom:8px; display:block;">Last Name</label>
+                <input type="text" id="profile-last-name" class="login-input" placeholder="Last Name">
+              </div>
+            </div>
+
+            <div class="input-group">
+              <label style="font-size:12px; color:var(--text3); margin-bottom:8px; display:block;">Professional
+                Bio</label>
+              <textarea id="profile-bio" class="login-input" style="height:100px; padding:15px; resize:none;"
+                placeholder="Tell us about your tech stack and interests..."></textarea>
+            </div>
+
+            <div class="grid" style="grid-template-columns: 1fr 1fr; gap:20px;">
+              <div class="input-group">
+                <label style="font-size:12px; color:var(--text3); margin-bottom:8px; display:block;">Department</label>
+                <input type="text" id="profile-dept" class="login-input" placeholder="e.g. Data Engineering">
+              </div>
+              <div class="input-group">
+                <label style="font-size:12px; color:var(--text3); margin-bottom:8px; display:block;">Joining
+                  Date</label>
+                <input type="date" id="profile-join" class="login-input">
+              </div>
+            </div>
+
+            <button class="login-btn" onclick="saveProfile()" style="margin-top:10px;">Update Profile</button>
+          </div>
+        </div>
+      </div>
     </div> <!-- end main -->
   </div> <!-- end main-content -->
 
