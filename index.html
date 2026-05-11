@@ -625,13 +625,23 @@
         <div id="quiz-start-view" class="card" style="text-align:center; padding:60px 40px;">
           <div style="font-size:48px; margin-bottom:20px;">🤖</div>
           <h3 style="font-size:24px; font-weight:800; margin-bottom:12px;">Ready to test your knowledge?</h3>
-          <p style="color:var(--text2); margin-bottom:30px; max-width:500px; margin-left:auto; margin-right:auto;">
+          <p style="color:var(--text2); margin-bottom:24px; max-width:500px; margin-left:auto; margin-right:auto;">
             QuizGPT will generate questions tailored to your current learning phase. Each correct answer boosts your
             profile score!
           </p>
+          
+          <div style="margin-bottom:30px; max-width:400px; margin-left:auto; margin-right:auto;">
+            <label class="form-label" style="text-align:left; margin-bottom:8px; display:block;">Select Quiz Focus</label>
+            <select id="quiz-topic-select" class="form-select" style="height:48px; font-size:14px;">
+              <option value="all">Anywhere (All Completed Topics)</option>
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+
           <button class="btn btn-primary" style="padding:12px 32px; font-size:16px; font-weight:700;"
             onclick="startQuiz()">Start AI Quiz</button>
         </div>
+
 
         <div id="quiz-question-view" class="quiz-container" style="display:none;">
           <div class="quiz-progress-wrap" style="margin-bottom:30px;">

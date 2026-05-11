@@ -100,3 +100,99 @@ const RESOURCES = [
   { domain: 'Data Science', type: 'Course', name: 'Scalable ML with Spark', url: 'https://www.coursera.org', priority: 'must', tags: ['ml', 'spark'] },
   { domain: 'Data Science', type: 'Practice', name: 'Kaggle Competitions', url: 'https://www.kaggle.com', priority: 'must', tags: ['ml', 'practice'] },
 ];
+
+const ALL_QUESTIONS = [
+  // SQL Topics
+  { 
+    topic: "SQL (Basic to Advanced)", 
+    tags: ["Data Engineering", "SQL"],
+    question: "Which SQL clause is used to filter records after an aggregation has been performed?", 
+    options: ["WHERE", "FILTER", "HAVING", "GROUP BY"], 
+    correctIndex: 2 
+  },
+  { 
+    topic: "SQL (Basic to Advanced)", 
+    tags: ["Data Engineering", "SQL"],
+    question: "What is the result of a LEFT JOIN if there is no match in the right table?", 
+    options: ["An error is thrown", "The row is omitted", "NULL values for right table columns", "A default value is used"], 
+    correctIndex: 2 
+  },
+  { 
+    topic: "SQL (Data Extraction)", 
+    tags: ["Data Science", "SQL"],
+    question: "Which window function would you use to get the value from the previous row?", 
+    options: ["LEAD()", "LAG()", "RANK()", "PREV()"], 
+    correctIndex: 1 
+  },
+  
+  // Python & PySpark
+  { 
+    topic: "Python & PySpark (The Processing Engine)", 
+    tags: ["Data Engineering", "Python", "PySpark"],
+    question: "In PySpark, which operation is a 'transformation' (lazy evaluation)?", 
+    options: ["show()", "collect()", "count()", "select()"], 
+    correctIndex: 3 
+  },
+  { 
+    topic: "Python & PySpark (The Processing Engine)", 
+    tags: ["Data Engineering", "Python", "PySpark"],
+    question: "What is the primary storage format used in Delta Lake for high-performance reads?", 
+    options: ["CSV", "JSON", "Parquet", "Avro"], 
+    correctIndex: 2 
+  },
+  { 
+    topic: "Python & PySpark (Scalable ML)", 
+    tags: ["Data Science", "Python", "PySpark"],
+    question: "Which Spark ML component is used to string together multiple transformations and estimators?", 
+    options: ["Transformer", "Estimator", "Pipeline", "Evaluator"], 
+    correctIndex: 2 
+  },
+
+  // Power BI
+  { 
+    topic: "Power BI (Visualizing the Pipeline)", 
+    tags: ["Data Engineering", "Power BI"],
+    question: "Which Power BI feature allows you to see the underlying data for a specific visual element?", 
+    options: ["Drillthrough", "Data View", "Power Query", "Relationship View"], 
+    correctIndex: 0 
+  },
+  { 
+    topic: "Microsoft Power BI Desktop for Business Intelligence", 
+    tags: ["Data Engineering", "Power BI"],
+    question: "In DAX, what is the difference between a Calculated Column and a Measure?", 
+    options: ["Columns are calculated at refresh, Measures at query time", "Measures are calculated at refresh, Columns at query time", "There is no difference", "Columns use less memory"], 
+    correctIndex: 0 
+  },
+  
+  // Machine Learning & Cloud (Data Science)
+  { 
+    topic: "Cloud DS & AutoML", 
+    tags: ["Data Science", "Cloud"],
+    question: "What does 'Drift' refer to in Machine Learning monitoring?", 
+    options: ["Software bugs", "Change in model input data distribution over time", "Slow model training speed", "Database connection issues"], 
+    correctIndex: 1 
+  },
+  { 
+    topic: "Natural Language Processing", 
+    tags: ["Data Science", "NLP"],
+    question: "What is the primary benefit of the Transformer architecture over RNNs?", 
+    options: ["Better at handling small datasets", "Parallel processing of sequences", "Lower memory usage", "Simpler mathematical foundation"], 
+    correctIndex: 1 
+  },
+  { 
+    topic: "Deep Learning Foundations", 
+    tags: ["Data Science", "Deep Learning"],
+    question: "Which activation function is commonly used in the hidden layers of a CNN to avoid the vanishing gradient problem?", 
+    options: ["Sigmoid", "Tanh", "ReLU", "Softmax"], 
+    correctIndex: 2 
+  },
+  
+  // MLOps
+  { 
+    topic: "MLOps & CI/CD for ML", 
+    tags: ["Data Science", "MLOps"],
+    question: "What is the main purpose of MLflow Tracking?", 
+    options: ["To deploy models to Kubernetes", "To log parameters, code versions, and metrics", "To visualize data distributions", "To manage user permissions"], 
+    correctIndex: 1 
+  }
+];

@@ -1170,9 +1170,10 @@ let quizState = {
   active: false,
   currentQuestion: null,
   index: 0,
-  total: 5,
+  total: 10,
   score: 0,
-  history: []
+  history: [],
+  selectedTopic: 'all'
 };
 
 function renderQuiz() {
@@ -1180,17 +1181,37 @@ function renderQuiz() {
     document.getElementById('quiz-start-view').style.display = 'block';
     document.getElementById('quiz-question-view').style.display = 'none';
     document.getElementById('quiz-result-view').style.display = 'none';
+
+    // Populate topic dropdown
+    const select = document.getElementById('quiz-topic-select');
+    if (select) {
+      const activePhases = getActivePhases();
+      const doneWeekNums = Object.keys(state.weekStatus).filter(w => state.weekStatus[w] === 'done').map(Number);
+      
+      const completedTopics = WEEKS_DB
+        .filter(w => doneWeekNums.includes(w.w))
+        .map(w => w.title);
+      
+      const uniqueTopics = [...new Set(completedTopics)];
+      
+      select.innerHTML = '<option value="all">Anywhere (All Completed Topics)</option>' + 
+        uniqueTopics.map(t => `<option value="${t}">${t}</option>`).join('');
+    }
   }
 }
 
 async function startQuiz() {
+  const topicSelect = document.getElementById('quiz-topic-select');
+  const selectedTopic = topicSelect ? topicSelect.value : 'all';
+
   quizState = {
     active: true,
     currentQuestion: null,
     index: 0,
-    total: 5,
+    total: 10,
     score: 0,
-    history: []
+    history: [],
+    selectedTopic: selectedTopic
   };
   
   document.getElementById('quiz-start-view').style.display = 'none';
@@ -1200,6 +1221,7 @@ async function startQuiz() {
   
   await fetchQuizQuestion();
 }
+
 
 async function fetchQuizQuestion() {
   const questionEl = document.getElementById('quiz-question-text');
@@ -1219,11 +1241,16 @@ async function fetchQuizQuestion() {
     const roadmap = state.assignedRoadmap || 'Data Engineering';
     const skills = Object.keys(state.skillNow).filter(k => state.skillNow[k] > 0);
     
+    // Solution 3: Difficulty calculation
+    const activePhases = getActivePhases();
+    const allWeeks = [].concat(...activePhases.map(p => p.weeks));
+    const doneWeeks = allWeeks.filter(w => state.weekStatus[w] === 'done').length;
+    const completionPct = allWeeks.length > 0 ? (doneWeeks / allWeeks.length) : 0;
+    const difficulty = completionPct > 0.5 ? 'Advanced' : 'Beginner';
+
     // Call Firebase Cloud Function (Proxy)
-    // Replace URL with your actual Firebase Function URL
     const functionUrl = 'https://us-central1-bestpeers-learning-dashboard.cloudfunctions.net/getQuizQuestion';
     
-    // For demonstration, if function is not yet deployed, we use a fallback mock
     let data;
     try {
       const response = await fetch(functionUrl, {
@@ -1233,7 +1260,9 @@ async function fetchQuizQuestion() {
           uid: auth.currentUser?.uid,
           roadmap: roadmap,
           skills: skills,
-          index: quizState.index
+          index: quizState.index,
+          difficulty: difficulty,
+          topic: quizState.selectedTopic
         })
       });
       if (response.ok) {
@@ -1242,8 +1271,8 @@ async function fetchQuizQuestion() {
         throw new Error("Function not available");
       }
     } catch (e) {
-      console.warn("Using mock quiz data (Cloud Function not detected)");
-      data = getMockQuestion(quizState.index);
+      console.warn("Using personalized mock quiz data (Cloud Function not detected)");
+      data = getMockQuestion(quizState.index, difficulty);
     }
 
     quizState.currentQuestion = data;
@@ -1253,6 +1282,7 @@ async function fetchQuizQuestion() {
     console.error(e);
   }
 }
+
 
 function renderQuestion(q) {
   const questionEl = document.getElementById('quiz-question-text');
@@ -1330,36 +1360,43 @@ async function finishQuiz() {
   await saveState();
 }
 
-function getMockQuestion(idx) {
-  const mocks = [
-    { 
+function getMockQuestion(idx, difficulty) {
+  // Use the global 'state' object and 'ALL_QUESTIONS' pool
+  const roadmap = state.assignedRoadmap || 'Data Engineering'; 
+  const userSkills = Object.keys(state.skillNow).filter(s => state.skillNow[s] > 0);
+  const doneWeekNums = Object.keys(state.weekStatus).filter(w => state.weekStatus[w] === 'done').map(Number);
+  const completedTopicTitles = WEEKS_DB.filter(w => doneWeekNums.includes(w.w)).map(w => w.title);
+
+  let personalizedPool = [];
+
+  if (quizState.selectedTopic !== 'all') {
+    // Focus on a specific topic
+    personalizedPool = ALL_QUESTIONS.filter(q => q.topic === quizState.selectedTopic);
+  } else {
+    // "Anywhere" - Filter by roadmap and only completed topics
+    personalizedPool = ALL_QUESTIONS.filter(q => 
+      (q.tags.includes(roadmap) || q.tags.some(tag => userSkills.includes(tag))) &&
+      (completedTopicTitles.includes(q.topic) || q.topic === "General")
+    );
+  }
+
+  // Fallback to all questions if pool is empty (e.g. nothing completed yet)
+  if (personalizedPool.length === 0) {
+    personalizedPool = ALL_QUESTIONS.filter(q => q.tags.includes(roadmap));
+  }
+  
+  // If still empty, use the original static mocks as ultimate fallback
+  if (personalizedPool.length === 0) {
+    return { 
       question: "Which SQL clause is used to filter records after an aggregation has been performed?", 
       options: ["WHERE", "FILTER", "HAVING", "GROUP BY"], 
       correctIndex: 2 
-    },
-    { 
-      question: "In Python Pandas, which method is used to remove duplicate rows?", 
-      options: ["df.clear_duplicates()", "df.drop_duplicates()", "df.remove_redundant()", "df.unique()"], 
-      correctIndex: 1 
-    },
-    { 
-      question: "Which Power BI feature allows you to see the underlying data for a specific visual element?", 
-      options: ["Drillthrough", "Data View", "Power Query", "Relationship View"], 
-      correctIndex: 0 
-    },
-    { 
-      question: "What does KPI stand for in a business context?", 
-      options: ["Knowledge Performance Index", "Key Process Indicator", "Key Performance Indicator", "Key Profit Intelligence"], 
-      correctIndex: 2 
-    },
-    { 
-      question: "Which join returns all records from the left table and the matched records from the right table?", 
-      options: ["INNER JOIN", "FULL OUTER JOIN", "LEFT JOIN", "RIGHT JOIN"], 
-      correctIndex: 2 
-    }
-  ];
-  return mocks[idx % mocks.length];
+    };
+  }
+
+  return personalizedPool[idx % personalizedPool.length];
 }
+
 
 // Explicitly expose to global scope
 window.startQuiz = startQuiz;
