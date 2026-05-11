@@ -207,6 +207,7 @@ function showPage(id, btn) {
     const titles = {
       dashboard: 'Dashboard', roadmap: 'Curriculum Roadmap', daily: 'Learning Logs',
       skills: 'Skills Tracker', projects: 'Portfolio Projects', weekly: 'Weekly Performance',
+      quiz: 'QuizGPT — AI Tutor',
       resources: 'Knowledge Base', 'admin-users': 'User Management', 
       'admin-content': 'Content Manager', profile: 'My Profile'
     };
@@ -216,6 +217,7 @@ function showPage(id, btn) {
   const renderers = {
     dashboard: renderDashboard, roadmap: renderRoadmap, skills: renderSkills,
     projects: renderProjects, weekly: renderWeekly, resources: renderResources,
+    quiz: renderQuiz,
     daily: renderRecentLogs, 'admin-users': renderAdminUsers, 
     'admin-content': renderAdminContent, profile: renderProfile
   };
@@ -1065,5 +1067,204 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('log-date')?.addEventListener('change', (e) => updateLogWeek(e.target.value));
 });
 
-// Explicitly expose to global scope for any remaining inline onclicks or external calls
-window.toggleLogForm = toggleLogForm;
+// ── QUIZ LOGIC ───────────────────────────────────────────────────────────────
+let quizState = {
+  active: false,
+  currentQuestion: null,
+  index: 0,
+  total: 5,
+  score: 0,
+  history: []
+};
+
+function renderQuiz() {
+  if (!quizState.active) {
+    document.getElementById('quiz-start-view').style.display = 'block';
+    document.getElementById('quiz-question-view').style.display = 'none';
+    document.getElementById('quiz-result-view').style.display = 'none';
+  }
+}
+
+async function startQuiz() {
+  quizState = {
+    active: true,
+    currentQuestion: null,
+    index: 0,
+    total: 5,
+    score: 0,
+    history: []
+  };
+  
+  document.getElementById('quiz-start-view').style.display = 'none';
+  document.getElementById('quiz-result-view').style.display = 'none';
+  document.getElementById('quiz-question-view').style.display = 'block';
+  document.getElementById('quiz-score-tag').textContent = `Score: 0`;
+  
+  await fetchQuizQuestion();
+}
+
+async function fetchQuizQuestion() {
+  const questionEl = document.getElementById('quiz-question-text');
+  const optionsEl = document.getElementById('quiz-options-list');
+  const nextBtn = document.getElementById('quiz-next-btn');
+  
+  questionEl.textContent = "Generating your question via AI...";
+  optionsEl.innerHTML = '';
+  nextBtn.style.display = 'none';
+  
+  // Update Progress
+  document.getElementById('quiz-progress-text').textContent = `Question ${quizState.index + 1} of ${quizState.total}`;
+  document.getElementById('quiz-progress-bar').style.width = `${((quizState.index + 1) / quizState.total) * 100}%`;
+
+  try {
+    // Determine context for AI
+    const roadmap = state.assignedRoadmap || 'Data Analytics';
+    const skills = Object.keys(state.skillNow).filter(k => state.skillNow[k] > 0);
+    
+    // Call Firebase Cloud Function (Proxy)
+    // Replace URL with your actual Firebase Function URL
+    const functionUrl = 'https://us-central1-bestpeers-learning-dashboard.cloudfunctions.net/getQuizQuestion';
+    
+    // For demonstration, if function is not yet deployed, we use a fallback mock
+    let data;
+    try {
+      const response = await fetch(functionUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          uid: auth.currentUser?.uid,
+          roadmap: roadmap,
+          skills: skills,
+          index: quizState.index
+        })
+      });
+      if (response.ok) {
+        data = await response.json();
+      } else {
+        throw new Error("Function not available");
+      }
+    } catch (e) {
+      console.warn("Using mock quiz data (Cloud Function not detected)");
+      data = getMockQuestion(quizState.index);
+    }
+
+    quizState.currentQuestion = data;
+    renderQuestion(data);
+  } catch (e) {
+    questionEl.textContent = "Error loading question. Please try again.";
+    console.error(e);
+  }
+}
+
+function renderQuestion(q) {
+  const questionEl = document.getElementById('quiz-question-text');
+  const optionsEl = document.getElementById('quiz-options-list');
+  
+  questionEl.textContent = q.question;
+  optionsEl.innerHTML = q.options.map((opt, i) => `
+    <button class="quiz-option" onclick="selectQuizOption(${i})">
+      <div class="option-letter">${String.fromCharCode(65 + i)}</div>
+      <span>${opt}</span>
+    </button>
+  `).join('');
+}
+
+function selectQuizOption(idx) {
+  if (!quizState.currentQuestion) return;
+  
+  const options = document.querySelectorAll('.quiz-option');
+  const correctIdx = quizState.currentQuestion.correctIndex;
+  const isCorrect = idx === correctIdx;
+  
+  // Disable all options
+  options.forEach(opt => opt.disabled = true);
+  
+  // Show correct/incorrect
+  options[idx].classList.add(isCorrect ? 'correct' : 'incorrect');
+  if (!isCorrect) {
+    options[correctIdx].classList.add('correct');
+    options[idx].classList.add('incorrect-shake');
+  }
+  
+  if (isCorrect) {
+    quizState.score++;
+    document.getElementById('quiz-score-tag').textContent = `Score: ${quizState.score}`;
+  }
+  
+  quizState.history.push({ question: quizState.currentQuestion.question, correct: isCorrect });
+  
+  document.getElementById('quiz-next-btn').style.display = 'block';
+  document.getElementById('quiz-next-btn').textContent = (quizState.index + 1 >= quizState.total) ? 'Finish Quiz' : 'Next Question';
+}
+
+function nextQuizQuestion() {
+  quizState.index++;
+  if (quizState.index < quizState.total) {
+    fetchQuizQuestion();
+  } else {
+    finishQuiz();
+  }
+}
+
+async function finishQuiz() {
+  quizState.active = false;
+  document.getElementById('quiz-question-view').style.display = 'none';
+  document.getElementById('quiz-result-view').style.display = 'block';
+  
+  const finalScore = quizState.score;
+  document.getElementById('quiz-final-score').textContent = `${finalScore}/${quizState.total}`;
+  
+  let feedback = "";
+  if (finalScore === quizState.total) feedback = "Perfect score! You're mastering the roadmap.";
+  else if (finalScore >= 3) feedback = "Good job! Keep practicing to fill the gaps.";
+  else feedback = "Keep learning! Review your roadmap and try again.";
+  
+  document.getElementById('quiz-feedback').textContent = feedback;
+  
+  // Save results to user profile
+  if (!state.quizScores) state.quizScores = [];
+  state.quizScores.push({
+    score: finalScore,
+    total: quizState.total,
+    date: new Date().toISOString()
+  });
+  
+  await saveState();
+}
+
+function getMockQuestion(idx) {
+  const mocks = [
+    { 
+      question: "Which SQL clause is used to filter records after an aggregation has been performed?", 
+      options: ["WHERE", "FILTER", "HAVING", "GROUP BY"], 
+      correctIndex: 2 
+    },
+    { 
+      question: "In Python Pandas, which method is used to remove duplicate rows?", 
+      options: ["df.clear_duplicates()", "df.drop_duplicates()", "df.remove_redundant()", "df.unique()"], 
+      correctIndex: 1 
+    },
+    { 
+      question: "Which Power BI feature allows you to see the underlying data for a specific visual element?", 
+      options: ["Drillthrough", "Data View", "Power Query", "Relationship View"], 
+      correctIndex: 0 
+    },
+    { 
+      question: "What does KPI stand for in a business context?", 
+      options: ["Knowledge Performance Index", "Key Process Indicator", "Key Performance Indicator", "Key Profit Intelligence"], 
+      correctIndex: 2 
+    },
+    { 
+      question: "Which join returns all records from the left table and the matched records from the right table?", 
+      options: ["INNER JOIN", "FULL OUTER JOIN", "LEFT JOIN", "RIGHT JOIN"], 
+      correctIndex: 2 
+    }
+  ];
+  return mocks[idx % mocks.length];
+}
+
+// Explicitly expose to global scope
+window.startQuiz = startQuiz;
+window.selectQuizOption = selectQuizOption;
+window.nextQuizQuestion = nextQuizQuestion;
+window.renderQuiz = renderQuiz;

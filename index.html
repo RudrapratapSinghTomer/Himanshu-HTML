@@ -102,6 +102,13 @@
           Projects
           <span class="badge">8</span>
         </button>
+        <button class="nav-item" onclick="showPage('quiz',this)" style="border-left: 3px solid var(--purple2);">
+          <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          QuizGPT
+          <span class="badge" style="background:var(--purple)22; color:var(--purple2);">AI</span>
+        </button>
         <div class="nav-section">Review</div>
         <button class="nav-item" onclick="showPage('weekly',this)">
           <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -571,6 +578,60 @@
       <div class="page" id="page-resources">
         <div class="resource-filter" id="resource-filter"></div>
         <div class="resource-grid" id="resource-grid"></div>
+      </div>
+
+      <!-- QUIZ PAGE -->
+      <div class="page" id="page-quiz">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">QuizGPT — AI Tutor</h2>
+            <p class="section-sub">Personalized assessment based on your roadmap & skills</p>
+          </div>
+          <div id="quiz-score-tag" class="badge">Score: 0</div>
+        </div>
+
+        <div id="quiz-start-view" class="card" style="text-align:center; padding:60px 40px;">
+          <div style="font-size:48px; margin-bottom:20px;">🤖</div>
+          <h3 style="font-size:24px; font-weight:800; margin-bottom:12px;">Ready to test your knowledge?</h3>
+          <p style="color:var(--text2); margin-bottom:30px; max-width:500px; margin-left:auto; margin-right:auto;">
+            QuizGPT will generate questions tailored to your current learning phase. Each correct answer boosts your profile score!
+          </p>
+          <button class="btn btn-primary" style="padding:12px 32px; font-size:16px; font-weight:700;" onclick="startQuiz()">Start AI Quiz</button>
+        </div>
+
+        <div id="quiz-question-view" class="quiz-container" style="display:none;">
+          <div class="quiz-progress-wrap" style="margin-bottom:30px;">
+             <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:8px; color:var(--text3);">
+               <span>Progress</span>
+               <span id="quiz-progress-text">Question 1 of 5</span>
+             </div>
+             <div class="progress-track" style="height:6px; background:var(--navy3); border-radius:3px; overflow:hidden;">
+               <div id="quiz-progress-bar" class="progress-fill" style="width:20%; background:var(--purple); height:100%;"></div>
+             </div>
+          </div>
+
+          <div class="card question-card" style="padding:40px; margin-bottom:24px; border-left:4px solid var(--purple);">
+            <div id="quiz-question-text" style="font-size:18px; font-weight:600; line-height:1.6; margin-bottom:24px;">
+              Generating your question...
+            </div>
+            <div id="quiz-options-list" style="display:flex; flex-direction:column; gap:12px;">
+              <!-- Options populated by JS -->
+            </div>
+          </div>
+          
+          <div style="display:flex; justify-content:flex-end; gap:12px;">
+            <button id="quiz-next-btn" class="btn btn-primary" style="display:none;" onclick="nextQuizQuestion()">Next Question</button>
+          </div>
+        </div>
+
+        <div id="quiz-result-view" class="card" style="display:none; text-align:center; padding:60px 40px;">
+          <div style="font-size:48px; margin-bottom:20px;">🎉</div>
+          <h3 style="font-size:24px; font-weight:800; margin-bottom:12px;">Quiz Completed!</h3>
+          <div style="font-size:36px; font-weight:800; color:var(--purple2); margin-bottom:20px;" id="quiz-final-score">0/5</div>
+          <p id="quiz-feedback" style="color:var(--text2); margin-bottom:30px;"></p>
+          <button class="btn btn-primary" onclick="showPage('dashboard', document.querySelector('.nav-item[onclick*=\\'dashboard\\']'))">Return to Dashboard</button>
+          <button class="btn" style="margin-left:12px;" onclick="startQuiz()">Try Again</button>
+        </div>
       </div>
 
     <div class="save-toast" id="save-toast">
