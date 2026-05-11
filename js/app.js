@@ -445,6 +445,35 @@ function renderRecentLogs() {
   if (logsUnsub) logsUnsub();
   logsUnsub = db.collection('users').doc(targetUid).collection('logs').orderBy('createdAt','desc').onSnapshot(snap => {
     const logs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    
+    // Calculate Streak based on unique days
+    const uniqueDates = [...new Set(logs.map(l => l.date))].sort((a, b) => new Date(b) - new Date(a));
+    let streak = 0;
+    if (uniqueDates.length > 0) {
+      const today = new Date();
+      today.setHours(0,0,0,0);
+      const lastLog = new Date(uniqueDates[0]);
+      lastLog.setHours(0,0,0,0);
+      
+      const diff = Math.floor((today - lastLog) / (86400000));
+      if (diff <= 1) { // Only count if logged today or yesterday
+        streak = 1;
+        for (let i = 0; i < uniqueDates.length - 1; i++) {
+          const d1 = new Date(uniqueDates[i]);
+          const d2 = new Date(uniqueDates[i+1]);
+          d1.setHours(0,0,0,0);
+          d2.setHours(0,0,0,0);
+          if (Math.floor((d1 - d2) / 86400000) === 1) streak++;
+          else break;
+        }
+      }
+    }
+    if (state.streak !== streak) {
+      state.streak = streak;
+      db.collection('users').doc(targetUid).update({ streak: streak });
+    }
+    updateKPIs(); // Refresh UI with new streak
+
     container.innerHTML = logs.map(e => `
       <div class="card" style="padding:16px; margin-bottom:12px; position:relative;">
         <strong>${e.topic}</strong><br>
@@ -589,8 +618,7 @@ async function saveLogEntry() {
     const userRef = db.collection('users').doc(targetUid);
     await userRef.collection('logs').add(entry);
     const updateObj = { 
-      totalHours: firebase.firestore.FieldValue.increment(hours),
-      streak: firebase.firestore.FieldValue.increment(1) 
+      totalHours: firebase.firestore.FieldValue.increment(hours)
     };
 
     // Ensure the week is tracked in both local state and DB to trigger dynamic scaling
