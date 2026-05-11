@@ -33,33 +33,33 @@ const ROADMAPS = {
 
 const WEEKS = [
   // --- DATA ENGINEERING (The Architect) ---
-  { 
-    w: 1, 
-    phase: 'de1', 
-    title: 'SQL (Basic to Advanced)', 
-    tools: ['SQL'], 
-    goals: 'Day-1: Foundational Queries – Mastering SELECT, WHERE, and logical operators. Day-2: The Join Logic – Using INNER, LEFT, and CROSS JOINS. Day-3: Aggregations & Grouping – Using GROUP BY and HAVING to summarize data. Day-4: Advanced Window Functions – Applying RANK(), LEAD/LAG, and PARTITION BY. Day-5: DDL/DML & Performance – Creating/Altering tables and using INDEXING. Day-6: Complex Logic (CTEs) – Writing Common Table Expressions for nested queries.' 
+  {
+    w: 1,
+    phase: 'de1',
+    title: 'SQL (Basic to Advanced)',
+    tools: ['SQL'],
+    goals: 'Day-1: Foundational Queries – Mastering SELECT, WHERE, and logical operators. Day-2: The Join Logic – Using INNER, LEFT, and CROSS JOINS. Day-3: Aggregations & Grouping – Using GROUP BY and HAVING to summarize data. Day-4: Advanced Window Functions – Applying RANK(), LEAD/LAG, and PARTITION BY. Day-5: DDL/DML & Performance – Creating/Altering tables and using INDEXING. Day-6: Complex Logic (CTEs) – Writing Common Table Expressions for nested queries.'
   },
-  { 
-    w: 2, 
-    phase: 'de1', 
-    title: 'Python & PySpark (The Processing Engine)', 
-    tools: ['Python', 'PySpark'], 
-    goals: 'Day-1: Python for Data – Handling file I/O (CSV/JSON) and error logging. Day-2: Intro to Distributed Computing – Understanding Spark parallel processing. Day-3: PySpark DataFrames – Using Spark API to filter and aggregate massive datasets. Day-4: Spark SQL & Functions – Running SQL queries directly on Spark DataFrames. Day-5: Data Cleaning at Scale – Handling NULL values and schema inconsistencies. Day-6: Data Writing & Formats – Saving data in Parquet and Avro formats.' 
+  {
+    w: 2,
+    phase: 'de1',
+    title: 'Python & PySpark (The Processing Engine)',
+    tools: ['Python', 'PySpark'],
+    goals: 'Day-1: Python for Data – Handling file I/O (CSV/JSON) and error logging. Day-2: Intro to Distributed Computing – Understanding Spark parallel processing. Day-3: PySpark DataFrames – Using Spark API to filter and aggregate massive datasets. Day-4: Spark SQL & Functions – Running SQL queries directly on Spark DataFrames. Day-5: Data Cleaning at Scale – Handling NULL values and schema inconsistencies. Day-6: Data Writing & Formats – Saving data in Parquet and Avro formats.'
   },
-  { 
-    w: 3, 
-    phase: 'de1', 
-    title: 'Power BI (Visualizing the Pipeline)', 
-    tools: ['Power BI'], 
-    goals: 'Day-1: Connecting to Sources – Linking to SQL and Cloud (ADLS/S3). Day-2: Power Query (M Language) – Shaping and cleaning data. Day-3: Data Modeling Basics – Creating a Star Schema (Fact/Dimension). Day-4: Basic DAX – Writing formulas like CALCULATE and SUM. Day-5: Visual Design – Building interactive charts and Slicers. Day-6: Service & Sharing – Publishing to Power BI Service.' 
+  {
+    w: 3,
+    phase: 'de1',
+    title: 'Power BI (Visualizing the Pipeline)',
+    tools: ['Power BI'],
+    goals: 'Day-1: Connecting to Sources – Linking to SQL and Cloud (ADLS/S3). Day-2: Power Query (M Language) – Shaping and cleaning data. Day-3: Data Modeling Basics – Creating a Star Schema (Fact/Dimension). Day-4: Basic DAX – Writing formulas like CALCULATE and SUM. Day-5: Visual Design – Building interactive charts and Slicers. Day-6: Service & Sharing – Publishing to Power BI Service.'
   },
-  { 
-    w: 4, 
-    phase: 'de1', 
-    title: 'Cloud & Orchestration (ADF / Databricks / Fabric)', 
-    tools: ['ADF', 'Databricks', 'Fabric'], 
-    goals: 'Day-1: Cloud Ingestion (ADF) – Building pipelines to move data to cloud. Day-2: Databricks Workspace – Setting up clusters and using notebooks. Day-3: The Medallion Architecture – Bronze, Silver, Gold strategy. Day-4: Microsoft Fabric (OneLake) – Unified SaaS platform. Day-5: Delta Lake Logic – ACID transactions (Upserts/Deletes). Day-6: Capstone Pipeline – End-to-end flow: ADF → Databricks → Power BI.' 
+  {
+    w: 4,
+    phase: 'de1',
+    title: 'Microsoft Power BI Desktop for Business Intelligence',
+    tools: ['Power BI Hands-on'],
+    goals: 'Day-1: Data Ingestion & Power Query (The ETL Phase). Day-2: Advanced Data Profiling & Transformation. Day-3: Relational Data Modeling (The Foundation). Day-4: DAX Foundations (Calculated Columns & Measures). Day-5: Advanced DAX & Time Intelligence. Day-6: Data Visualization & UI/UX Design. Day-7: AI Visuals & The Final Capstone Project'
   },
 
   // --- DATA SCIENCE ---
@@ -78,7 +78,7 @@ const SKILLS = [
   { domain: 'Data Engineering', color: '#6366F1', key: 'de1', name: 'Cloud Ingestion (ADF/Fabric)', before: 0, now: 0, target: 5 },
   { domain: 'Data Engineering', color: '#6366F1', key: 'de2', name: 'PySpark & Distributed Compute', before: 0, now: 0, target: 5 },
   { domain: 'Data Engineering', color: '#6366F1', key: 'de3', name: 'Delta Lake & Medallion Arch', before: 0, now: 0, target: 5 },
-  
+
   { domain: 'Data Science', color: '#8B5CF6', key: 'ds1', name: 'Scalable ML with PySpark', before: 0, now: 0, target: 5 },
   { domain: 'Data Science', color: '#8B5CF6', key: 'ds2', name: 'Deep Learning & LLM APIs', before: 0, now: 0, target: 5 },
   { domain: 'Data Science', color: '#8B5CF6', key: 'ds3', name: 'MLOps & Model Tracking', before: 0, now: 0, target: 5 },
@@ -95,7 +95,7 @@ const PROJECTS = [
 const RESOURCES = [
   { domain: 'Data Engineering', type: 'Course', name: 'Azure Data Factory Fundamentals', url: 'https://learn.microsoft.com', priority: 'must', tags: ['cloud', 'adf'] },
   { domain: 'Data Engineering', type: 'Docs', name: 'Databricks Delta Lake Guide', url: 'https://docs.delta.io', priority: 'must', tags: ['spark', 'delta'] },
-  
+
   { domain: 'Data Science', type: 'Course', name: 'Scalable ML with Spark', url: 'https://www.coursera.org', priority: 'must', tags: ['ml', 'spark'] },
   { domain: 'Data Science', type: 'Practice', name: 'Kaggle Competitions', url: 'https://www.kaggle.com', priority: 'must', tags: ['ml', 'practice'] },
 ];
