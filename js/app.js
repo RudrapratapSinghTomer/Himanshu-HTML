@@ -311,6 +311,10 @@ function renderRoadmap() {
             </select>
           </div>
           <div class="week-title" style="margin-bottom:8px;">${w.title}</div>
+          ${w.url ? `<a href="${w.url}" target="_blank" class="btn-sm" style="text-decoration:none; display:inline-flex; align-items:center; gap:6px; margin-bottom:12px; background:var(--navy3); border:1px solid var(--border); width:fit-content; font-size:10px;">
+            <svg style="width:12px; height:12px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+            Course Material
+          </a>` : ''}
           <details class="week-details" style="cursor:pointer; font-size:12px; color:var(--text2);" ${status === 'doing' ? 'open' : ''}>
             <summary style="outline:none; list-style:none; color:var(--blue2); font-weight:500;">View Daily Goals</summary>
             <div class="week-goals" style="margin-top:12px; padding-top:12px; border-top:1px solid var(--border);">${goalsHtml}</div>

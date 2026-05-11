@@ -59,6 +59,7 @@ const WEEKS = [
     phase: 'de1',
     title: 'Microsoft Power BI Desktop for Business Intelligence',
     tools: ['Power BI Hands-on'],
+    url: 'https://www.udemy.com/course/microsoft-power-bi-up-running-with-power-bi-desktop/?src=sac&kw=Microsoft+Power+BI+Desktop+for+Business+Intelligence',
     goals: 'Day-1: Data Ingestion & Power Query (The ETL Phase). Day-2: Advanced Data Profiling & Transformation. Day-3: Relational Data Modeling (The Foundation). Day-4: DAX Foundations (Calculated Columns & Measures). Day-5: Advanced DAX & Time Intelligence. Day-6: Data Visualization & UI/UX Design. Day-7: AI Visuals & The Final Capstone Project'
   },
 
