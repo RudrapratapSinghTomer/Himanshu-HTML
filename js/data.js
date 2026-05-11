@@ -77,14 +77,16 @@ const WEEKS = [
 ];
 
 const SKILLS = [
-  { domain: 'Data Engineering', color: '#6366F1', key: 'de1', name: 'Cloud Ingestion (ADF/Fabric)', before: 0, now: 0, target: 5 },
-  { domain: 'Data Engineering', color: '#6366F1', key: 'de2', name: 'PySpark & Distributed Compute', before: 0, now: 0, target: 5 },
-  { domain: 'Data Engineering', color: '#6366F1', key: 'de3', name: 'Delta Lake & Medallion Arch', before: 0, now: 0, target: 5 },
-
-  { domain: 'Data Science', color: '#8B5CF6', key: 'ds1', name: 'Scalable ML with PySpark', before: 0, now: 0, target: 5 },
-  { domain: 'Data Science', color: '#8B5CF6', key: 'ds2', name: 'Deep Learning & LLM APIs', before: 0, now: 0, target: 5 },
-  { domain: 'Data Science', color: '#8B5CF6', key: 'ds3', name: 'MLOps & Model Tracking', before: 0, now: 0, target: 5 },
+  { domain: 'SQL', color: '#6366F1', key: 'sql1', name: 'Advanced Window Functions', before: 0, now: 0, target: 5 },
+  { domain: 'SQL', color: '#6366F1', key: 'sql2', name: 'Performance Tuning & Indexing', before: 0, now: 0, target: 5 },
+  { domain: 'Python', color: '#3776AB', key: 'py1', name: 'PySpark Distributed Compute', before: 0, now: 0, target: 5 },
+  { domain: 'Python', color: '#3776AB', key: 'py2', name: 'Memory Management & Logging', before: 0, now: 0, target: 5 },
+  { domain: 'Power BI', color: '#F2C811', key: 'pbi1', name: 'DAX Measures & Time Intelligence', before: 0, now: 0, target: 5 },
+  { domain: 'Power BI', color: '#F2C811', key: 'pbi2', name: 'Relational Data Modeling', before: 0, now: 0, target: 5 },
+  { domain: 'Machine Learning', color: '#8B5CF6', key: 'ml1', name: 'Deep Learning & LLM APIs', before: 0, now: 0, target: 5 },
+  { domain: 'Machine Learning', color: '#8B5CF6', key: 'ml2', name: 'MLOps & Model Tracking', before: 0, now: 0, target: 5 },
 ];
+
 
 const PROJECTS = [
   { id: 'de_p1', phase: 'de1', color: '#6366F1', num: '01', title: 'Cloud ETL Pipeline', tools: ['ADF', 'Databricks'], dataset: 'Log events', kaggle: 'https://www.kaggle.com', tasks: ['Ingest JSON', 'Transform to Parquet', 'Load to Lakehouse'], q: 'Latency trends?', insight: 'Average latency decreased by 20%', status: 'Not Started' },
