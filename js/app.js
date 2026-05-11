@@ -559,6 +559,17 @@ function updateLogWeek(dateVal) {
   
   const weekSelect = document.getElementById('log-week');
   if (weekSelect && weekNumber >= 1 && weekNumber <= 52) {
+    // Check if the option exists
+    let optionExists = Array.from(weekSelect.options).some(opt => opt.value == weekNumber);
+    
+    // If not, add it dynamically to prevent blank state
+    if (!optionExists) {
+      const newOpt = document.createElement('option');
+      newOpt.value = weekNumber;
+      newOpt.textContent = `Week ${weekNumber} (Extra)`;
+      weekSelect.appendChild(newOpt);
+    }
+    
     weekSelect.value = weekNumber;
   }
 }
