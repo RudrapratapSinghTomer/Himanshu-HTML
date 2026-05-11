@@ -322,8 +322,14 @@ function renderRecentLogs() {
   const targetUid = (myRole === 'host' && viewingUserId) ? viewingUserId : user.uid;
   if (logsUnsub) logsUnsub();
   logsUnsub = db.collection('users').doc(targetUid).collection('logs').orderBy('createdAt','desc').onSnapshot(snap => {
-    const logs = snap.docs.map(d => d.data());
-    container.innerHTML = logs.map(e => `<div class="card" style="padding:16px; margin-bottom:12px;"><strong>${e.topic}</strong><br><small>${e.date} · ${e.hours}h</small><p>${e.learned}</p></div>`).join('');
+    const logs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    container.innerHTML = logs.map(e => `
+      <div class="card" style="padding:16px; margin-bottom:12px; position:relative;">
+        <strong>${e.topic}</strong><br>
+        <small>${e.date} · ${e.hours}h</small>
+        <p>${e.learned}</p>
+        ${myRole === 'host' ? `<button onclick="deleteLogEntry('${e.id}')" style="position:absolute; top:10px; right:10px; background:rgba(239,68,68,0.1); border:none; color:var(--red); width:24px; height:24px; border-radius:4px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:16px;">&times;</button>` : ''}
+      </div>`).join('');
   });
 }
 
@@ -441,7 +447,8 @@ async function saveLogEntry() {
   };
 
   try {
-    const userRef = db.collection('users').doc(user.uid);
+    const targetUid = (myRole === 'host' && viewingUserId) ? viewingUserId : user.uid;
+    const userRef = db.collection('users').doc(targetUid);
     await userRef.collection('logs').add(entry);
     await userRef.update({ 
       totalHours: firebase.firestore.FieldValue.increment(hours),
@@ -544,6 +551,31 @@ async function deleteUser(userId) {
   } catch (e) {
     console.error("Delete error:", e);
     showToast("Delete failed", true);
+  }
+}
+
+async function deleteLogEntry(logId) {
+  if (myRole !== 'host') return;
+  if (!confirm("Are you sure you want to delete this log entry?")) return;
+  
+  const targetUid = (myRole === 'host' && viewingUserId) ? viewingUserId : auth.currentUser?.uid;
+  if (!targetUid) return;
+
+  try {
+    const logRef = db.collection('users').doc(targetUid).collection('logs').doc(logId);
+    const doc = await logRef.get();
+    if (doc.exists) {
+      const hours = doc.data().hours || 0;
+      await logRef.delete();
+      await db.collection('users').doc(targetUid).update({
+        totalHours: firebase.firestore.FieldValue.increment(-hours)
+      });
+      showToast("Log entry deleted");
+      renderWeekly(); // Refresh weekly aggregation
+    }
+  } catch (e) {
+    console.error("Delete Log Error:", e);
+    showToast("Failed to delete log", true);
   }
 }
 
