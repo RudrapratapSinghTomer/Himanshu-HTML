@@ -475,7 +475,7 @@ function renderAdminUsers() {
 
   // Directory
   userList.innerHTML = allUsers.map(u => `
-    <div class="user-item" onclick="switchViewUser('${u.id}')" style="display:flex; justify-content:space-between; align-items:center; padding:12px; background:var(--navy3); border-radius:8px; cursor:pointer; margin-bottom:8px;">
+    <div class="user-item" style="display:flex; justify-content:space-between; align-items:center; padding:12px; background:var(--navy3); border-radius:8px; margin-bottom:8px;">
       <div style="display:flex; gap:12px; align-items:center;">
         <div class="avatar" style="width:32px; height:32px; font-size:12px;">${(u.firstName?.[0]||'')+ (u.lastName?.[0]||'')}</div>
         <div>
@@ -483,7 +483,11 @@ function renderAdminUsers() {
           <div style="font-size:10px; color:var(--text3);">${u.role?.toUpperCase() || 'USER'}</div>
         </div>
       </div>
-      <div class="badge" style="background:var(--blue)22; color:var(--blue2);">${u.assignedRoadmap || 'None'}</div>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <div class="badge" style="background:var(--blue)22; color:var(--blue2);">${u.assignedRoadmap || 'None'}</div>
+        <button onclick="switchViewUser('${u.id}')" class="btn" style="padding:4px 10px; font-size:11px; background:var(--navy4);">Edit</button>
+        <button onclick="deleteUser('${u.id}')" class="btn" style="padding:4px 10px; font-size:11px; background:var(--red)22; color:var(--red); border-color:var(--red)44;">Delete</button>
+      </div>
     </div>
   `).join('');
 
@@ -519,6 +523,28 @@ async function switchViewUser(uid) {
     updateViewingStatus(`${u.firstName} ${u.lastName || ''}`);
     showPage('dashboard', document.querySelector('.nav-item[onclick*="dashboard"]'));
   } 
+}
+
+async function deleteUser(userId) {
+  if (myRole !== 'host') return alert("Unauthorized");
+  if (!confirm("Are you sure you want to delete this user?")) return;
+
+  try {
+    await db.collection('users').doc(userId).delete();
+    showToast("User deleted successfully");
+    // If you were viewing this user, clear the view
+    if (viewingUserId === userId) {
+      viewingUserId = null;
+      state = { ...me };
+      renderDashboard();
+      updateViewingStatus(null);
+    }
+    // Refresh the user list
+    fetchEmployees();
+  } catch (e) {
+    console.error("Delete error:", e);
+    showToast("Delete failed", true);
+  }
 }
 
 function updateViewingStatus(userName) {
