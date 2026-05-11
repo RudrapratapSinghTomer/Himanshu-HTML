@@ -254,7 +254,6 @@ function renderRoadmap() {
               <option value="doing" ${status==='doing'?'selected':''}>In Progress</option>
               <option value="done" ${status==='done'?'selected':''}>Completed</option>
             </select>
-          </div>
           <div class="week-title">${w.title}</div>
           <div class="week-goals">${w.goals}</div>
         </div>
@@ -517,8 +516,20 @@ async function switchViewUser(uid) {
     state = { ...defaultState, ...u }; 
     updateUserUI(); 
     renderDashboard(); 
+    updateViewingStatus(`${u.firstName} ${u.lastName || ''}`);
     showPage('dashboard', document.querySelector('.nav-item[onclick*="dashboard"]'));
   } 
+}
+
+function updateViewingStatus(userName) {
+  const msgEl = document.getElementById('currently-viewing-msg');
+  if (!msgEl) return;
+  if (userName) {
+    msgEl.textContent = `Currently Viewing: ${userName}`;
+    msgEl.style.display = 'block';
+  } else {
+    msgEl.style.display = 'none';
+  }
 }
 
 function toggleLogForm() {
