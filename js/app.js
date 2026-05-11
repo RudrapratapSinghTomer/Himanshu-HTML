@@ -434,15 +434,13 @@ async function saveLogEntry() {
   const week = document.getElementById('log-week')?.value;
   const tool = document.getElementById('log-tool')?.value;
   const mood = state.selectedMood || 3;
-  const wins = document.getElementById('log-wins')?.value;
   const handson = document.getElementById('log-handson')?.value;
-  const blockers = document.getElementById('log-blockers')?.value;
   const tomorrow = document.getElementById('log-tomorrow')?.value;
 
   if (!topic || !learned) return showToast("Fill topic and learned fields", true);
 
   const entry = { 
-    topic, learned, hours, date, week, tool, mood, wins, handson, blockers, tomorrow,
+    topic, learned, hours, date, week, tool, mood, handson, tomorrow,
     createdAt: firebase.firestore.FieldValue.serverTimestamp() 
   };
 
@@ -725,8 +723,6 @@ async function renderWeekly() {
   const aggregated = {
     topics: weeklyLogs.map(l => l.topic).filter(Boolean).join(', '),
     handson: weeklyLogs.map(l => l.handson).filter(Boolean).join('. '),
-    wins: weeklyLogs.map(l => l.wins).filter(Boolean).join('. '),
-    blockers: weeklyLogs.map(l => l.blockers).filter(Boolean).join('. '),
     focus: weeklyLogs.map(l => l.tomorrow).filter(Boolean).slice(-1)[0] || '', 
     hours: weeklyLogs.reduce((sum, l) => sum + (parseFloat(l.hours) || 0), 0)
   };
