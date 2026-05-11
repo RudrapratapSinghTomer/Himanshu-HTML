@@ -167,10 +167,34 @@ async function saveState() {
 // ── DATA FETCHING ────────────────────────────────────────────────────────────
 function loadDynamicData() {
   db.collection('config').doc('roadmaps').onSnapshot(doc => {
-    if (doc.exists) { ROADMAPS_DB = doc.data(); renderDashboard(); renderRoadmap(); }
+    if (doc.exists) { 
+      const data = doc.data();
+      // Auto-upgrade stale database if new tracks are missing
+      if (!data['Data Engineering'] || data['Data Analytics']) {
+        console.warn("Stale global roadmap detected. Prioritizing local logic-first curriculum.");
+        ROADMAPS_DB = ROADMAPS;
+        if (myRole === 'host') {
+          showToast("Upgrading global curriculum...");
+          saveRoadmapConfig();
+        }
+      } else {
+        ROADMAPS_DB = data;
+      }
+      renderDashboard(); renderRoadmap(); 
+    }
   });
   db.collection('weeks').onSnapshot(snap => {
-    if (!snap.empty) { WEEKS_DB = snap.docs.map(d => d.data()).sort((a,b) => a.w - b.w); renderRoadmap(); }
+    // If we have weeks in DB, we use them, but we check if they are the new ones
+    if (!snap.empty) { 
+      const data = snap.docs.map(d => d.data()).sort((a,b) => a.w - b.w);
+      // If none of the weeks have a 'phase' property, they are old
+      if (!data.some(w => w.phase && w.phase.includes('da'))) {
+         WEEKS_DB = WEEKS;
+      } else {
+         WEEKS_DB = data;
+      }
+      renderRoadmap(); 
+    }
   });
   db.collection('projects').onSnapshot(snap => {
     if (!snap.empty) { PROJECTS_DB = snap.docs.map(d => d.data()).sort((a,b) => a.num - b.num); renderProjects(); }
@@ -280,11 +304,24 @@ function renderPhaseFilters(phases) {
     phases.map(p => `<button class="phase-btn ${activePhaseFilter===p.id?'active':''}" onclick="setPhaseFilter('${p.id}')">${p.name}</button>`).join('');
 }
 function setPhaseFilter(p) { activePhaseFilter = p; renderRoadmap(); }
+function switchRoadmap(name, btn) {
+  state.assignedRoadmap = name;
+  activePhaseFilter = 'all'; // Reset phase filter when switching roadmaps
+  
+  // Update UI buttons
+  if (btn) {
+    const parent = btn.parentElement;
+    parent.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+  
+  renderRoadmap();
+}
 function setWeekStatus(w, s) { state.weekStatus[w] = s; saveState(); renderRoadmap(); updateKPIs(); }
 
 function renderSkills() {
   const container = document.getElementById('skills-content'); if (!container) return;
-  const domainFilter = { all:null, sql:'SQL', python:'Python', powerbi:'Power BI', excel:'Excel', core:'Analytics Core' }[state.activeSkillTab] || null;
+  const domainFilter = { all:null, da:'Data Analyst', de:'Data Engineering', ds:'Data Science' }[state.activeSkillTab] || null;
   container.innerHTML = [...new Set(SKILLS_DB.map(s => s.domain))].map(domain => {
     if (domainFilter && domain !== domainFilter) return '';
     return `<div class="skills-domain"><div class="domain-header">${domain}</div>${SKILLS_DB.filter(s => s.domain === domain).map(s => `<div class="skill-row"><span>${s.name}</span><div class="skill-bar-wrap"><div class="skill-bar-fill" style="width:${(state.skillNow[s.key]||0)*33}%;background:${s.color};"></div></div><select onchange="updateSkill('${s.key}',this.value)" class="form-select"><option value="0" ${state.skillNow[s.key]==0?'selected':''}>None</option><option value="1" ${state.skillNow[s.key]==1?'selected':''}>Beginner</option><option value="2" ${state.skillNow[s.key]==2?'selected':''}>Inter</option><option value="3" ${state.skillNow[s.key]==3?'selected':''}>Expert</option></select></div>`).join('')}</div>`;
@@ -322,11 +359,26 @@ function toggleProjectTask(pid, tidx) {
 function updateProjectStatus(id, v) { state.projectStatus[id] = v; saveState(); renderProjects(); updateKPIs(); }
 
 function renderResources() {
-  const container = document.getElementById('resource-grid'); if (!container) return;
+  const container = document.getElementById('resource-grid');
+  const filterBar = document.getElementById('resource-filter');
+  if (!container || !filterBar) return;
+
+  const domains = ['All', ...new Set(RESOURCES_DB.map(r => r.domain))];
+  filterBar.innerHTML = domains.map(d => `
+    <button class="phase-btn ${ (state.activeResourceFilter || 'All') === d ? 'active' : '' }" 
+            onclick="setResourceFilter('${d}')">${d}</button>
+  `).join('');
+
   const filter = state.activeResourceFilter || 'All';
   const filtered = filter === 'All' ? RESOURCES_DB : RESOURCES_DB.filter(r => r.domain === filter);
-  container.innerHTML = filtered.map(r => `<div class="resource-item"><div>${r.name}</div><a href="${r.url}" target="_blank">Link</a></div>`).join('');
+  container.innerHTML = filtered.map(r => `
+    <div class="resource-item">
+      <div style="font-weight:700; margin-bottom:4px;">${r.name}</div>
+      <div style="font-size:11px; color:var(--text3); margin-bottom:12px;">${r.type} · ${r.domain}</div>
+      <a href="${r.url}" target="_blank" class="btn-sm" style="text-decoration:none; display:inline-block;">Open Resource</a>
+    </div>`).join('');
 }
+function setResourceFilter(f) { state.activeResourceFilter = f; renderResources(); }
 
 function renderRecentLogs() {
   const container = document.getElementById('log-entries-list'); if (!container) return;
@@ -717,15 +769,11 @@ window.showTab = function(type, filter, btn) {
     let shouldShow = false;
     if (filter === 'all') {
       shouldShow = true;
-    } else if (filter === 'sql' && header === 'sql') {
+    } else if (filter === 'da' && header === 'data analyst') {
       shouldShow = true;
-    } else if (filter === 'python' && header === 'python') {
+    } else if (filter === 'de' && header === 'data engineering') {
       shouldShow = true;
-    } else if (filter === 'powerbi' && header === 'power bi') {
-      shouldShow = true;
-    } else if (filter === 'excel' && header === 'excel') {
-      shouldShow = true;
-    } else if (filter === 'core' && header === 'analytics core') {
+    } else if (filter === 'ds' && header === 'data science') {
       shouldShow = true;
     }
     
@@ -1016,7 +1064,7 @@ function updateProjectItem(idx, key, val) { PROJECTS_DB[idx][key] = val; }
 
 function addWeekItem() {
   const nextW = (WEEKS_DB[WEEKS_DB.length-1]?.w || 0) + 1;
-  WEEKS_DB.push({ w: nextW, title: 'New Week', goals: 'Enter goals here', phase: 'p1' });
+  WEEKS_DB.push({ w: nextW, title: 'New Week', goals: 'Enter goals here', phase: 'da1' });
   renderAdminContent();
 }
 
@@ -1028,14 +1076,16 @@ function addProjectItem() {
 
 async function saveRoadmapConfig() {
   try {
-    await db.collection('config').doc('roadmaps').set(ROADMAPS_DB);
-    // For weeks/projects, we might need to batch update or set whole collection if small
-    // Simpler: just loop and set for now if counts are low
+    await db.collection('config').doc('roadmaps').set(ROADMAPS);
     const batch = db.batch();
-    WEEKS_DB.forEach(w => batch.set(db.collection('weeks').doc('w'+w.w), w));
-    PROJECTS_DB.forEach(p => batch.set(db.collection('projects').doc(p.id), p));
+    WEEKS.forEach(w => {
+      const docId = w.phase + '_w' + w.w; // Use unique doc ID for different roadmaps
+      batch.set(db.collection('weeks').doc(docId), w);
+    });
+    PROJECTS.forEach(p => batch.set(db.collection('projects').doc(p.id), p));
+    SKILLS.forEach(s => batch.set(db.collection('skills').doc(s.key), s));
     await batch.commit();
-    showToast("Content Saved Globally");
+    showToast("Global Content Synchronized!");
   } catch (e) { 
     console.error("Global Save Error:", e);
     showToast("Global Save Failed", true); 
@@ -1118,7 +1168,7 @@ async function fetchQuizQuestion() {
 
   try {
     // Determine context for AI
-    const roadmap = state.assignedRoadmap || 'Data Analytics';
+    const roadmap = state.assignedRoadmap || 'Data Analyst';
     const skills = Object.keys(state.skillNow).filter(k => state.skillNow[k] > 0);
     
     // Call Firebase Cloud Function (Proxy)
