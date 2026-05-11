@@ -1163,6 +1163,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Date to Week Auto-calculation
   document.getElementById('log-date')?.addEventListener('change', (e) => updateLogWeek(e.target.value));
+
+  // Quiz Topic Selection
+  document.getElementById('quiz-topic-select')?.addEventListener('change', (e) => {
+    quizState.selectedTopic = e.target.value;
+  });
 });
 
 // ── QUIZ LOGIC ───────────────────────────────────────────────────────────────
@@ -1186,18 +1191,34 @@ function renderQuiz() {
 
     // Populate topic dropdown
     const select = document.getElementById('quiz-topic-select');
+    const startBtn = document.getElementById('quiz-start-btn');
     if (select) {
-      const activePhases = getActivePhases();
-      const doneWeekNums = Object.keys(state.weekStatus).filter(w => state.weekStatus[w] === 'done').map(Number);
+      const roadmap = state.assignedRoadmap || 'Data Engineering';
+      const myPhases = ROADMAPS[roadmap]?.map(p => p.id) || [];
+      const doneWeekNums = Object.keys(state.weekStatus || {}).filter(w => state.weekStatus[w] === 'done').map(Number);
       
       const completedTopics = WEEKS_DB
-        .filter(w => doneWeekNums.includes(w.w))
+        .filter(w => doneWeekNums.includes(w.w) && myPhases.includes(w.phase))
         .map(w => w.title);
       
       const uniqueTopics = [...new Set(completedTopics)];
       
-      select.innerHTML = '<option value="all">Anywhere (All Completed Topics)</option>' + 
-        uniqueTopics.map(t => `<option value="${t}">${t}</option>`).join('');
+      if (uniqueTopics.length === 0) {
+        select.innerHTML = '<option value="none">No Topics Completed Yet</option>';
+        if (startBtn) {
+          startBtn.disabled = true;
+          startBtn.style.opacity = '0.5';
+          startBtn.textContent = 'Complete a topic to unlock';
+        }
+      } else {
+        if (startBtn) {
+          startBtn.disabled = false;
+          startBtn.style.opacity = '1';
+          startBtn.textContent = 'Start AI Quiz';
+        }
+        select.innerHTML = '<option value="all">Anywhere (All Completed Topics)</option>' + 
+          uniqueTopics.map(t => `<option value="${t}">${t}</option>`).join('');
+      }
     }
   }
 }
@@ -1210,7 +1231,10 @@ async function startQuiz() {
   const roadmap = state.assignedRoadmap || 'Data Engineering';
   const userSkills = Object.keys(state.skillNow).filter(s => state.skillNow[s] > 0);
   const doneWeekNums = Object.keys(state.weekStatus).filter(w => state.weekStatus[w] === 'done').map(Number);
-  const completedTopicTitles = WEEKS_DB.filter(w => doneWeekNums.includes(w.w)).map(w => w.title);
+  const myPhases = ROADMAPS[roadmap]?.map(p => p.id) || [];
+  const completedTopicTitles = WEEKS_DB
+    .filter(w => doneWeekNums.includes(w.w) && myPhases.includes(w.phase))
+    .map(w => w.title);
 
   const combinedPool = [
     ...ALL_QUESTIONS,
@@ -1220,9 +1244,10 @@ async function startQuiz() {
   ];
 
   let filteredPool = [];
-  if (selectedTopic !== 'all') {
+  if (selectedTopic !== 'all' && selectedTopic !== 'none') {
     filteredPool = combinedPool.filter(q => q.topic === selectedTopic);
   } else {
+    // Only include questions from completed topics or general ones
     filteredPool = combinedPool.filter(q => 
       (q.tags.includes(roadmap) || q.tags.some(tag => userSkills.includes(tag))) &&
       (completedTopicTitles.includes(q.topic) || q.topic === "General")
