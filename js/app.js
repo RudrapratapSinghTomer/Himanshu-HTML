@@ -895,4 +895,12 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+
+  // Log Form Toggles
+  document.getElementById('btn-log-session')?.addEventListener('click', toggleLogForm);
+  document.getElementById('btn-new-session')?.addEventListener('click', toggleLogForm);
+  document.getElementById('btn-cancel-log')?.addEventListener('click', toggleLogForm);
 });
+
+// Explicitly expose to global scope for any remaining inline onclicks or external calls
+window.toggleLogForm = toggleLogForm;

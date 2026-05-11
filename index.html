@@ -183,7 +183,7 @@
           <div class="streak-badge">
             <span>🔥</span> <span id="streak-count-topbar">0</span>
           </div>
-          <button class="btn btn-primary" onclick="toggleLogForm()">+ Log Session</button>
+          <button class="btn btn-primary" id="btn-log-session">+ Log Session</button>
         </div>
       </div>
 
@@ -387,7 +387,7 @@
               <option>Excel</option>
               <option>Tableau</option>
             </select>
-            <button class="btn btn-primary" onclick="toggleLogForm()">+ New Session</button>
+            <button class="btn btn-primary" id="btn-new-session">+ New Session</button>
           </div>
         </div>
         <div id="log-form-container" class="card"
@@ -431,7 +431,7 @@
                 placeholder="What's the #1 priority for your next session?"></div>
             <div style="grid-column:1/-1; display:flex; gap:12px;">
               <button class="btn btn-primary" style="flex:1;" onclick="saveLogEntry()">Save Session</button>
-              <button class="btn" style="background:var(--card2);" onclick="toggleLogForm()">Cancel</button>
+              <button class="btn" id="btn-cancel-log" style="background:var(--card2);">Cancel</button>
             </div>
           </div>
         </div>
