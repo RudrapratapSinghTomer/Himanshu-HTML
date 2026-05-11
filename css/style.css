@@ -127,10 +127,14 @@ body {
 }
 
 .nav-item.active {
-  background: rgba(99, 102, 241, 0.1);
-  color: var(--blue2);
-  font-weight: 600;
-  border-left-color: var(--blue2);
+  background: #FFFFFF;
+  color: #0F172A;
+  font-weight: 700;
+  border-left-color: var(--blue);
+}
+
+.nav-item.active .icon {
+  opacity: 1;
 }
 
 
@@ -153,20 +157,25 @@ body {
 }
 
 .nav-item.active .badge {
-  background: rgba(59, 130, 246, 0.25);
-  color: #fff;
+  background: var(--navy2);
+  color: #FFFFFF;
 }
 
 /* QuizGPT Special Style */
 .nav-item.quiz-ai.active {
-  border-left-color: var(--purple2);
-  background: rgba(139, 92, 246, 0.1);
-  color: var(--purple2);
+  background: #FFFFFF;
+  color: var(--purple);
+  border-left-color: var(--purple);
 }
 
 .nav-item.quiz-ai .badge {
   background: rgba(139, 92, 246, 0.15);
-  color: var(--purple2);
+  color: var(--purple);
+}
+
+.nav-item.quiz-ai.active .badge {
+  background: var(--purple);
+  color: #FFFFFF;
 }
 
 .user-card {
