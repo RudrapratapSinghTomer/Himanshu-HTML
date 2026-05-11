@@ -18,7 +18,8 @@ const defaultState = {
   activeResourceFilter: 'All',
   streak: 0,
   rating: 0,
-  dayStatus: {}
+  dayStatus: {},
+  selectedQuizTopic: 'all'
 };
 
 const ROADMAPS = {

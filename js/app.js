@@ -66,6 +66,7 @@ auth.onAuthStateChanged(async (user) => {
           updateUserUI();
           renderDashboard();
           renderWeekly();
+          if (document.getElementById('page-quiz')?.classList.contains('active')) renderQuiz();
         }
       } else {
         // New user: Create initial profile doc
@@ -1167,6 +1168,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // Quiz Topic Selection
   document.getElementById('quiz-topic-select')?.addEventListener('change', (e) => {
     quizState.selectedTopic = e.target.value;
+    state.selectedQuizTopic = e.target.value;
+    saveState();
   });
 });
 
@@ -1218,6 +1221,18 @@ function renderQuiz() {
         }
         select.innerHTML = '<option value="all">Anywhere (All Completed Topics)</option>' + 
           uniqueTopics.map(t => `<option value="${t}">${t}</option>`).join('');
+        
+        // Restore selection
+        if (state.selectedQuizTopic) {
+          if (uniqueTopics.includes(state.selectedQuizTopic) || state.selectedQuizTopic === 'all') {
+            select.value = state.selectedQuizTopic;
+            quizState.selectedTopic = state.selectedQuizTopic;
+          } else {
+            select.value = 'all';
+            quizState.selectedTopic = 'all';
+            state.selectedQuizTopic = 'all';
+          }
+        }
       }
     }
   }
@@ -1249,6 +1264,18 @@ async function startQuiz() {
   } else {
     // Broadened filter to ensure larger variety (All questions for your roadmap)
     filteredPool = combinedPool.filter(q => q.tags.includes(roadmap));
+  }
+
+  // ENSURE 20 QUESTIONS: If the selected topic or roadmap pool is too small,
+  // supplement with ANY available questions to reach the 20 target.
+  if (filteredPool.length < 20) {
+    const fallbackPool = combinedPool.filter(q => !filteredPool.includes(q));
+    // Shuffle fallback to get random variety
+    for (let i = fallbackPool.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [fallbackPool[i], fallbackPool[j]] = [fallbackPool[j], fallbackPool[i]];
+    }
+    filteredPool = [...filteredPool, ...fallbackPool];
   }
 
   // Shuffle logic (Fisher-Yates)
