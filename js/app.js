@@ -237,10 +237,19 @@ function renderRoadmap() {
 
     renderPhaseFilters(activePhases);
 
-    const filteredPhases = activePhaseFilter === 'all' ? activePhases : activePhases.filter(p => p.id === activePhaseFilter);
-    const allWeeks = [].concat(...filteredPhases.map(p => p.weeks));
+    const roadmapWeeks = [].concat(...activePhases.map(p => p.weeks));
+    const currentWeekNum = getCurrentWeek();
+    const maxW = Math.max(...roadmapWeeks, currentWeekNum, 20);
+
+    let displayWeeks;
+    if (activePhaseFilter === 'all') {
+      displayWeeks = Array.from({length: maxW}, (_, i) => i + 1);
+    } else {
+      const filteredPhases = activePhases.filter(p => p.id === activePhaseFilter);
+      displayWeeks = [].concat(...filteredPhases.map(p => p.weeks));
+    }
     
-    grid.innerHTML = allWeeks.map(wNum => {
+    grid.innerHTML = displayWeeks.map(wNum => {
       const w = WEEKS_DB.find(x => x.w === wNum) || { title: 'TBD', goals: '' };
       const status = state.weekStatus[wNum] || 'todo';
       const phase = activePhases.find(p => p.weeks.includes(wNum)) || { color: '#ccc' };
@@ -598,7 +607,11 @@ function toggleLogForm() {
     const weekSelect = document.getElementById('log-week');
     if (weekSelect) {
       const activePhases = getActivePhases();
-      const allWeeks = [].concat(...activePhases.map(p => p.weeks));
+      const roadmapWeeks = [].concat(...activePhases.map(p => p.weeks));
+      const currentWeekNum = getCurrentWeek();
+      const maxW = Math.max(...roadmapWeeks, currentWeekNum, 20);
+      
+      const allWeeks = Array.from({length: maxW}, (_, i) => i + 1);
       weekSelect.innerHTML = allWeeks.map(w => `<option value="${w}">Week ${w}</option>`).join('');
       
       // Auto-select the currently active week if available
@@ -614,31 +627,38 @@ function toggleLogForm() {
   }
 }
 
+function getCurrentWeek() {
+  const startOfFirstWeek = new Date('2025-12-29');
+  const now = new Date();
+  const diffInMs = now - startOfFirstWeek;
+  const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
+  return Math.max(1, Math.ceil((diffInDays + 1) / 7));
+}
+
 function updateLogWeek(dateVal) {
   const selectedDate = new Date(dateVal);
   if (isNaN(selectedDate)) return;
   
-  // Logic: Week 1 starts on Dec 29, 2025
-  const startOfFirstWeek = new Date('2025-12-29');
-  const diffInMs = selectedDate - startOfFirstWeek;
-  const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
-  let weekNumber = Math.ceil((diffInDays + 1) / 7);
+  const weekNumber = calculateWeekFromDate(selectedDate);
   
   const weekSelect = document.getElementById('log-week');
   if (weekSelect && weekNumber >= 1 && weekNumber <= 52) {
-    // Check if the option exists
     let optionExists = Array.from(weekSelect.options).some(opt => opt.value == weekNumber);
-    
-    // If not, add it dynamically to prevent blank state
     if (!optionExists) {
       const newOpt = document.createElement('option');
       newOpt.value = weekNumber;
-      newOpt.textContent = `Week ${weekNumber} (Extra)`;
+      newOpt.textContent = `Week ${weekNumber}`;
       weekSelect.appendChild(newOpt);
     }
-    
     weekSelect.value = weekNumber;
   }
+}
+
+function calculateWeekFromDate(date) {
+  const startOfFirstWeek = new Date('2025-12-29');
+  const diffInMs = date - startOfFirstWeek;
+  const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
+  return Math.ceil((diffInDays + 1) / 7);
 }
 
 
@@ -693,7 +713,12 @@ function toggleHostEditMode() {
 function renderReviewWeeks() {
   const grid = document.getElementById('review-week-grid'); if (!grid) return;
   const activePhases = getActivePhases();
-  const allWeeks = [].concat(...activePhases.map(p => p.weeks));
+  const roadmapWeeks = [].concat(...activePhases.map(p => p.weeks));
+  const currentWeekNum = getCurrentWeek();
+  
+  // Show all weeks in roadmap + any weeks elapsed since start date (up to current)
+  const maxW = Math.max(...roadmapWeeks, currentWeekNum, 20);
+  const allWeeks = Array.from({length: maxW}, (_, i) => i + 1);
   
   grid.innerHTML = allWeeks.map(w => {
     const isSelected = (state.selectedReviewWeek || 1) == w;
