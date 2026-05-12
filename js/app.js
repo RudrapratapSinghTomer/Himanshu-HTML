@@ -55,6 +55,10 @@ auth.onAuthStateChanged(async (user) => {
   if (user) {
     document.body.classList.add('auth');
     
+    // Ensure clean page state on login
+    if (!document.querySelector('.page.active')) {
+      showPage('dashboard');
+    }
     // 1. Listen to Self
     userUnsub = db.collection('users').doc(user.uid).onSnapshot(doc => {
       if (doc.exists) {

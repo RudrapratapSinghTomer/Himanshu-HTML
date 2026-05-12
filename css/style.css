@@ -1538,6 +1538,7 @@ body.auth #main-content {
 }
 
 body.auth #login-overlay {
+  display: none !important;
   opacity: 0;
   pointer-events: none;
 }
