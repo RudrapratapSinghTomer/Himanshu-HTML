@@ -24,7 +24,7 @@ const defaultState = {
 
 const ROADMAPS = {
   'Data Engineering': [
-    { id: 'de1', name: 'Month 1: The Core Engineering Sprint', color: '#6366F1', weeks: [1, 2, 3, 4, 5, 6, 7, 8] },
+    { id: 'de1', name: 'Month 1: The Core Engineering Sprint', color: '#6366F1', weeks: [1, 2, 3, 4] },
   ],
   'Data Science': [
     { id: 'ds1', name: 'Month 1: Foundations & ML Basics', color: '#8B5CF6', weeks: [1, 2, 3, 4] },
