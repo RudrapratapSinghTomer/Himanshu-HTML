@@ -13,7 +13,7 @@ const defaultState = {
   logEntries: [],
   weekReviews: {},
   selectedMood: 3,
-  selectedReviewWeek: 1,
+  selectedReviewWeek: 20,
   activeSkillTab: 'all',
   activeResourceFilter: 'All',
   streak: 0,

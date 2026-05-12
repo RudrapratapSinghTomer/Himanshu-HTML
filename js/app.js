@@ -860,12 +860,13 @@ function renderReviewWeeks() {
   const currentWeekNum = getCurrentWeek();
   const dataWeeks = [...Object.keys(state.weekStatus || {}), ...Object.keys(state.weekReviews || {})].map(Number);
   
-  // Show all weeks in roadmap + any weeks elapsed + any weeks with data
-  const maxW = Math.max(...roadmapWeeks, currentWeekNum, ...dataWeeks, 4); // Min 4 weeks
-  const allWeeks = Array.from({ length: maxW }, (_, i) => i + 1);
+  // Shifted Focus: Show weeks 20 through 52
+  const startW = 20;
+  const endW = Math.max(52, currentWeekNum, ...dataWeeks);
+  const allWeeks = Array.from({ length: endW - startW + 1 }, (_, i) => i + startW);
   
   grid.innerHTML = allWeeks.map(w => {
-    const isSelected = (state.selectedReviewWeek || 1) == w;
+    const isSelected = (state.selectedReviewWeek || 20) == w;
     const status = state.weekReviews?.[w]?.status || 'Empty';
     return `<button class="week-sel-btn ${isSelected?'active':''}" onclick="setReviewWeek(${w})">W${w}<br><small style="font-size:8px;">${status}</small></button>`;
   }).join('');
