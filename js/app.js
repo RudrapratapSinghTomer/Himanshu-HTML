@@ -269,9 +269,10 @@ function renderRoadmap() {
     const dataWeeks = [...Object.keys(state.weekStatus || {}), ...Object.keys(state.weekReviews || {})].map(Number);
     const maxW = Math.max(...roadmapWeeks, currentWeekNum, ...dataWeeks);
 
+    const allUniqueWeeks = [...new Set([...roadmapWeeks, ...dataWeeks, currentWeekNum])].sort((a,b)=>a-b);
     let displayWeeks;
     if (activePhaseFilter === 'all') {
-      displayWeeks = roadmapWeeks; // Only show weeks defined in the roadmap
+      displayWeeks = allUniqueWeeks; 
     } else {
       const filteredPhases = activePhases.filter(p => p.id === activePhaseFilter);
       displayWeeks = [].concat(...filteredPhases.map(p => p.weeks));
@@ -860,8 +861,8 @@ function renderReviewWeeks() {
   const dataWeeks = [...Object.keys(state.weekStatus || {}), ...Object.keys(state.weekReviews || {})].map(Number);
   
   // Show all weeks in roadmap + any weeks elapsed + any weeks with data
-  const maxW = Math.max(...roadmapWeeks, currentWeekNum, ...dataWeeks);
-  const allWeeks = roadmapWeeks;
+  const maxW = Math.max(...roadmapWeeks, currentWeekNum, ...dataWeeks, 4); // Min 4 weeks
+  const allWeeks = Array.from({ length: maxW }, (_, i) => i + 1);
   
   grid.innerHTML = allWeeks.map(w => {
     const isSelected = (state.selectedReviewWeek || 1) == w;
