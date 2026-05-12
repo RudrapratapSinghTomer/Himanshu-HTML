@@ -267,9 +267,15 @@ function renderRoadmap() {
     const roadmapWeeks = [].concat(...activePhases.map(p => p.weeks));
     const currentWeekNum = getCurrentWeek();
     const dataWeeks = [...Object.keys(state.weekStatus || {}), ...Object.keys(state.weekReviews || {})].map(Number);
-    const maxW = Math.max(...roadmapWeeks, currentWeekNum, ...dataWeeks);
+    const allUniqueWeeks = [...new Set([...roadmapWeeks, ...dataWeeks, currentWeekNum])]
+      .sort((a,b)=>a-b)
+      .filter(wNum => {
+        const inRoadmap = roadmapWeeks.includes(wNum);
+        const hasContent = WEEKS_DB.some(x => x.w === wNum);
+        const isStarted = (state.weekStatus?.[wNum] && state.weekStatus[wNum] !== 'todo') || state.weekReviews?.[wNum];
+        return inRoadmap || hasContent || isStarted;
+      });
 
-    const allUniqueWeeks = [...new Set([...roadmapWeeks, ...dataWeeks, currentWeekNum])].sort((a,b)=>a-b);
     let displayWeeks;
     if (activePhaseFilter === 'all') {
       displayWeeks = allUniqueWeeks; 
