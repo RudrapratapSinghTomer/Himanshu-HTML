@@ -123,106 +123,113 @@ const PROJECTS = [
 ];
 
 const RESOURCES = [
-  { domain: 'Data Engineering', type: 'Course', name: 'Azure Data Factory Fundamentals', url: 'https://learn.microsoft.com', priority: 'must', tags: ['cloud', 'adf'] },
-  { domain: 'Data Engineering', type: 'Docs', name: 'Databricks Delta Lake Guide', url: 'https://docs.delta.io', priority: 'must', tags: ['spark', 'delta'] },
+  { domain: 'Data Engineering', type: 'Course', name: 'Azure Data Factory Fundamentals', url: 'https://learn.microsoft.com', priority: 'must', tags: ['Cloud', 'adf'] },
+  { domain: 'Data Engineering', type: 'Docs', name: 'Databricks Delta Lake Guide', url: 'https://docs.delta.io', priority: 'must', tags: ['Spark', 'delta'] },
+  { domain: 'Data Engineering', type: 'Docs', name: 'Learn SQL Beginner to Advanced', url: 'https://www.youtube.com/watch?v=OT1RErkfLNQ&t=2s', priority: 'must', tags: ['SQL', 'Advanced'] },
+  { domain: 'Data Engineering', type: 'Docs', name: 'Learn Power BI in Under 3 Hours | Formatting, Visualizations, Dashboards + Full Project', url: 'https://www.youtube.com/watch?v=I0vQ_VLZTWg', priority: 'must', tags: ['Power BI', 'Beginner'] },
+  { domain: 'Data Engineering', type: 'Docs', name: 'Microsoft Power BI Desktop for Business Intelligence', url: 'https://www.udemy.com/course/microsoft-power-bi-up-running-with-power-bi-desktop/?src=sac&kw=Microsoft+Power+BI+Desktop+for+Business+Intelligence&couponCode=PMNVD2025', priority: 'must', tags: ['Power BI', 'Advanced'] },
 
   { domain: 'Data Science', type: 'Course', name: 'Scalable ML with Spark', url: 'https://www.coursera.org', priority: 'must', tags: ['ml', 'spark'] },
   { domain: 'Data Science', type: 'Practice', name: 'Kaggle Competitions', url: 'https://www.kaggle.com', priority: 'must', tags: ['ml', 'practice'] },
+  { domain: 'Data Science', type: 'Course', name: '100 Days of Deep Learning', url: 'https://www.youtube.com/watch?v=2dH_qjc9mFg&list=PLKnIA16_RmvYuZauWaPlRTC54KxSNLtNn', priority: 'must', tags: ['ml', 'Deep Learning'] },
+  { domain: 'Data Science', type: 'Course', name: '100 Days of Machine Learning', url: 'https://www.youtube.com/watch?v=ZftI2fEz0Fw&list=PLKnIA16_Rmvbr7zKYQuBfsVkjoLcJgxHH', priority: 'must', tags: ['ml', 'Machine Learning'] },
+  { domain: 'Data Science', type: 'Course', name: '100 Days of Python Programming', url: 'https://www.youtube.com/watch?v=u1RKh1kQqaE&list=PLKnIA16_Rmvb1RYR-iTA_hzckhdONtSW4', priority: 'must', tags: ['Python', 'Programming'] },
+  { domain: 'Data Science', type: 'Course', name: 'GenAI Roadmap for Beginners | End-to-End GenAI Course 2025', url: 'https://www.youtube.com/watch?v=pSVk-5WemQ0&list=PLKnIA16_RmvaTbihpo4MtzVm4XOQa0ER0', priority: 'must', tags: ['ml', 'GenAI'] }
 ];
 
 const ALL_QUESTIONS = [
   // SQL Topics
-  { 
-    topic: "SQL (Basic to Advanced)", 
+  {
+    topic: "SQL (Basic to Advanced)",
     tags: ["Data Engineering", "SQL"],
-    question: "Which SQL clause is used to filter records after an aggregation has been performed?", 
-    options: ["WHERE", "FILTER", "HAVING", "GROUP BY"], 
-    correctIndex: 2 
+    question: "Which SQL clause is used to filter records after an aggregation has been performed?",
+    options: ["WHERE", "FILTER", "HAVING", "GROUP BY"],
+    correctIndex: 2
   },
-  { 
-    topic: "SQL (Basic to Advanced)", 
+  {
+    topic: "SQL (Basic to Advanced)",
     tags: ["Data Engineering", "SQL"],
-    question: "What is the result of a LEFT JOIN if there is no match in the right table?", 
-    options: ["An error is thrown", "The row is omitted", "NULL values for right table columns", "A default value is used"], 
-    correctIndex: 2 
+    question: "What is the result of a LEFT JOIN if there is no match in the right table?",
+    options: ["An error is thrown", "The row is omitted", "NULL values for right table columns", "A default value is used"],
+    correctIndex: 2
   },
-  { 
-    topic: "SQL (Data Extraction)", 
+  {
+    topic: "SQL (Data Extraction)",
     tags: ["Data Science", "SQL"],
-    question: "Which window function would you use to get the value from the previous row?", 
-    options: ["LEAD()", "LAG()", "RANK()", "PREV()"], 
-    correctIndex: 1 
+    question: "Which window function would you use to get the value from the previous row?",
+    options: ["LEAD()", "LAG()", "RANK()", "PREV()"],
+    correctIndex: 1
   },
-  
+
   // Python & PySpark
-  { 
-    topic: "Python & PySpark (The Processing Engine)", 
+  {
+    topic: "Python & PySpark (The Processing Engine)",
     tags: ["Data Engineering", "Python", "PySpark"],
-    question: "In PySpark, which operation is a 'transformation' (lazy evaluation)?", 
-    options: ["show()", "collect()", "count()", "select()"], 
-    correctIndex: 3 
+    question: "In PySpark, which operation is a 'transformation' (lazy evaluation)?",
+    options: ["show()", "collect()", "count()", "select()"],
+    correctIndex: 3
   },
-  { 
-    topic: "Python & PySpark (The Processing Engine)", 
+  {
+    topic: "Python & PySpark (The Processing Engine)",
     tags: ["Data Engineering", "Python", "PySpark"],
-    question: "What is the primary storage format used in Delta Lake for high-performance reads?", 
-    options: ["CSV", "JSON", "Parquet", "Avro"], 
-    correctIndex: 2 
+    question: "What is the primary storage format used in Delta Lake for high-performance reads?",
+    options: ["CSV", "JSON", "Parquet", "Avro"],
+    correctIndex: 2
   },
-  { 
-    topic: "Python & PySpark (Scalable ML)", 
+  {
+    topic: "Python & PySpark (Scalable ML)",
     tags: ["Data Science", "Python", "PySpark"],
-    question: "Which Spark ML component is used to string together multiple transformations and estimators?", 
-    options: ["Transformer", "Estimator", "Pipeline", "Evaluator"], 
-    correctIndex: 2 
+    question: "Which Spark ML component is used to string together multiple transformations and estimators?",
+    options: ["Transformer", "Estimator", "Pipeline", "Evaluator"],
+    correctIndex: 2
   },
 
   // Power BI
-  { 
-    topic: "Power BI (Visualizing the Pipeline)", 
+  {
+    topic: "Power BI (Visualizing the Pipeline)",
     tags: ["Data Engineering", "Power BI"],
-    question: "Which Power BI feature allows you to see the underlying data for a specific visual element?", 
-    options: ["Drillthrough", "Data View", "Power Query", "Relationship View"], 
-    correctIndex: 0 
+    question: "Which Power BI feature allows you to see the underlying data for a specific visual element?",
+    options: ["Drillthrough", "Data View", "Power Query", "Relationship View"],
+    correctIndex: 0
   },
-  { 
-    topic: "Microsoft Power BI Desktop for Business Intelligence", 
+  {
+    topic: "Microsoft Power BI Desktop for Business Intelligence",
     tags: ["Data Engineering", "Power BI"],
-    question: "In DAX, what is the difference between a Calculated Column and a Measure?", 
-    options: ["Columns are calculated at refresh, Measures at query time", "Measures are calculated at refresh, Columns at query time", "There is no difference", "Columns use less memory"], 
-    correctIndex: 0 
+    question: "In DAX, what is the difference between a Calculated Column and a Measure?",
+    options: ["Columns are calculated at refresh, Measures at query time", "Measures are calculated at refresh, Columns at query time", "There is no difference", "Columns use less memory"],
+    correctIndex: 0
   },
-  
+
   // Machine Learning & Cloud (Data Science)
-  { 
-    topic: "Cloud DS & AutoML", 
+  {
+    topic: "Cloud DS & AutoML",
     tags: ["Data Science", "Cloud"],
-    question: "What does 'Drift' refer to in Machine Learning monitoring?", 
-    options: ["Software bugs", "Change in model input data distribution over time", "Slow model training speed", "Database connection issues"], 
-    correctIndex: 1 
+    question: "What does 'Drift' refer to in Machine Learning monitoring?",
+    options: ["Software bugs", "Change in model input data distribution over time", "Slow model training speed", "Database connection issues"],
+    correctIndex: 1
   },
-  { 
-    topic: "Natural Language Processing", 
+  {
+    topic: "Natural Language Processing",
     tags: ["Data Science", "NLP"],
-    question: "What is the primary benefit of the Transformer architecture over RNNs?", 
-    options: ["Better at handling small datasets", "Parallel processing of sequences", "Lower memory usage", "Simpler mathematical foundation"], 
-    correctIndex: 1 
+    question: "What is the primary benefit of the Transformer architecture over RNNs?",
+    options: ["Better at handling small datasets", "Parallel processing of sequences", "Lower memory usage", "Simpler mathematical foundation"],
+    correctIndex: 1
   },
-  { 
-    topic: "Deep Learning Foundations", 
+  {
+    topic: "Deep Learning Foundations",
     tags: ["Data Science", "Deep Learning"],
-    question: "Which activation function is commonly used in the hidden layers of a CNN to avoid the vanishing gradient problem?", 
-    options: ["Sigmoid", "Tanh", "ReLU", "Softmax"], 
-    correctIndex: 2 
+    question: "Which activation function is commonly used in the hidden layers of a CNN to avoid the vanishing gradient problem?",
+    options: ["Sigmoid", "Tanh", "ReLU", "Softmax"],
+    correctIndex: 2
   },
-  
+
   // MLOps
-  { 
-    topic: "MLOps & CI/CD for ML", 
+  {
+    topic: "MLOps & CI/CD for ML",
     tags: ["Data Science", "MLOps"],
-    question: "What is the main purpose of MLflow Tracking?", 
-    options: ["To deploy models to Kubernetes", "To log parameters, code versions, and metrics", "To visualize data distributions", "To manage user permissions"], 
-    correctIndex: 1 
+    question: "What is the main purpose of MLflow Tracking?",
+    options: ["To deploy models to Kubernetes", "To log parameters, code versions, and metrics", "To visualize data distributions", "To manage user permissions"],
+    correctIndex: 1
   }
 ];
 
@@ -240,7 +247,7 @@ const CODING_CHALLENGES = [
     type: "code",
     question: "Create a Python function 'clean_data' that takes a list of strings and returns only those that are not empty and have more than 3 characters.",
     initialCode: "def clean_data(items):\n    # Your code here\n    return []",
-    expectedKeywords: ["def", "filter", "len", "return"] ,
+    expectedKeywords: ["def", "filter", "len", "return"],
     tags: ["Python", "Data Engineering"]
   },
   {
