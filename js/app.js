@@ -288,13 +288,20 @@ function renderProfile() {
   document.getElementById('profile-dept').value = state.department || '';
   document.getElementById('profile-join').value = state.joiningDate || '';
 }
-async function saveProfile() {
-  state.firstName = document.getElementById('profile-first-name')?.value;
-  state.lastName = document.getElementById('profile-last-name')?.value;
-  state.bio = document.getElementById('profile-bio')?.value;
-  state.department = document.getElementById('profile-dept')?.value;
-  state.joiningDate = document.getElementById('profile-join')?.value;
+async function saveProfile(e) {
+  if (e) e.preventDefault();
+  const form = document.getElementById('profile-form');
+  if (!form) return;
+  const formData = new FormData(form);
+  
+  state.firstName = formData.get('firstName') || '';
+  state.lastName = formData.get('lastName') || '';
+  state.bio = formData.get('bio') || '';
+  state.department = formData.get('department') || '';
+  state.joiningDate = formData.get('joiningDate') || '';
+  
   await saveState();
+  showToast('Profile updated successfully!');
 }
 
 
@@ -652,6 +659,9 @@ document.addEventListener('DOMContentLoaded', () => {
     state.selectedQuizTopic = e.target.value;
     saveState();
   });
+
+  // Profile Form
+  document.getElementById('profile-form')?.addEventListener('submit', saveProfile);
 });
 
 // ── QUIZ LOGIC ───────────────────────────────────────────────────────────────

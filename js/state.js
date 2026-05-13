@@ -52,6 +52,11 @@ async function saveState() {
   try {
     const userRef = db.collection('users').doc(targetUid);
     const updateObj = {
+      firstName: state.firstName || '',
+      lastName: state.lastName || '',
+      bio: state.bio || '',
+      department: state.department || '',
+      joiningDate: state.joiningDate || '',
       assignedRoadmap: state.assignedRoadmap || null,
       weekStatus: state.weekStatus || {},
       dayStatus: state.dayStatus || {},
