@@ -31,6 +31,7 @@ const db = firebase.firestore();
 
 // ── AUTH LOGIC ───────────────────────────────────────────────────────────────
 async function handleAuth() {
+  console.log('Login attempt started');
   const email = document.getElementById('auth-email')?.value;
   const password = document.getElementById('auth-password')?.value;
   const btn = document.querySelector('.login-card .login-btn');
@@ -1015,6 +1016,7 @@ window.selectQuizOption = selectQuizOption;
 window.nextQuizQuestion = nextQuizQuestion;
 window.renderQuiz = renderQuiz;
 window.submitCodeAnswer = submitCodeAnswer;
+
 
 
 
