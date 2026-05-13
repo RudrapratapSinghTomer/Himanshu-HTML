@@ -64,6 +64,14 @@ const WEEKS = [
     url: 'https://www.udemy.com/course/microsoft-power-bi-up-running-with-power-bi-desktop/?src=sac&kw=Microsoft+Power+BI+Desktop+for+Business+Intelligence',
     goals: 'Day-1: Data Ingestion & Power Query (The ETL Phase). Day-2: Advanced Data Profiling & Transformation. Day-3: Relational Data Modeling (The Foundation). Day-4: DAX Foundations (Calculated Columns & Measures). Day-5: Advanced DAX & Time Intelligence. Day-6: Data Visualization & UI/UX Design. Day-7: AI Visuals & The Final Capstone Project'
   },
+  {
+    w: 5,
+    phase: 'de1',
+    title: 'ADF/GCP/Microsoft Fabric',
+    tools: ['ADF', 'GCP', 'Microsoft Fabric'],
+    url: 'https://www.youtube.com/watch?v=8zIVOdKyoDA / https://www.youtube.com/watch?v=IUU6OR8yHCc / https://www.youtube.com/watch?v=a7UZ9WKj9yo',
+    goals: 'Day 1: Introduction & Architecture (80 mins). Day 2: Data Factory & Orchestration (90 mins). Day 3: Lakehouse & PySpark (90 mins). Day 4: Data Warehouse & SQL (80 mins). Day 5: Real-Time Intelligence & Data Science (70 mins). Day 6: Power BI & DirectLake (60 mins). Day 7: End-to-End Project & Administration (Remaining Time)'
+  },
 
   // --- DATA SCIENCE ---
   { w: 1, phase: 'ds1', title: 'SQL (Data Extraction)', tools: ['SQL'], goals: 'Day-1: Retrieval, Day-2: Filtering, Day-3: Aggregation, Day-4: Window Functions, Day-5: Data Sampling, Day-6: Formatting' },
