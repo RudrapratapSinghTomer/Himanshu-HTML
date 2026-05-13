@@ -4,9 +4,14 @@ function renderDashboard() {
 
 function updateKPIs() {
   const activePhases = getActivePhases();
-  const allWeeks = [].concat(...activePhases.map(p => p.weeks));
-  const doneWeeks = allWeeks.filter(w => state.weekStatus[w] === 'done').length;
-  const pct = allWeeks.length > 0 ? Math.round((doneWeeks / allWeeks.length) * 100) : 0;
+  const roadmapWeeks = [].concat(...activePhases.map(p => p.weeks));
+  const currentWeekNum = getCurrentWeek();
+  const dataWeeks = [...Object.keys(state.weekStatus || {}), ...Object.keys(state.weekReviews || {})].map(Number);
+  
+  // The actual scope of the roadmap for this user
+  const allUniqueWeeks = [...new Set([...roadmapWeeks, ...dataWeeks, currentWeekNum])];
+  const doneWeeks = allUniqueWeeks.filter(w => state.weekStatus[w] === 'done').length;
+  const pct = allUniqueWeeks.length > 0 ? Math.round((doneWeeks / allUniqueWeeks.length) * 100) : 0;
   
   const completedProjects = PROJECTS_DB.filter(p => state.projectStatus[p.id] === 'Completed').length;
   const projLabel = `${completedProjects} / ${PROJECTS_DB.length} complete`;
@@ -17,10 +22,25 @@ function updateKPIs() {
     'kpi-skills': SKILLS_DB.filter(s => (state.skillNow[s.key] || 0) >= 1).length, 
     'overall-pct': pct + '%',
     'kpi-streak': state.streak || 0,
+    'streak-count-topbar': state.streak || 0,
     'proj-count-label': projLabel,
     'proj-count-label-projects': projLabel
   };
-  Object.entries(kpis).forEach(([id, val]) => { const el = document.getElementById(id); if (el) el.textContent = val; });
+  
+  Object.entries(kpis).forEach(([id, val]) => { 
+    const el = document.getElementById(id); 
+    if (el) el.textContent = val; 
+  });
+
+  // Update Circular Progress Bar
+  const circle = document.getElementById('milestone-progress-bar');
+  if (circle) {
+    const radius = circle.r.baseVal.value;
+    const circumference = 2 * Math.PI * radius;
+    const offset = circumference - (pct / 100) * circumference;
+    circle.style.strokeDasharray = `${circumference} ${circumference}`;
+    circle.style.strokeDashoffset = offset;
+  }
 }
 
 function renderPhaseProgressBars() {

@@ -22,9 +22,14 @@ function updateUserUI() {
     try {
       if (welcomeSub) {
         const activePhases = getActivePhases();
-        const allWeeks = [].concat(...activePhases.map(p => p.weeks));
-        const doneWeeks = allWeeks.filter(w => state.weekStatus[w] === 'done').length;
-        const pct = allWeeks.length > 0 ? Math.round((doneWeeks / allWeeks.length) * 100) : 0;
+        const roadmapWeeks = [].concat(...activePhases.map(p => p.weeks));
+        const currentWeekNum = getCurrentWeek();
+        const dataWeeks = [...Object.keys(state.weekStatus || {}), ...Object.keys(state.weekReviews || {})].map(Number);
+        
+        const allUniqueWeeks = [...new Set([...roadmapWeeks, ...dataWeeks, currentWeekNum])];
+        const doneWeeks = allUniqueWeeks.filter(w => state.weekStatus[w] === 'done').length;
+        const pct = allUniqueWeeks.length > 0 ? Math.round((doneWeeks / allUniqueWeeks.length) * 100) : 0;
+        
         welcomeSub.innerHTML = `Today is <span style="color:var(--blue2); font-weight:600;">${new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</span> · You've completed ${pct}% of your roadmap. Keep the momentum!`;
       }
     } catch (e) { }

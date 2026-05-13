@@ -40,20 +40,8 @@
 
   <div id="login-overlay">
     <div class="login-card">
-      <div class="sidebar-logo">
-        <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"
-          style="border-radius:8px;">
-          <rect width="32" height="32" rx="8" fill="url(#logo-grad)" />
-          <path d="M10 22V10L16 14L22 10V22" stroke="white" stroke-width="2.5" stroke-linecap="round"
-            stroke-linejoin="round" />
-          <defs>
-            <linearGradient id="logo-grad" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
-              <stop stop-color="#4361ee" />
-              <stop offset="1" stop-color="#4cc9f0" />
-            </linearGradient>
-          </defs>
-        </svg>
-        <span>Learning Portal</span>
+      <div class="sidebar-logo" style="margin-bottom:12px;">
+        <img src="logo.png" alt="BestPeers Logo" style="height:45px; object-fit:contain;">
       </div>
       <div class="login-sub">Analytics Transition Platform</div>
 
@@ -72,24 +60,8 @@
 
     <!-- SIDEBAR -->
     <nav class="sidebar">
-      <div class="sidebar-logo" style="display:flex; align-items:center; gap:10px; margin-bottom:40px;">
-        <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"
-          style="border-radius:8px;">
-          <rect width="32" height="32" rx="8" fill="url(#logo-grad)" />
-          <path d="M10 22V10L16 14L22 10V22" stroke="white" stroke-width="2.5" stroke-linecap="round"
-            stroke-linejoin="round" />
-          <defs>
-            <linearGradient id="logo-grad" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
-              <stop stop-color="#4361ee" />
-              <stop offset="1" stop-color="#4cc9f0" />
-            </linearGradient>
-          </defs>
-        </svg>
-        <div style="display:flex; flex-direction:column;">
-          <span style="font-size:16px; font-weight:800; line-height:1.2;">Learning Portal</span>
-          <span
-            style="font-size:12px; color:var(--text3); letter-spacing:1px; text-transform:uppercase;">Accelerator</span>
-        </div>
+      <div class="sidebar-logo" style="margin-bottom:30px; padding: 10px 0;">
+        <img src="logo.png" alt="BestPeers Logo" style="height:48px; width:100%; object-fit:contain; filter: drop-shadow(0 0 10px rgba(99, 102, 241, 0.15));">
       </div>
       <div class="nav">
         <div class="nav-section">Overview</div>
@@ -177,7 +149,7 @@
         </button>
       </div>
       <div class="user-card" style="position:relative;">
-        <div class="avatar">DA</div>
+        <div class="avatar" style="border-radius:8px;">DA</div>
         <div style="flex:1;">
           <div class="user-name">Guest</div>
           <div class="user-role">Analytics Student</div>
@@ -190,7 +162,7 @@
           <span id="streak-count-sidebar">0</span>d
         </div>
         <button onclick="logout()"
-          style="position:absolute; right:10px; top:-20px; background:var(--navy3); border:1px solid var(--border); color:var(--text3); border-radius:4px; padding:2px 6px; font-size:10px; cursor:pointer;">Logout</button>
+          style="position:absolute; right:10px; top:-20px; background:#E2E8F0; border:none; color:#0F172A; border-radius:4px; padding:4px 8px; font-size:10px; font-weight:700; cursor:pointer; box-shadow:0 4px 12px rgba(0,0,0,0.15);">Logout</button>
       </div>
     </nav>
 
@@ -398,7 +370,7 @@
               <button class="tab-btn active" onclick="switchRoadmap('Data Engineering', this)">Data Engineering</button>
               <button class="tab-btn" onclick="switchRoadmap('Data Science', this)">Data Science</button>
             </div>
-            <div class="phase-bar" id="phase-filter-bar" style="margin-bottom:0; min-width:400px;"></div>
+            <div class="phase-bar" id="phase-filter-bar"></div>
           </div>
           <div class="week-grid" id="week-grid"></div>
         </div>
@@ -554,20 +526,6 @@
             </div>
             <div>
               <div class="review-section">
-                <label class="form-label" style="color:var(--gold);">Key Wins & A-ha Moments</label>
-                <div id="display-win"
-                  style="padding:16px; background:var(--card2); border-radius:8px; font-size:13px; line-height:1.6; min-height:80px;">
-                </div>
-                <textarea id="edit-win" class="form-textarea" style="display:none;"></textarea>
-              </div>
-              <div class="review-section" style="margin-top:24px;">
-                <label class="form-label" style="color:var(--red);">Blockers & Challenges</label>
-                <div id="display-blocker"
-                  style="padding:16px; background:var(--card2); border-radius:8px; font-size:13px; line-height:1.6; min-height:80px;">
-                </div>
-                <textarea id="edit-blocker" class="form-textarea" style="display:none;"></textarea>
-              </div>
-              <div class="review-section" style="margin-top:24px;">
                 <label class="form-label" style="color:var(--blue);">Focus for Next Week</label>
                 <div id="display-focus"
                   style="padding:16px; background:var(--card2); border-radius:8px; font-size:13px; line-height:1.6; min-height:80px;">
@@ -820,6 +778,57 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
         </svg>
         <span id="save-toast-text">Progress saved!</span>
+      </div>
+
+      <!-- LOG SESSION MODAL -->
+      <div id="log-form-container" class="modal-overlay" style="display:none;">
+        <div class="modal-card">
+          <div class="modal-header">
+            <h2 class="modal-title">Log Learning Session</h2>
+            <button class="btn-close" id="btn-cancel-log">&times;</button>
+          </div>
+          <div class="modal-body">
+            <div class="grid" style="grid-template-columns: 1fr 1fr; gap:16px; margin-bottom:16px;">
+              <div class="input-group">
+                <label class="form-label">Date</label>
+                <input type="date" id="log-date" class="login-input">
+              </div>
+              <div class="input-group">
+                <label class="form-label">Roadmap Week</label>
+                <select id="log-week" class="login-input"></select>
+              </div>
+            </div>
+            <div class="input-group" style="margin-bottom:16px;">
+              <label class="form-label">Primary Topic / Skill</label>
+              <input type="text" id="log-topic" class="login-input" placeholder="e.g. Window Functions in SQL">
+            </div>
+            <div class="grid" style="grid-template-columns: 1fr 1fr; gap:16px; margin-bottom:16px;">
+              <div class="input-group">
+                <label class="form-label">Tool Used</label>
+                <input type="text" id="log-tool" class="login-input" placeholder="e.g. BigQuery, PySpark">
+              </div>
+              <div class="input-group">
+                <label class="form-label">Time Spent (Hours)</label>
+                <input type="number" id="log-hours" class="login-input" step="0.5" value="2.0">
+              </div>
+            </div>
+            <div class="input-group" style="margin-bottom:16px;">
+              <label class="form-label">Key Takeaways & What You Learned</label>
+              <textarea id="log-learned" class="login-input" style="height:80px; resize:none;" placeholder="Summary of your breakthroughs..."></textarea>
+            </div>
+            <div class="input-group" style="margin-bottom:16px;">
+              <label class="form-label">Hands-on Work (Project/Query Links)</label>
+              <input type="text" id="log-handson" class="login-input" placeholder="Link to GitHub, Kaggle, or documentation">
+            </div>
+            <div class="input-group">
+              <label class="form-label">Plan for Tomorrow</label>
+              <input type="text" id="log-tomorrow" class="login-input" placeholder="What's the next goal?">
+            </div>
+          </div>
+          <div class="modal-footer" style="margin-top:24px;">
+            <button class="login-btn" onclick="saveLogEntry()" style="width:100%;">Complete Session Log</button>
+          </div>
+        </div>
       </div>
 </body>
 

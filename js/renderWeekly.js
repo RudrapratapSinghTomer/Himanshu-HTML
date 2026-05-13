@@ -47,8 +47,6 @@ async function renderWeekly() {
   const displayData = {
     topics: review.topics || aggregated.topics || 'No logs for this week yet.',
     handson: review.handson || aggregated.handson || 'No practical work logged.',
-    wins: review.wins || aggregated.wins || 'No breakthroughs recorded.',
-    blockers: review.blockers || aggregated.blockers || 'No blockers reported.',
     focus: review.focus || aggregated.focus || 'Next week focus not set.',
     hours: (review.hours !== undefined) ? review.hours : aggregated.hours,
     status: review.status || (weeklyLogs.length > 0 ? 'Draft' : 'Empty'),
@@ -74,8 +72,6 @@ async function renderWeekly() {
     'review-week-label': weekNum,
     'display-topics': displayData.topics,
     'display-handson': displayData.handson,
-    'display-win': displayData.wins,
-    'display-blocker': displayData.blockers,
     'display-focus': displayData.focus,
     'review-hours-display': displayData.hours,
     'review-status-badge': displayData.status,
@@ -94,7 +90,7 @@ async function renderWeekly() {
   }
 
   // Toggle Edit Visibility
-  const editFields = ['topics', 'handson', 'win', 'blocker', 'focus', 'hours', 'rating'];
+  const editFields = ['topics', 'handson', 'focus', 'hours', 'rating'];
   editFields.forEach(f => {
     const display = document.getElementById('display-' + f);
     const edit = document.getElementById('edit-' + f);
@@ -102,8 +98,7 @@ async function renderWeekly() {
       display.style.display = isHostEditMode ? 'none' : 'block';
       edit.style.display = isHostEditMode ? 'block' : 'none';
       if (isHostEditMode) {
-        const fieldKey = f === 'win' ? 'wins' : (f === 'blocker' ? 'blockers' : f);
-        edit.value = (f === 'rating') ? (review.rating || 0) : (review[fieldKey] || display.textContent);
+        edit.value = (f === 'rating') ? (review.rating || 0) : (review[f] || display.textContent);
       }
     }
   });
@@ -125,8 +120,6 @@ async function submitWeeklyReview() {
       ...state.weekReviews[weekNum],
       topics: document.getElementById('edit-topics')?.value,
       handson: document.getElementById('edit-handson')?.value,
-      wins: document.getElementById('edit-win')?.value,
-      blockers: document.getElementById('edit-blocker')?.value,
       focus: document.getElementById('edit-focus')?.value,
       hours: parseFloat(document.getElementById('edit-hours')?.value || 0),
       rating: parseInt(document.getElementById('edit-rating')?.value || 0),
