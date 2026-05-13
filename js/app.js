@@ -33,7 +33,7 @@ const db = firebase.firestore();
 async function handleAuth() {
   const email = document.getElementById('auth-email')?.value;
   const password = document.getElementById('auth-password')?.value;
-  const btn = document.querySelector('.auth-card .btn-primary');
+  const btn = document.querySelector('.login-card .login-btn');
   
   if (!email || !password) return showToast('Please enter both email and password', true);
   
@@ -46,6 +46,10 @@ async function handleAuth() {
     await auth.signInWithEmailAndPassword(email, password);
     showToast('Login successful!');
   } catch (e) { 
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = 'Sign In';
+    }
     let msg = 'Login failed. Please check your credentials.';
     if (e.code === 'auth/user-not-found') msg = 'No user found with this email.';
     if (e.code === 'auth/wrong-password') msg = 'Incorrect password.';
@@ -1011,4 +1015,6 @@ window.selectQuizOption = selectQuizOption;
 window.nextQuizQuestion = nextQuizQuestion;
 window.renderQuiz = renderQuiz;
 window.submitCodeAnswer = submitCodeAnswer;
+
+
 
