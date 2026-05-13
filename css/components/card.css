@@ -1,0 +1,20 @@
+/* css/components/card.css */
+
+.card {
+  background: var(--background-light);
+  border-radius: 12px;
+  padding: var(--spacing-md);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 12px rgba(0,0,0,0.12);
+}
+
+/* Dark mode adjustment */
+[data-theme='dark'] .card {
+  background: var(--background-dark);
+  box-shadow: 0 4px 6px rgba(255,255,255,0.05);
+}

@@ -1,0 +1,36 @@
+:root {
+  /* Color palette */
+  --primary: #4cc9f0;
+  --primary-dark: #4361ee;
+  --accent: #ff006e;
+  --background-light: #f5f7fa;
+  --background-dark: #1a1b1e;
+  --text: #212529;
+  --text-light: #f8f9fa;
+  --border: rgba(0,0,0,0.1);
+
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+
+  /* Typography */
+  --font-family-sans: 'Inter', system-ui, sans-serif;
+  --font-family-mono: 'JetBrains Mono', monospace;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-bold: 700;
+}
+
+/* Dark mode */
+[data-theme='dark'] {
+  --background-light: #1a1b1e;
+  --background-dark: #0f1114;
+  --text: #e1e1e1;
+  --border: rgba(255,255,255,0.1);
+}

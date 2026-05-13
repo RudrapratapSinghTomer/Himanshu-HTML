@@ -1,4 +1,10 @@
 :root {
+  @import "./design-tokens.css";
+  @import "./components/buttons.css";
+  @import "./components/card.css";
+  @import "./components/badges.css";
+  @import "./components/inputs.css";
+  /* Additional component imports can be added here */
   --navy: #0F172A;
   --navy2: #1E293B;
   --navy3: #334155;
@@ -42,6 +48,21 @@ body {
   color: var(--text);
   min-height: 100vh;
   overflow-x: hidden;
+}
+
+*:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(88, 80, 236, 0.3);
+  transition: outline-offset 0.2s ease, box-shadow 0.2s ease;
+}
+
+button:focus-visible, 
+a:focus-visible, 
+input:focus-visible, 
+select:focus-visible, 
+textarea:focus-visible {
+  outline-color: var(--blue2);
 }
 
 .sr-only {
@@ -163,17 +184,7 @@ body {
   opacity: 0.8;
 }
 
-.nav-item .badge {
-  margin-left: auto;
-  font-size: 11px;
-  padding: 2px 8px;
-  border-radius: 6px;
-  font-family: 'JetBrains Mono', monospace;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  background: rgba(99, 102, 241, 0.15);
-  color: var(--blue2);
-}
+
 
 .notif-dot {
   width: 6px;
@@ -186,14 +197,20 @@ body {
 }
 
 @keyframes pulse {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.4); opacity: 0.5; }
+
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  50% {
+    transform: scale(1.4);
+    opacity: 0.5;
+  }
 }
 
-.nav-item.active .badge {
-  background: rgba(88, 80, 236, 0.25);
-  color: var(--blue2);
-}
+
 
 /* QuizGPT Special Style */
 .nav-item.quiz-ai.active {
@@ -205,10 +222,7 @@ body {
   background: var(--purple2);
 }
 
-.nav-item.quiz-ai .badge {
-  background: rgba(139, 92, 246, 0.2);
-  color: var(--purple2);
-}
+
 
 .user-card {
   padding: 14px 16px;
@@ -241,15 +255,7 @@ body {
   color: var(--text3);
 }
 
-.streak-badge {
-  margin-left: auto;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 12px;
-  color: var(--orange2);
-  font-family: 'JetBrains Mono', monospace;
-}
+
 
 /* ── MAIN ── */
 .main {
@@ -736,11 +742,7 @@ body {
   gap: 14px;
 }
 
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
+
 
 .form-label {
   font-size: 11px;
@@ -756,34 +758,13 @@ body {
   cursor: not-allowed;
 }
 
-.form-input,
-.form-select,
-.form-textarea {
-  background: var(--navy3);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 10px 14px;
-  color: var(--text);
-  font-family: 'Instrument Sans', sans-serif;
-  font-size: 13px;
-  outline: none;
-  transition: border-color 0.15s;
-}
 
-.form-input:focus,
-.form-select:focus,
-.form-textarea:focus {
-  border-color: var(--blue);
-}
 
-.form-textarea {
-  resize: vertical;
-  min-height: 80px;
-}
 
-.form-select option {
-  background: var(--navy2);
-}
+
+
+
+
 
 .mood-grid {
   display: flex;
@@ -1370,23 +1351,9 @@ body {
   z-index: 10;
 }
 
-.login-input {
-  width: 100%;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid var(--border2);
-  border-radius: 12px;
-  padding: 14px 18px;
-  color: #fff;
-  font-size: 14px;
-  margin-bottom: 16px;
-  outline: none;
-  transition: all 0.2s;
-}
 
-.login-input:focus {
-  border-color: var(--blue);
-  background: rgba(255, 255, 255, 0.06);
-}
+
+
 
 .login-btn {
   font-weight: 600;
@@ -1838,9 +1805,19 @@ input#profile-join::-webkit-calendar-picker-indicator {
 }
 
 @keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-4px); }
-  75% { transform: translateX(4px); }
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  25% {
+    transform: translateX(-4px);
+  }
+
+  75% {
+    transform: translateX(4px);
+  }
 }
 
 .incorrect-shake {

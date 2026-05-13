@@ -4,7 +4,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Professional Learning Portal Dashboard for Analytics Transition. Track your progress, logs, and skills in Data Engineering and Data Science.">
+  <meta name="description"
+    content="Professional Learning Portal Dashboard for Analytics Transition. Track your progress, logs, and skills in Data Engineering and Data Science.">
   <title>Bestpeers Learning Dashboard — Analytics Transition Platform</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -21,7 +22,17 @@
   <script defer src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
   <script defer src="js/data.js"></script>
   <script defer src="js/quiz_bank.js"></script>
+  <script defer src="js/state.js"></script>
+  <script defer src="js/utils.js"></script>
+  <script defer src="js/renderDashboard.js"></script>
+  <script defer src="js/renderRoadmap.js"></script>
+  <script defer src="js/renderSkills.js"></script>
+  <script defer src="js/renderProjects.js"></script>
+  <script defer src="js/renderResources.js"></script>
+  <script defer src="js/renderWeekly.js"></script>
+  <script defer src="js/events.js"></script>
   <script defer src="js/app.js"></script>
+  <script defer src="js/darkMode.js"></script>
 </head>
 
 
@@ -207,6 +218,7 @@
           <div class="streak-badge">
             <span>🔥</span> <span id="streak-count-topbar">0</span>
           </div>
+          <button class="btn btn-secondary" id="dark-mode-toggle" title="Toggle Dark Mode">🌙</button>
           <button class="btn btn-primary" id="btn-log-session">+ Log Session</button>
         </div>
       </header>
@@ -378,9 +390,11 @@
           <div class="section-header" style="margin-bottom:20px;">
             <div>
               <h2 class="section-title" id="roadmap-user-title">Your Learning Path</h2>
-              <p class="section-sub" id="roadmap-user-sub">Logic-first curriculum focusing on engineering principles and tool syntax.</p>
+              <p class="section-sub" id="roadmap-user-sub">Logic-first curriculum focusing on engineering principles and
+                tool syntax.</p>
             </div>
-            <div class="tab-row" id="roadmap-track-filters" style="margin-bottom:20px; border-bottom:1px solid var(--border); padding-bottom:12px;">
+            <div class="tab-row" id="roadmap-track-filters"
+              style="margin-bottom:20px; border-bottom:1px solid var(--border); padding-bottom:12px;">
               <button class="tab-btn active" onclick="switchRoadmap('Data Engineering', this)">Data Engineering</button>
               <button class="tab-btn" onclick="switchRoadmap('Data Science', this)">Data Science</button>
             </div>
@@ -428,7 +442,8 @@
           <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:20px;">
             <div class="form-group"><input type="date" class="form-input" id="log-date" title="Session Date"></div>
             <div class="form-group"><select class="form-select" id="log-week" title="Select Week"></select></div>
-            <div class="form-group"><input type="text" class="form-input" id="log-topic" placeholder="Main Topic Studied"></div>
+            <div class="form-group"><input type="text" class="form-input" id="log-topic"
+                placeholder="Main Topic Studied"></div>
             <div class="form-group"><select class="form-select" id="log-tool" title="Primary Tool Used">
                 <option value="" disabled selected>Select Primary Tool</option>
                 <option>SQL</option>
@@ -437,13 +452,13 @@
                 <option>Excel</option>
                 <option>Tableau</option>
               </select></div>
-            <div class="form-group"><input type="number" class="form-input" id="log-hours" step="0.5" placeholder="Hours Logged (e.g. 2.5)"></div>
+            <div class="form-group"><input type="number" class="form-input" id="log-hours" step="0.5"
+                placeholder="Hours Logged (e.g. 2.5)"></div>
             <div class="form-group" style="grid-column:1/-1;"><textarea class="form-textarea" id="log-learned"
                 placeholder="Core Concepts & Learnings (What did you master today?)"></textarea></div>
             <div class="form-group" style="grid-column:1/-1;"><textarea class="form-textarea" id="log-handson"
                 placeholder="Hands-on Work (Describe specific labs, scripts, or project tasks)"></textarea></div>
-            <div class="form-group" style="grid-column:1/-1;"><input
-                type="text" class="form-input" id="log-tomorrow"
+            <div class="form-group" style="grid-column:1/-1;"><input type="text" class="form-input" id="log-tomorrow"
                 placeholder="Tomorrow's #1 Priority"></div>
             <div style="grid-column:1/-1; display:flex; gap:12px;">
               <button class="btn btn-primary" style="flex:1;" onclick="saveLogEntry()">Save Session</button>
@@ -621,7 +636,7 @@
             QuizGPT will generate questions tailored to your current learning phase. Each correct answer boosts your
             profile score!
           </p>
-          
+
           <div style="margin-bottom:30px; max-width:400px; margin-left:auto; margin-right:auto;">
             <select id="quiz-topic-select" class="form-select" style="height:48px; font-size:14px;">
               <option value="all">Focus: All Completed Topics</option>
@@ -629,8 +644,8 @@
             </select>
           </div>
 
-          <button id="quiz-start-btn" class="btn btn-primary" style="padding:12px 32px; font-size:16px; font-weight:700;"
-            onclick="startQuiz()">Start AI Quiz</button>
+          <button id="quiz-start-btn" class="btn btn-primary"
+            style="padding:12px 32px; font-size:16px; font-weight:700;" onclick="startQuiz()">Start AI Quiz</button>
         </div>
 
 
@@ -656,11 +671,15 @@
             <div id="quiz-options-list" style="display:flex; flex-direction:column; gap:12px;">
               <!-- Options populated by JS -->
             </div>
-            
+
             <div id="quiz-code-input-wrap" style="display:none; flex-direction:column; gap:16px;">
-              <div style="font-size:12px; color:var(--text3); font-family:'JetBrains Mono', monospace; background:var(--navy4); padding:4px 8px; border-radius:4px; width:fit-content;">EDITOR</div>
-              <textarea id="quiz-code-input" class="form-textarea" style="font-family:'JetBrains Mono', monospace; height:200px; font-size:13px; background:var(--navy3); color:var(--text); border:1px solid var(--border); padding:16px; line-height:1.5;"></textarea>
-              <div id="quiz-ai-feedback" style="display:none; padding:16px; background:var(--blue)11; border-radius:8px; border:1px solid var(--blue)33; font-size:13px; line-height:1.6;">
+              <div
+                style="font-size:12px; color:var(--text3); font-family:'JetBrains Mono', monospace; background:var(--navy4); padding:4px 8px; border-radius:4px; width:fit-content;">
+                EDITOR</div>
+              <textarea id="quiz-code-input" class="form-textarea"
+                style="font-family:'JetBrains Mono', monospace; height:200px; font-size:13px; background:var(--navy3); color:var(--text); border:1px solid var(--border); padding:16px; line-height:1.5;"></textarea>
+              <div id="quiz-ai-feedback"
+                style="display:none; padding:16px; background:var(--blue)11; border-radius:8px; border:1px solid var(--blue)33; font-size:13px; line-height:1.6;">
                 <div style="font-weight:700; margin-bottom:8px; display:flex; align-items:center; gap:8px;">
                   <span>🤖 AI Review</span>
                 </div>
@@ -670,8 +689,10 @@
           </div>
 
           <div style="display:flex; justify-content:flex-end; gap:12px;">
-            <button id="quiz-submit-code-btn" class="btn btn-primary" style="display:none;" onclick="submitCodeAnswer()">Submit for AI Review</button>
-            <button id="quiz-next-btn" class="btn btn-primary" style="display:none;" onclick="nextQuizQuestion()">Next Challenge</button>
+            <button id="quiz-submit-code-btn" class="btn btn-primary" style="display:none;"
+              onclick="submitCodeAnswer()">Submit for AI Review</button>
+            <button id="quiz-next-btn" class="btn btn-primary" style="display:none;" onclick="nextQuizQuestion()">Next
+              Challenge</button>
           </div>
 
         </div>

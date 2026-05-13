@@ -13,15 +13,29 @@ A premium data analytics learning and tracking portal designed for aspiring data
 - **Firebase Integration**: Real-time database sync and secure authentication.
 
 ## Tech Stack
-- **Frontend**: HTML5, CSS3 (Vanilla), JavaScript (ES6+)
+- **Frontend**: HTML5, CSS3 (Component-Based), JavaScript (ES6 Modules)
 - **Backend/Auth**: Firebase (Authentication & Firestore)
+- **Testing**: Jest for unit testing logic functions
 - **Deployment**: GitHub Pages
 - **CI/CD**: GitHub Actions
 
+## Architecture Updates
+- **JS Modularization**: The legacy `app.js` monolith has been split into purpose-driven files (`state.js`, `events.js`, `utils.js`, `render*.js`).
+- **Dark Mode**: Integrated `data-theme` architecture with localStorage persistence.
+- **Component CSS**: Extracted utility and design tokens to `css/design-tokens.css` and `css/components/`.
+
 ## Setup
 1. Clone the repository.
-2. Update the Firebase configuration in `js/app.js` with your project credentials.
-3. Open `index.html` in a local server environment.
+2. Ensure you have Node.js installed to run tests.
+3. Run `npm install` to install Jest dependencies.
+4. Update the Firebase configuration in `js/app.js` with your project credentials.
+5. Open `index.html` in a local server environment (e.g., Live Server).
+
+## Testing
+Run the test suite using:
+```bash
+npx jest
+```
 
 ## Administrative Access
 Users with the `host` role can:
