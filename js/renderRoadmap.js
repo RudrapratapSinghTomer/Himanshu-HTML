@@ -2,7 +2,7 @@ function renderRoadmap() {
   const grid = document.getElementById('week-grid'); if (!grid) return;
   try {
     const activePhases = getActivePhases();
-    const roadmapId = state.assignedRoadmap || 'Data Engineering';
+    const roadmapId = state.assignedRoadmap || 'Data Engineering/Analytics';
     const titleEl = document.getElementById('roadmap-user-title');
     if (titleEl) titleEl.textContent = roadmapId + ' Path';
 
@@ -63,14 +63,18 @@ function renderRoadmap() {
             </select>
           </div>
           <div class="week-title" style="margin-bottom:8px;">${w.title}</div>
-          ${w.url ? `
-            <a href="${w.url}" target="_blank" class="btn-sm" style="text-decoration:none; display:inline-flex; align-items:center; gap:8px; margin-bottom:16px; background:${w.url.includes('youtube.com') || w.url.includes('youtu.be') ? '#FF0000' : 'var(--blue)'}; color:#FFFFFF; border:none; width:fit-content; font-size:12px; font-weight:600; padding:8px 12px; border-radius:6px; box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);">
-              ${w.url.includes('youtube.com') || w.url.includes('youtu.be') ? 
-                `<svg style="width:14px; height:14px;" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.377.505 9.377.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>` : 
-                `<svg style="width:14px; height:14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>`
-              }
-              ${w.url.includes('youtube.com') || w.url.includes('youtu.be') ? 'Watch Tutorial' : 'Open Course Material'}
-            </a>` : ''}
+          ${w.url ? w.url.split('|').map(link => {
+            const trimmedLink = link.trim();
+            const isYT = trimmedLink.includes('youtube.com') || trimmedLink.includes('youtu.be');
+            return `
+              <a href="${trimmedLink}" target="_blank" class="btn-sm" style="text-decoration:none; display:inline-flex; align-items:center; gap:8px; margin-bottom:8px; margin-right:8px; background:${isYT ? '#FF0000' : 'var(--blue)'}; color:#FFFFFF; border:none; width:fit-content; font-size:11px; font-weight:600; padding:6px 10px; border-radius:6px; box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);">
+                ${isYT ? 
+                  `<svg style="width:12px; height:12px;" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.377.505 9.377.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>` : 
+                  `<svg style="width:12px; height:12px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>`
+                }
+                ${isYT ? 'Watch' : 'Open'}
+              </a>`;
+          }).join('') : ''}
           <details class="week-details" style="cursor:pointer; font-size:12px; color:var(--text2);" ${status === 'doing' ? 'open' : ''}>
             <summary style="outline:none; list-style:none; color:var(--blue2); font-weight:500;">View Daily Goals</summary>
             <div class="week-goals" style="margin-top:12px; padding-top:12px; border-top:1px solid var(--border);">${goalsHtml}</div>

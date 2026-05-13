@@ -5,7 +5,7 @@ const defaultState = {
   firstName: '',
   lastName: '',
   role: 'user',
-  assignedRoadmap: 'Data Engineering',
+  assignedRoadmap: 'Data Engineering/Analytics',
   weekStatus: {},
   projectTasks: {},
   projectStatus: {},
@@ -23,8 +23,8 @@ const defaultState = {
 };
 
 const ROADMAPS = {
-  'Data Engineering': [
-    { id: 'de1', name: 'Month 1: The Core Engineering Sprint', color: '#6366F1', weeks: [1, 2, 3, 4] },
+  'Data Engineering/Analytics': [
+    { id: 'de1', name: 'Month 1: The Core Engineering Sprint', color: '#6366F1', weeks: [1, 2, 3, 4, 5] },
   ],
   'Data Science': [
     { id: 'ds1', name: 'Month 1: Foundations & ML Basics', color: '#8B5CF6', weeks: [1, 2, 3, 4] },
@@ -67,9 +67,9 @@ const WEEKS = [
   {
     w: 5,
     phase: 'de1',
-    title: 'ADF/GCP/Microsoft Fabric',
-    tools: ['ADF', 'GCP', 'Microsoft Fabric'],
-    url: 'https://www.youtube.com/watch?v=8zIVOdKyoDA / https://www.youtube.com/watch?v=IUU6OR8yHCc / https://www.youtube.com/watch?v=a7UZ9WKj9yo',
+    title: 'Microsoft Fabric/ADF/GCP',
+    tools: ['Microsoft Fabric', 'ADF', 'GCP'],
+    url: 'https://www.youtube.com/watch?v=IUU6OR8yHCc | https://www.youtube.com/watch?v=a7UZ9WKj9yo | https://www.youtube.com/watch?v=IUU6OR8yHCc',
     goals: 'Day 1: Introduction & Architecture (80 mins). Day 2: Data Factory & Orchestration (90 mins). Day 3: Lakehouse & PySpark (90 mins). Day 4: Data Warehouse & SQL (80 mins). Day 5: Real-Time Intelligence & Data Science (70 mins). Day 6: Power BI & DirectLake (60 mins). Day 7: End-to-End Project & Administration (Remaining Time)'
   },
 

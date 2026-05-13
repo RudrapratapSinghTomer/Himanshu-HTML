@@ -157,7 +157,7 @@ function loadDynamicData() {
   configUnsub = db.collection('config').doc('roadmaps').onSnapshot(doc => {
     if (doc.exists) { 
       const data = doc.data();
-      if (!data['Data Engineering'] || data['Data Analyst']) {
+      if (!data['Data Engineering/Analytics'] || data['Data Analyst']) {
         console.warn("Stale global roadmap detected. Prioritizing local logic-first curriculum.");
         ROADMAPS_DB = ROADMAPS;
       } else {
@@ -687,7 +687,7 @@ function renderQuiz() {
     const select = document.getElementById('quiz-topic-select');
     const startBtn = document.getElementById('quiz-start-btn');
     if (select) {
-      const roadmap = state.assignedRoadmap || 'Data Engineering';
+      const roadmap = state.assignedRoadmap || 'Data Engineering/Analytics';
       const myPhases = ROADMAPS[roadmap]?.map(p => p.id) || [];
       const doneWeekNums = Object.keys(state.weekStatus || {}).filter(w => state.weekStatus[w] === 'done').map(Number);
       
@@ -734,7 +734,7 @@ async function startQuiz() {
   const selectedTopic = topicSelect ? topicSelect.value : 'all';
 
   // Pre-calculate and Shuffle Pool
-  const roadmap = state.assignedRoadmap || 'Data Engineering';
+  const roadmap = state.assignedRoadmap || 'Data Engineering/Analytics';
   const userSkills = Object.keys(state.skillNow).filter(s => state.skillNow[s] > 0);
   const doneWeekNums = Object.keys(state.weekStatus).filter(w => state.weekStatus[w] === 'done').map(Number);
   const myPhases = ROADMAPS[roadmap]?.map(p => p.id) || [];

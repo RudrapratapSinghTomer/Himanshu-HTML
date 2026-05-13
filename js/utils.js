@@ -1,6 +1,6 @@
 function getActivePhases() {
-  const roadmapName = state.assignedRoadmap || 'Data Engineering';
-  return ROADMAPS_DB[roadmapName] || ROADMAPS_DB['Data Engineering'] || [];
+  const roadmapName = state.assignedRoadmap || 'Data Engineering/Analytics';
+  return ROADMAPS_DB[roadmapName] || ROADMAPS_DB['Data Engineering/Analytics'] || [];
 }
 
 function updateUserUI() {
