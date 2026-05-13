@@ -512,7 +512,7 @@ function toggleLogForm() {
 
 
 function fixLinks() {}
-let isHostEditMode = false;
+isHostEditMode = false;
 
 
 
@@ -655,7 +655,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ── QUIZ LOGIC ───────────────────────────────────────────────────────────────
-let quizState = {
+quizState = {
   active: false,
   currentQuestion: null,
   index: 0,
