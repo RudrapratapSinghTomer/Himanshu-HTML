@@ -7,6 +7,10 @@ function renderProjects() {
     const pct = Math.round((completedTasks / p.tasks.length) * 100);
     return `
       <div class="project-card" style="border-top:4px solid ${p.color};">
+        <!-- Injected Elements -->
+        <div class="light-wrap"><div class="light-color"></div></div>
+        <div class="noise-overlay"></div>
+
         <div style="display:flex;justify-content:space-between;font-size:10px;"><span>PROJ ${p.num}</span><span class="badge">${status}</span></div>
         <div style="font-weight:700;margin:12px 0 8px 0; font-size:15px;">${p.title}</div>
         <div class="project-tasks">

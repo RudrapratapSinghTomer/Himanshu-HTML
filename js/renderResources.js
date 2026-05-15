@@ -13,6 +13,10 @@ function renderResources() {
   const filtered = filter === 'All' ? RESOURCES_DB : RESOURCES_DB.filter(r => r.domain === filter);
   container.innerHTML = filtered.map(r => `
     <div class="resource-item">
+      <!-- Injected Elements -->
+      <div class="light-wrap"><div class="light-color"></div></div>
+      <div class="noise-overlay"></div>
+
       <div style="font-weight:700; margin-bottom:4px;">${r.name}</div>
       <div style="font-size:11px; color:var(--text3); margin-bottom:12px;">${r.type} · ${r.domain}</div>
       <a href="${r.url}" target="_blank" class="btn-sm" style="text-decoration:none; display:inline-block;">Open Resource</a>

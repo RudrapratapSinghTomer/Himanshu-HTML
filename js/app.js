@@ -261,10 +261,14 @@ function renderRecentLogs() {
 
     container.innerHTML = logs.map(e => `
       <div class="card" style="padding:16px; margin-bottom:12px; position:relative;">
+        <!-- Injected Elements -->
+        <div class="light-wrap"><div class="light-color"></div></div>
+        <div class="noise-overlay"></div>
+
         <strong>${e.topic}</strong><br>
         <small>${e.date} · ${e.hours}h</small>
         <p>${e.learned}</p>
-        ${myRole === 'host' ? `<button onclick="deleteLogEntry('${e.id}')" style="position:absolute; top:10px; right:10px; background:rgba(239,68,68,0.1); border:none; color:var(--red); width:24px; height:24px; border-radius:4px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:16px;">&times;</button>` : ''}
+        ${myRole === 'host' ? `<button onclick="deleteLogEntry('${e.id}')" style="position:absolute; top:10px; right:10px; background:rgba(239,68,68,0.1); border:none; color:var(--red); width:24px; height:24px; border-radius:4px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:16px; z-index:10;">&times;</button>` : ''}
       </div>`).join('');
   });
 }
@@ -370,15 +374,19 @@ function renderAdminUsers() {
 
   // Directory
   userList.innerHTML = allUsers.map(u => `
-    <div class="user-item" style="display:flex; justify-content:space-between; align-items:center; padding:12px; background:var(--navy3); border-radius:8px; margin-bottom:8px;">
-      <div style="display:flex; gap:12px; align-items:center;">
+    <div class="user-item" style="display:flex; justify-content:space-between; align-items:center; padding:12px; margin-bottom:8px;">
+      <!-- Injected Elements -->
+      <div class="light-wrap"><div class="light-color"></div></div>
+      <div class="noise-overlay"></div>
+
+      <div style="display:flex; gap:12px; align-items:center; position:relative; z-index:2;">
         <div class="avatar" style="width:32px; height:32px; font-size:12px;">${(u.firstName?.[0]||'')+ (u.lastName?.[0]||'')}</div>
         <div>
           <div style="font-weight:600; font-size:13px;">${u.firstName} ${u.lastName || ''}</div>
           <div style="font-size:10px; color:var(--text3);">${u.role?.toUpperCase() || 'USER'}</div>
         </div>
       </div>
-      <div style="display:flex; gap:8px; align-items:center;">
+      <div style="display:flex; gap:8px; align-items:center; position:relative; z-index:2;">
         <div class="badge" style="background:var(--blue)22; color:var(--blue2);">${u.assignedRoadmap || 'None'}</div>
         <button onclick="switchViewUser('${u.id}')" class="btn" style="padding:4px 10px; font-size:11px; background:var(--navy4);">Edit</button>
         <button onclick="deleteUser('${u.id}')" class="btn" style="padding:4px 10px; font-size:11px; background:var(--red)22; color:var(--red); border-color:var(--red)44;">Delete</button>
@@ -547,13 +555,20 @@ function renderAdminContent() {
   
   if (roadmapList) {
     roadmapList.innerHTML = Object.entries(ROADMAPS_DB).map(([name, phases]) => `
-      <div class="card" style="padding:16px; background:var(--navy3);">
-        <div style="font-weight:700; margin-bottom:12px;">${name}</div>
-        <div style="display:flex; flex-direction:column; gap:8px;">
+      <div class="sub-card">
+        <!-- Injected Elements -->
+        <div class="light-wrap"><div class="light-color"></div></div>
+        <div class="noise-overlay"></div>
+
+        <div class="admin-phase-header" style="border:none; margin-bottom:16px;">
+          <span class="admin-phase-badge">ROADMAP</span>
+          ${name}
+        </div>
+        <div style="display:flex; flex-direction:column; gap:12px; position:relative; z-index:2;">
           ${phases.map((p, idx) => `
-            <div style="display:flex; gap:8px;">
-              <input type="text" class="form-input" value="${p.name}" onchange="updateRoadmapPhase('${name}', ${idx}, 'name', this.value)">
-              <input type="color" value="${p.color}" onchange="updateRoadmapPhase('${name}', ${idx}, 'color', this.value)" style="width:40px; padding:0;">
+            <div style="display:flex; gap:12px; align-items:center;">
+              <input type="text" class="form-input" style="flex:1;" value="${p.name}" onchange="updateRoadmapPhase('${name}', ${idx}, 'name', this.value)">
+              <input type="color" value="${p.color}" onchange="updateRoadmapPhase('${name}', ${idx}, 'color', this.value)" style="width:45px; height:45px; padding:2px; border-radius:8px;">
             </div>
           `).join('')}
         </div>
@@ -562,25 +577,64 @@ function renderAdminContent() {
   }
 
   if (weeksList) {
-    weeksList.innerHTML = WEEKS_DB.map((w, idx) => `
-      <div class="card" style="padding:12px; background:var(--navy3); margin-bottom:8px;">
-        <div style="display:flex; gap:8px; margin-bottom:8px;">
-          <input type="number" class="form-input" value="${w.w}" style="width:60px;" onchange="updateWeekItem(${idx}, 'w', this.value)">
-          <input type="text" class="form-input" value="${w.title}" onchange="updateWeekItem(${idx}, 'title', this.value)">
+    // Group weeks by phase for clarity
+    const grouped = WEEKS_DB.reduce((acc, w, idx) => {
+      const phaseId = w.phase || 'other';
+      if (!acc[phaseId]) acc[phaseId] = [];
+      acc[phaseId].push({ ...w, originalIdx: idx });
+      return acc;
+    }, {});
+
+    weeksList.innerHTML = Object.entries(grouped).map(([phase, weeks]) => `
+      <div class="admin-phase-group">
+        <div class="admin-phase-header">
+          <span class="admin-phase-badge">${phase.toUpperCase()}</span>
+          Phase: ${phase}
         </div>
-        <textarea class="form-textarea" style="font-size:11px; height:60px;" onchange="updateWeekItem(${idx}, 'goals', this.value)">${w.goals}</textarea>
+        ${weeks.map(w => `
+          <div class="sub-card">
+            <!-- Injected Elements -->
+            <div class="light-wrap"><div class="light-color"></div></div>
+            <div class="noise-overlay"></div>
+
+            <div class="admin-item-header">
+              <input type="number" class="form-input admin-week-num" value="${w.w}" placeholder="Wk" onchange="updateWeekItem(${w.originalIdx}, 'w', this.value)">
+              <input type="text" class="form-input admin-item-title" value="${w.title}" placeholder="Week Title" onchange="updateWeekItem(${w.originalIdx}, 'title', this.value)">
+            </div>
+            <textarea class="form-textarea admin-item-goals" placeholder="Week Goals & Daily Breakdown" onchange="updateWeekItem(${w.originalIdx}, 'goals', this.value)">${w.goals}</textarea>
+          </div>
+        `).join('')}
       </div>
     `).join('');
   }
 
   if (projectsList) {
-    projectsList.innerHTML = PROJECTS_DB.map((p, idx) => `
-      <div class="card" style="padding:12px; background:var(--navy3); margin-bottom:8px;">
-        <div style="display:flex; gap:8px; margin-bottom:8px;">
-          <input type="text" class="form-input" value="${p.title}" onchange="updateProjectItem(${idx}, 'title', this.value)">
-          <input type="color" value="${p.color}" style="width:40px;" onchange="updateProjectItem(${idx}, 'color', this.value)">
+    const grouped = PROJECTS_DB.reduce((acc, p, idx) => {
+      const phaseId = p.phase || 'other';
+      if (!acc[phaseId]) acc[phaseId] = [];
+      acc[phaseId].push({ ...p, originalIdx: idx });
+      return acc;
+    }, {});
+
+    projectsList.innerHTML = Object.entries(grouped).map(([phase, projs]) => `
+      <div class="admin-phase-group">
+        <div class="admin-phase-header">
+          <span class="admin-phase-badge">${phase.toUpperCase()}</span>
+          Phase: ${phase}
         </div>
-        <input type="text" class="form-input" value="${p.tools.join(', ')}" style="font-size:11px;" onchange="updateProjectItem(${idx}, 'tools', this.value.split(','))">
+        ${projs.map(p => `
+          <div class="sub-card">
+            <!-- Injected Elements -->
+            <div class="light-wrap"><div class="light-color"></div></div>
+            <div class="noise-overlay"></div>
+
+            <div class="admin-item-header">
+              <input type="text" class="form-input admin-item-title" value="${p.title}" onchange="updateProjectItem(${p.originalIdx}, 'title', this.value)">
+              <input type="color" value="${p.color}" style="width:45px; height:45px; padding:2px; border-radius:8px;" onchange="updateProjectItem(${p.originalIdx}, 'color', this.value)">
+            </div>
+            <input type="text" class="form-input" value="${p.tools.join(', ')}" placeholder="Tools (comma separated)" style="font-size:12px;" onchange="updateProjectItem(${p.originalIdx}, 'tools', this.value.split(','))">
+          </div>
+        `).join('')}
       </div>
     `).join('');
   }
@@ -662,7 +716,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Profile Form
   document.getElementById('profile-form')?.addEventListener('submit', saveProfile);
+
+  // Premium Glow Effects
+  initPremiumEffects();
 });
+
+function initPremiumEffects() {
+  document.addEventListener('mousemove', (e) => {
+    const card = e.target.closest('.kpi-card, .card, .week-card, .skills-domain, .project-card, .resource-item, .week-sel-btn, .welcome-banner, .admin-card, .log-entry, .modal-content, .login-card, .user-card, .sub-card, .user-item');
+    if (!card) return;
+    
+    const light = card.querySelector('.light-wrap');
+    if (!light) return;
+    
+    const rect = card.getBoundingClientRect();
+    const x = e.clientX - rect.left - 190; // 190 is half light width
+    const y = e.clientY - rect.top - 190;
+    
+    // Smooth motion
+    requestAnimationFrame(() => {
+      light.style.transform = `translate(${x}px, ${y}px)`;
+    });
+  });
+
+  // Initialize Global Trailing Cursor Effect with enhanced particles for smoothness
+  new cursoreffects.trailingCursor({
+    particles: 20,
+    rate: 0.4
+  });
+}
 
 // ── QUIZ LOGIC ───────────────────────────────────────────────────────────────
 quizState = {
@@ -687,22 +769,18 @@ function renderQuiz() {
     const select = document.getElementById('quiz-topic-select');
     const startBtn = document.getElementById('quiz-start-btn');
     if (select) {
-      const roadmap = state.assignedRoadmap || 'Data Engineering/Analytics';
-      const myPhases = ROADMAPS[roadmap]?.map(p => p.id) || [];
-      const doneWeekNums = Object.keys(state.weekStatus || {}).filter(w => state.weekStatus[w] === 'done').map(Number);
-      
-      const completedTopics = WEEKS_DB
-        .filter(w => doneWeekNums.includes(w.w) && myPhases.includes(w.phase))
+      const roadmapTopics = WEEKS_DB
+        .filter(w => myPhases.includes(w.phase))
         .map(w => w.title);
       
-      const uniqueTopics = [...new Set(completedTopics)];
+      const uniqueTopics = [...new Set(roadmapTopics)];
       
       if (uniqueTopics.length === 0) {
-        select.innerHTML = '<option value="none">No Topics Completed Yet</option>';
+        select.innerHTML = '<option value="none">No Topics Available</option>';
         if (startBtn) {
           startBtn.disabled = true;
           startBtn.style.opacity = '0.5';
-          startBtn.textContent = 'Complete a topic to unlock';
+          startBtn.textContent = 'Curriculum content not found';
         }
       } else {
         if (startBtn) {
@@ -710,7 +788,7 @@ function renderQuiz() {
           startBtn.style.opacity = '1';
           startBtn.textContent = 'Start AI Quiz';
         }
-        select.innerHTML = '<option value="all">Anywhere (All Completed Topics)</option>' + 
+        select.innerHTML = '<option value="all">Anywhere (All Roadmap Topics)</option>' + 
           uniqueTopics.map(t => `<option value="${t}">${t}</option>`).join('');
         
         // Restore selection

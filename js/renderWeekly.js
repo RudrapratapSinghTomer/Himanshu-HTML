@@ -13,7 +13,11 @@ function renderReviewWeeks() {
   grid.innerHTML = allWeeks.map(w => {
     const isSelected = (state.selectedReviewWeek || 20) == w;
     const status = state.weekReviews?.[w]?.status || 'Empty';
-    return `<button class="week-sel-btn ${isSelected?'active':''}" onclick="setReviewWeek(${w})">W${w}<br><small style="font-size:8px;">${status}</small></button>`;
+    return `<button class="week-sel-btn ${isSelected?'active':''}" onclick="setReviewWeek(${w})">
+      <!-- Injected Elements -->
+      <div class="light-wrap"><div class="light-color"></div></div>
+      <div class="noise-overlay"></div>
+      W${w}<br><small style="font-size:8px;">${status}</small></button>`;
   }).join('');
 }
 

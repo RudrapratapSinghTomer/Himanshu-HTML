@@ -3,6 +3,7 @@
 @import "./components/card.css";
 @import "./components/badges.css";
 @import "./components/inputs.css";
+@import "./components/admin.css";
 
 :root {
   /* LIGHT MODE (DEFAULT) - Premium Soft Cerulean Palette (Clearly Non-White) */
@@ -541,9 +542,6 @@ textarea:focus-visible {
 
 /* ── DASHBOARD ── */
 .welcome-banner {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 16px;
   padding: 24px 28px;
   margin-bottom: 24px;
   display: flex;
@@ -569,6 +567,14 @@ textarea:focus-visible {
   background: linear-gradient(135deg, var(--blue) 0%, transparent 100%);
   opacity: 0.05;
   pointer-events: none;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  width: 100%;
 }
 
 .section-title {
@@ -646,32 +652,93 @@ textarea:focus-visible {
   margin-bottom: 24px;
 }
 
-.kpi-card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 20px;
-  position: relative;
-  overflow: hidden;
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  cursor: pointer;
+/* 1. Grid & Card Container Base */
+.card,
+.week-card,
+.kpi-card,
+.skills-domain, 
+.project-card, 
+.resource-item, 
+.week-sel-btn,
+.welcome-banner,
+.admin-card,
+.log-entry,
+/* Moved premium design system to end of file to ensure priority */
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 160px;
 }
 
 .kpi-card:hover {
   transform: translateY(-8px);
-  box-shadow: 0 20px 40px -10px rgba(0,0,0,0.2);
-  border-color: var(--border2);
 }
 
-.kpi-card::before {
-  content: '';
+/* 2. Interactive Light Effect */
+.light-wrap {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 380px;
+  height: 380px;
+  pointer-events: none;
+  z-index: 1;
+  filter: blur(40px);
+  opacity: 0.8;
+  will-change: transform;
+}
+
+.light-color {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 180deg at 50% 50%,
+    rgba(99, 102, 241, 0.4) 0deg,
+    rgba(139, 92, 246, 0.4) 120deg,
+    rgba(20, 184, 166, 0.4) 240deg,
+    rgba(99, 102, 241, 0.4) 360deg
+  );
+  mask-image: radial-gradient(circle, black 0%, transparent 70%);
+  -webkit-mask-image: radial-gradient(circle, black 0%, transparent 70%);
+}
+
+/* 3. Grainy Noise Texture */
+.noise-overlay {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
-  height: 3px;
-  background: var(--accent-color);
+  bottom: 0;
+  pointer-events: none;
+  z-index: 10;
+  background-image: url('https://framerusercontent.com/images/6mcf62RlDfRfU61Yg5vb2pefpi4.png');
+  background-repeat: repeat;
+  background-size: 109px auto;
+  opacity: 0.12;
 }
+
+/* 4. Content Layering */
+.kpi-card > *:not(.light-wrap):not(.noise-overlay),
+.card > *:not(.light-wrap):not(.noise-overlay),
+.week-card > *:not(.light-wrap):not(.noise-overlay),
+.skills-domain > *:not(.light-wrap):not(.noise-overlay),
+.project-card > *:not(.light-wrap):not(.noise-overlay),
+.resource-item > *:not(.light-wrap):not(.noise-overlay),
+.week-sel-btn > *:not(.light-wrap):not(.noise-overlay),
+.welcome-banner > *:not(.light-wrap):not(.noise-overlay),
+.admin-card > *:not(.light-wrap):not(.noise-overlay),
+.log-entry > *:not(.light-wrap):not(.noise-overlay),
+.modal-content > *:not(.light-wrap):not(.noise-overlay),
+.login-card > *:not(.light-wrap):not(.noise-overlay),
+.user-card > *:not(.light-wrap):not(.noise-overlay),
+.user-item > *:not(.light-wrap):not(.noise-overlay),
+.search-result-item > *:not(.light-wrap):not(.noise-overlay) {
+  position: relative;
+  z-index: 2;
+}
+
 
 .kpi-label {
   font-size: 11px;
@@ -723,21 +790,7 @@ textarea:focus-visible {
   margin-bottom: 24px;
 }
 
-.card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 24px;
-  box-shadow: var(--shadow);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-.card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.3);
-}
+/* Legacy card style removed */
 
 .card-title {
   font-family: 'Syne', sans-serif;
@@ -841,29 +894,21 @@ textarea:focus-visible {
 }
 
 .week-card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 16px;
   padding: 20px;
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   cursor: pointer;
-  position: relative;
 }
 
 .week-card:hover {
-  border-color: var(--border2);
   transform: translateY(-8px);
   box-shadow: 0 15px 30px -10px rgba(0,0,0,0.2);
 }
 
 .week-card.current {
-  border-color: rgba(59, 130, 246, 0.4);
-  background: rgba(59, 130, 246, 0.07);
+  border-color: var(--blue2);
 }
 
 .week-card.done {
-  border-color: rgba(16, 185, 129, 0.3);
-  background: rgba(16, 185, 129, 0.05);
+  border-color: rgba(16, 185, 129, 0.2);
 }
 
 .week-num {
@@ -1048,6 +1093,7 @@ textarea:focus-visible {
 /* ── SKILLS ── */
 .skills-domain {
   margin-bottom: 28px;
+  padding: 24px;
 }
 
 .domain-header {
@@ -1134,14 +1180,8 @@ textarea:focus-visible {
 }
 
 .project-card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 14px;
   padding: 20px 22px;
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   cursor: pointer;
-  position: relative;
-  overflow: hidden;
 }
 
 .project-card:hover {
@@ -1260,9 +1300,6 @@ textarea:focus-visible {
 }
 
 .resource-item {
-  background: var(--navy3);
-  border: 1px solid var(--border);
-  border-radius: 12px;
   padding: 16px 18px;
   display: flex;
   align-items: start;
@@ -1348,12 +1385,9 @@ textarea:focus-visible {
   overflow-y: visible !important;
 }
 
-.review-week-btn {
+.week-sel-btn {
   padding: 14px 10px;
-  border-radius: 10px;
   text-align: center;
-  border: 1px solid var(--border);
-  background: var(--card);
   cursor: pointer;
   transition: all 0.15s;
 }
@@ -2154,6 +2188,80 @@ input#profile-join::-webkit-calendar-picker-indicator {
   to { transform: translateY(0); opacity: 1; }
 }
 
-[data-theme='light'] .modal-overlay {
-  background: rgba(240, 245, 255, 0.85);
+
+/* ── PREMIUM GLOW & GRAIN DESIGN SYSTEM (GLOBAL OVERRIDE) ── */
+.card,
+.week-card,
+.kpi-card,
+.skills-domain, 
+.project-card, 
+.resource-item, 
+.week-sel-btn,
+.welcome-banner,
+.admin-card,
+.log-entry,
+.modal-content,
+.login-card,
+.user-card,
+.search-result-item {
+  position: relative;
+  background: rgba(19, 19, 19, 0.8) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 
+    rgba(0, 0, 0, 0.15) 0px 10px 20px 0px, 
+    rgba(0, 0, 0, 0.2) 0px 20px 40px 0px, 
+    rgba(255, 255, 255, 0.1) 0.5px 0.5px 0px 0px inset, 
+    rgba(255, 255, 255, 0.05) 4px 4px 15px 0px inset;
+  transition: transform 0.3s ease, border-color 0.3s ease;
+}
+
+.sub-card, .user-item {
+  position: relative;
+  background: rgba(255, 255, 255, 0.03) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: none !important;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.sub-card:hover, .user-item:hover {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.light-wrap {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 380px;
+  height: 380px;
+  pointer-events: none;
+  z-index: 1;
+  filter: blur(40px);
+  opacity: 0.6;
+  will-change: transform;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0) 70%);
+}
+
+.noise-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image: url("https://grainy-gradients.vercel.app/noise.svg");
+  opacity: 0.05;
+  pointer-events: none;
+  z-index: 1;
+  mix-blend-mode: overlay;
+}
+
+.card:hover, .week-card:hover, .kpi-card:hover {
+  transform: translateY(-5px);
+  border-color: rgba(255, 255, 255, 0.15);
 }

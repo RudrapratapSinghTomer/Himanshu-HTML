@@ -54,6 +54,10 @@ function renderRoadmap() {
 
       return `
         <div class="week-card ${status==='done'?'done':''}" style="border-top:4px solid ${phase.color}">
+          <!-- Injected Elements -->
+          <div class="light-wrap"><div class="light-color"></div></div>
+          <div class="noise-overlay"></div>
+
           <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
             <span class="badge" style="background:${phase.color}22; color:${phase.color};">WK ${wNum}</span>
             <select onchange="setWeekStatus(${wNum}, this.value)" class="form-select" style="width:auto; height:24px; font-size:10px; padding:0 4px; border-radius:4px;">

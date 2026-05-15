@@ -112,9 +112,13 @@ const handleGlobalSearch = debounce(function(query) {
     container.innerHTML = '<div class="no-results">No matches found for "' + query + '"</div>';
   } else {
     container.innerHTML = results.slice(0, 10).map(r => `
-      <div class="search-result-item" onclick="showPage('${r.page}', document.querySelector('.nav-item[onclick*=\\'${r.page}\\']')); document.getElementById('global-search-results').classList.remove('active');">
-        <div class="result-icon">${r.icon}</div>
-        <div class="result-content">
+      <div class="card search-result-item" onclick="showPage('${r.page}', document.querySelector('.nav-item[onclick*=\\'${r.page}\\']')); document.getElementById('global-search-results').classList.remove('active');" style="margin-bottom:8px; padding:12px;">
+        <!-- Injected Elements -->
+        <div class="light-wrap"><div class="light-color"></div></div>
+        <div class="noise-overlay"></div>
+
+        <div class="result-icon" style="position:relative; z-index:2;">${r.icon}</div>
+        <div class="result-content" style="position:relative; z-index:2;">
           <div class="result-type">${r.type}</div>
           <div class="result-title">${r.title}</div>
         </div>
